@@ -19,7 +19,7 @@
 | Learn | 6–8 short, cited, reviewed articles (bundled) | Remote CMS |
 | Premium | Multiple profiles, PDF report, advanced analytics (percentile/velocity history) | AI coach |
 | Payments | StoreKit 2 monthly + yearly, Family Sharing on, restore, honest paywall | RevenueCat, lifetime, trial (decided in Stage 2 tests) |
-| Data | **Local-first SwiftData + optional iCloud sync (CloudKit private DB)**, JSON/CSV export, "delete all data" (local + iCloud) | Our own server, accounts, Supabase |
+| Data | **Local-first** (Phase 2: JSON file store behind a `ProfileStore` protocol instead of SwiftData, see `phase-2-foundation.md` §7) **+ optional iCloud sync (CloudKit private DB)**, JSON/CSV export, "delete all data" (local + iCloud) | Our own server, accounts, Supabase |
 | Notifications | Local monthly measuring reminder, optional habit reminder | Push server |
 | Analytics | Privacy-first anonymous aggregate events (no health values, no identifiers for child profiles) **or none at launch** (Open Decision) | Ad/attribution SDKs |
 | Platform | iPhone, iOS 17+, English, US storefront | iPad-optimised layouts, widgets, Watch |
