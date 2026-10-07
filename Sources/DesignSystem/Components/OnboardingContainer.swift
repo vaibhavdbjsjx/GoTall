@@ -54,6 +54,8 @@ public struct OnboardingContainer<Content: View, Footer: View>: View {
     public var body: some View {
         VStack(spacing: 0) {
             topBar
+                // Fixed height: an empty Color.clear slot is greedy and previously took half the screen.
+                .frame(height: DS.minimumTapTarget)
                 .padding(.horizontal, DS.Spacing.xs)
                 .padding(.top, DS.Spacing.xs)
 
@@ -134,7 +136,7 @@ public struct OnboardingContainer<Content: View, Footer: View>: View {
                         .font(DS.Typography.subheadline.weight(.semibold))
                         .foregroundStyle(DS.Colors.textSecondary)
                 } else {
-                    Color.clear
+                    Color.clear.frame(width: DS.minimumTapTarget, height: DS.minimumTapTarget)
                 }
             }
             .frame(minWidth: DS.minimumTapTarget, minHeight: DS.minimumTapTarget)
