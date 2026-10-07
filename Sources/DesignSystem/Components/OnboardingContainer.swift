@@ -1,5 +1,7 @@
 #if os(iOS)
 import SwiftUI
+import UIKit
+import Combine
 
 public struct OnboardingProgressModel: Equatable {
     public var chapters: [String]
@@ -25,6 +27,7 @@ public struct OnboardingContainer<Content: View, Footer: View>: View {
     let onSkip: (() -> Void)?
     let content: Content
     let footer: Footer
+    @State private var keyboardVisible = false
 
     public init(
         progress: OnboardingProgressModel?,
@@ -97,12 +100,8 @@ public struct OnboardingContainer<Content: View, Footer: View>: View {
             .background(DS.Colors.background.opacity(0.96).ignoresSafeArea(edges: .bottom))
         }
         .dsPageBackground()
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Done") { dismissKeyboard() }
-            }
-        }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in keyboardVisible = true }
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in keyboardVisible = false }
     }
 
     private var topBar: some View {
@@ -126,7 +125,11 @@ public struct OnboardingContainer<Content: View, Footer: View>: View {
             }
 
             Group {
-                if let skipTitle, let onSkip {
+                if keyboardVisible {
+                    Button("Done") { dismissKeyboard() }
+                        .font(DS.Typography.subheadline.weight(.semibold))
+                        .foregroundStyle(DS.Colors.accent)
+                } else if let skipTitle, let onSkip {
                     Button(skipTitle, action: onSkip)
                         .font(DS.Typography.subheadline.weight(.semibold))
                         .foregroundStyle(DS.Colors.textSecondary)

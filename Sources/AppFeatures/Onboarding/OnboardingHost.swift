@@ -22,11 +22,9 @@ struct OnboardingHost: View {
     var body: some View {
         Group {
             if let controller {
-                // NavigationStack provides the context the keyboard toolbar ("Done") needs; its bar stays hidden.
-                NavigationStack {
-                    OnboardingFlowView(controller: controller, onCancel: onCancel)
-                        .toolbar(.hidden, for: .navigationBar)
-                }
+                // No NavigationStack: it reserved hidden navigation-bar space and pushed content down
+                // (seen in simulator screenshots). The keyboard Done button lives in OnboardingContainer's top bar.
+                OnboardingFlowView(controller: controller, onCancel: onCancel)
                 .onChange(of: controller.completedProfile) { _, profile in
                     if profile != nil { onFinish?() }
                 }
