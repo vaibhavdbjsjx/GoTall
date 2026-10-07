@@ -46,12 +46,36 @@ shoot "$MAIN" light-09-measure-height -demoScenario teen -openAddMeasurement YES
 shoot "$MAIN" light-10-measure-method -demoScenario teen -openAddMeasurement YES -measurementStep method
 shoot "$MAIN" light-11-measure-review -demoScenario teen -openAddMeasurement YES -measurementStep review
 shoot "$MAIN" light-12-measure-success -demoScenario starter -openAddMeasurement YES -measurementSuccess YES
-shoot "$MAIN" light-13-profile -demoScenario teen -initialTab profile
+shoot "$MAIN" light-13-profile -demoScenario teen -initialTab profile -storeMode free
 shoot "$MAIN" light-14-onboarding-height -demoScenario onboarding
 shoot "$MAIN" light-15-onboarding-summary -demoScenario onboardingSummary
 shoot "$MAIN" light-16-home-adult -demoScenario adult
 shoot "$MAIN" light-17-home-starter -demoScenario starter
 shoot "$MAIN" light-18-growth-concern -demoScenario concern -initialTab growth
+# Phase 5: commercial layer (DEBUG preview store; prices mirror the test StoreKit configuration)
+PW="-demoScenario teen -storeMode"
+shoot "$MAIN" light-19-paywall $PW free -openPaywall general
+shoot "$MAIN" light-20-paywall-plans $PW free -openPaywall general -paywallScrollTo plans
+shoot "$MAIN" light-21-paywall-purchasing $PW hang -openPaywall general -paywallScrollTo plans -paywallAutoPurchase YES
+shoot "$MAIN" light-22-paywall-success $PW free -openPaywall general -paywallAutoPurchase YES
+shoot "$MAIN" light-23-paywall-cancelled $PW cancelPurchase -openPaywall general -paywallScrollTo plans -paywallAutoPurchase YES
+shoot "$MAIN" light-24-paywall-failed $PW failPurchase -openPaywall general -paywallScrollTo plans -paywallAutoPurchase YES
+shoot "$MAIN" light-25-paywall-pending $PW pending -openPaywall general -paywallScrollTo plans -paywallAutoPurchase YES
+shoot "$MAIN" light-26-paywall-unavailable $PW unavailable -openPaywall general -paywallScrollTo plans
+shoot "$MAIN" light-27-paywall-family $PW free -openPaywall family
+shoot "$MAIN" light-28-profile-premium $PW premium -initialTab profile
+shoot "$MAIN" light-29-profile-cancelled $PW cancelled -initialTab profile
+shoot "$MAIN" light-30-report-free $PW free -initialTab profile -openReport YES
+shoot "$MAIN" light-31-report-premium $PW premium -initialTab profile -openReport YES
+shoot "$MAIN" light-32-report-ready $PW premium -initialTab profile -openReport YES -reportAutoGenerate YES
+shoot "$MAIN" light-33-notifications-on $PW free -initialTab profile -openNotificationSettings YES -notificationsMode preview -demoNotifications YES
+shoot "$MAIN" light-34-notifications-off $PW free -initialTab profile -openNotificationSettings YES -notificationsMode preview
+shoot "$MAIN" light-35-home-offer $PW free -homeScrollTo premium
+shoot "$MAIN" light-36-home-premium $PW premium -homeScrollTo premium
+shoot "$MAIN" light-37-growth-locked $PW free -initialTab growth -growthScrollTo advanced
+shoot "$MAIN" light-38-growth-advanced $PW premium -initialTab growth -growthScrollTo advanced
+shoot "$MAIN" light-39-weekly-summary $PW free -openWeeklySummary YES
+shoot "$MAIN" light-40-switcher-gated -demoScenario parent -storeMode free -openProfileSwitcher YES
 
 # Dark
 xcrun simctl ui "$MAIN" appearance dark
@@ -62,6 +86,13 @@ shoot "$MAIN" dark-08-switcher -demoScenario parent -openProfileSwitcher YES
 shoot "$MAIN" dark-12-measure-success -demoScenario starter -openAddMeasurement YES -measurementSuccess YES
 shoot "$MAIN" dark-13-profile -demoScenario teen -initialTab profile
 shoot "$MAIN" dark-15-onboarding-summary -demoScenario onboardingSummary
+shoot "$MAIN" dark-19-paywall $PW free -openPaywall general
+shoot "$MAIN" dark-20-paywall-plans $PW free -openPaywall general -paywallScrollTo plans
+shoot "$MAIN" dark-28-profile-premium $PW premium -initialTab profile
+shoot "$MAIN" dark-31-report-premium $PW premium -initialTab profile -openReport YES
+shoot "$MAIN" dark-33-notifications-on $PW free -initialTab profile -openNotificationSettings YES -notificationsMode preview -demoNotifications YES
+shoot "$MAIN" dark-37-growth-locked $PW free -initialTab growth -growthScrollTo advanced
+shoot "$MAIN" dark-36-home-premium $PW premium -homeScrollTo premium
 xcrun simctl ui "$MAIN" appearance light
 
 # Accessibility text size
@@ -71,7 +102,12 @@ shoot "$MAIN" ax-02-home-teen-today -demoScenario teen -homeScrollTo today
 shoot "$MAIN" ax-03-habits-teen -demoScenario teen -initialTab habits
 shoot "$MAIN" ax-04-growth-teen -demoScenario teen -initialTab growth
 shoot "$MAIN" ax-11-measure-review -demoScenario teen -openAddMeasurement YES -measurementStep review
-shoot "$MAIN" ax-13-profile -demoScenario teen -initialTab profile
+shoot "$MAIN" ax-13-profile -demoScenario teen -initialTab profile -storeMode free
+shoot "$MAIN" ax-19-paywall $PW free -openPaywall general
+shoot "$MAIN" ax-20-paywall-plans $PW free -openPaywall general -paywallScrollTo plans
+shoot "$MAIN" ax-31-report-premium $PW premium -initialTab profile -openReport YES
+shoot "$MAIN" ax-33-notifications-on $PW free -initialTab profile -openNotificationSettings YES -notificationsMode preview -demoNotifications YES
+shoot "$MAIN" ax-37-growth-locked $PW free -initialTab growth -growthScrollTo advanced
 xcrun simctl ui "$MAIN" content_size large
 xcrun simctl shutdown "$MAIN" 2>/dev/null || true
 
@@ -83,6 +119,10 @@ if [ -n "$SMALL" ]; then
   shoot "$SMALL" se-03-habits-teen -demoScenario teen -initialTab habits
   shoot "$SMALL" se-04-growth-teen -demoScenario teen -initialTab growth
   shoot "$SMALL" se-15-onboarding-summary -demoScenario onboardingSummary
+  shoot "$SMALL" se-19-paywall -demoScenario teen -storeMode free -openPaywall general
+  shoot "$SMALL" se-20-paywall-plans -demoScenario teen -storeMode free -openPaywall general -paywallScrollTo plans
+  shoot "$SMALL" se-31-report-premium -demoScenario teen -storeMode premium -initialTab profile -openReport YES
+  shoot "$SMALL" se-33-notifications-on -demoScenario teen -storeMode free -initialTab profile -openNotificationSettings YES -notificationsMode preview -demoNotifications YES
   xcrun simctl shutdown "$SMALL" 2>/dev/null || true
 else
   echo "No iPhone SE simulator available"
@@ -92,6 +132,8 @@ if [ -n "$LARGE" ]; then
   prepare "$LARGE"
   shoot "$LARGE" max-01-home-teen -demoScenario teen
   shoot "$LARGE" max-04-growth-teen -demoScenario teen -initialTab growth
+  shoot "$LARGE" max-19-paywall -demoScenario teen -storeMode free -openPaywall general
+  shoot "$LARGE" max-31-report-premium -demoScenario teen -storeMode premium -initialTab profile -openReport YES
   xcrun simctl shutdown "$LARGE" 2>/dev/null || true
 fi
 ls "$OUT" | wc -l

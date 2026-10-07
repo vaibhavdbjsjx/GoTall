@@ -49,6 +49,8 @@ jobs:
             sips -Z 640 -s format jpeg -s formatOptions 55 "$f" --out "small/$n.jpg" >/dev/null
             echo "IMG:$n:$(base64 -i "small/$n.jpg" | tr -d '\n')"
           done
+      - name: StoreKit and UI tests (iOS Simulator)
+        run: scripts/run_ios_tests.sh
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4

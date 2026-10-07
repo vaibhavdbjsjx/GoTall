@@ -22,7 +22,6 @@ targets:
   GrowthApp:
     type: application
     platform: iOS
-    scheme: {}
     sources:
       - Sources
     dependencies:
@@ -42,3 +41,58 @@ targets:
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
         SWIFT_VERSION: "5.0"
         CODE_SIGN_STYLE: Automatic
+
+  # Runs the real StoreKit 2 service against the local StoreKit test environment (Products.storekit).
+  GrowthAppTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/StoreKit
+      - path: Products.storekit
+        buildPhase: resources
+    dependencies:
+      - target: GrowthApp
+      - package: GrowthPackage
+        product: GrowthCore
+      - package: GrowthPackage
+        product: AppFeatures
+      - sdk: StoreKitTest.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.growthapp.tests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Automatic
+
+  # UI tests for the commercial flows (Profile, Premium, paywall, reminders, report).
+  GrowthAppUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/UI
+    dependencies:
+      - target: GrowthApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.growthapp.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_STYLE: Automatic
+        TEST_TARGET_NAME: GrowthApp
+
+schemes:
+  GrowthApp:
+    build:
+      targets:
+        GrowthApp: all
+    run:
+      config: Debug
+      # Local StoreKit testing when running from Xcode. Test prices only; real prices come from App Store Connect.
+      storeKitConfiguration: Products.storekit
+    test:
+      config: Debug
+      targets:
+        - GrowthAppTests
+        - GrowthAppUITests
+    archive:
+      config: Release

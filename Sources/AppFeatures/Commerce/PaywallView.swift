@@ -63,6 +63,7 @@ struct PaywallView: View {
     @ViewBuilder
     private func content(_ model: PaywallModel) -> some View {
         let pinned = !dynamicTypeSize.isAccessibilitySize
+        ScrollViewReader { proxy in
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.xl) {
                 PaywallHero(title: "Go deeper with your growth profile.",
@@ -74,11 +75,21 @@ struct PaywallView: View {
                 benefits
                 alwaysFree
                 plans(model)
+                    .id("plans")
                 terms(model)
                 if !pinned { purchaseArea(model) }
             }
             .padding(.horizontal, DS.Spacing.page)
             .padding(.bottom, DS.Spacing.xl)
+        }
+        .onChange(of: model.loadedPlans.count) { _, count in
+            #if DEBUG
+            // Screenshot harness: `-paywallScrollTo plans`.
+            if count > 0, let target = UserDefaults.standard.string(forKey: "paywallScrollTo") {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { proxy.scrollTo(target, anchor: .top) }
+            }
+            #endif
+        }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if pinned {
