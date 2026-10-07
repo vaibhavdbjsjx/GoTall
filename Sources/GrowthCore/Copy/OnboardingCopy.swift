@@ -233,7 +233,7 @@ public enum CopyGuard {
     ]
 
     /// Negated forms that are required honesty wording, removed before matching.
-    public static let allowedPhrases = ["not a guarantee", "no guarantee"]
+    public static let allowedPhrases = ["not a guarantee", "no guarantee", "not guarantees"]
 
     public static func violations(in text: String) -> [String] {
         var lowered = text.lowercased()

@@ -33,8 +33,8 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO
-      - name: Core tests on macOS
-        run: swift test
+      - name: Core tests on macOS (also renders the PDF report pages)
+        run: REPORT_PNG_DIR="$PWD/report-pages" swift test
       - name: Capture simulator screenshots
         run: |
           chmod +x scripts/capture_screenshots.sh
@@ -43,7 +43,8 @@ jobs:
         # Lets reviewers without artifact-storage access inspect the screenshots (base64 JPEG, ~600 px).
         run: |
           mkdir -p small
-          for f in screenshots/*.png; do
+          for f in screenshots/*.png report-pages/*.png; do
+            [ -f "$f" ] || continue
             n=$(basename "$f" .png)
             sips -Z 640 -s format jpeg -s formatOptions 55 "$f" --out "small/$n.jpg" >/dev/null
             echo "IMG:$n:$(base64 -i "small/$n.jpg" | tr -d '\n')"
@@ -53,5 +54,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: screenshots
-          path: screenshots
+          path: |
+            screenshots
+            report-pages
           retention-days: 14

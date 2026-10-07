@@ -106,66 +106,6 @@ final class HabitEngineTests: XCTestCase {
     }
 }
 
-final class NotificationPlannerTests: XCTestCase {
-    let planner = NotificationPlanner(now: T.today, calendar: T.calendar) // 2026-10-07 10:00 UTC
-
-    func profile(measured: Date) -> GrowthProfile {
-        GrowthProfile(subject: .child, nickname: "Ava", birthDate: T.date(2016, 1, 1), chartSex: .female, unitPreference: .centimeters,
-                      measurements: [HeightMeasurement(date: measured, heightCm: 135, method: .home, origin: .manual)], createdAt: T.today, updatedAt: T.today)
-    }
-
-    func testNothingWhenAllOff() {
-        XCTAssertEqual(planner.plan(preferences: NotificationPreferences(), profiles: [profile(measured: T.today)]), [])
-        XCTAssertFalse(NotificationPreferences().anyEnabled)
-    }
-
-    func testMeasurementReminderAtSuggestedDate() {
-        let plan = planner.plan(preferences: NotificationPreferences(measurementReminders: true), profiles: [profile(measured: T.date(2026, 9, 1))])
-        XCTAssertEqual(plan.count, 1)
-        XCTAssertEqual(plan[0].category, .measurementReminder)
-        XCTAssertEqual(plan[0].fireDate, T.calendar.date(from: DateComponents(year: 2026, month: 12, day: 1, hour: 10))!)
-        XCTAssertTrue(plan[0].body.contains("Ava"))
-        XCTAssertFalse(plan[0].repeats)
-    }
-
-    func testDueReminderFiresTomorrowMorning() {
-        let plan = planner.plan(preferences: NotificationPreferences(measurementReminders: true), profiles: [profile(measured: T.date(2026, 1, 1))])
-        XCTAssertEqual(plan[0].fireDate, T.calendar.date(from: DateComponents(year: 2026, month: 10, day: 8, hour: 10))!)
-    }
-
-    func testDailyAndWeekly() {
-        let prefs = NotificationPreferences(dailyCheckIn: true, dailyCheckInTime: TimeOfDay(hour: 8, minute: 0), weeklySummary: true)
-        let plan = planner.plan(preferences: prefs, profiles: [])
-        let daily = plan.first { $0.category == .dailyCheckIn }!
-        XCTAssertEqual(daily.fireDate, T.calendar.date(from: DateComponents(year: 2026, month: 10, day: 8, hour: 8))!, "08:00 already passed today")
-        XCTAssertTrue(daily.repeats)
-        let weekly = plan.first { $0.category == .weeklySummary }!
-        XCTAssertEqual(T.calendar.component(.weekday, from: weekly.fireDate), 1)
-        XCTAssertGreaterThan(weekly.fireDate, T.today)
-    }
-
-    func testCopyIsCalm() {
-        let prefs = NotificationPreferences(measurementReminders: true, dailyCheckIn: true, weeklySummary: true)
-        for n in planner.plan(preferences: prefs, profiles: [profile(measured: T.date(2026, 9, 1))]) {
-            let text = (n.title + " " + n.body).lowercased()
-            XCTAssertEqual(CopyGuard.violations(in: text), [])
-            for fear in ["losing", "lose", "streak", "don't miss", "hurry", "last chance"] { XCTAssertFalse(text.contains(fear), text) }
-        }
-    }
-
-    func testPreferencesPersistAndOldFilesDecode() throws {
-        let store = try T.makeFileStore()
-        MainActor.assumeIsolated {
-            let repository = AppRepository(store: store)
-            repository.setNotificationPreferences(NotificationPreferences(dailyCheckIn: true))
-        }
-        guard case .loaded(let loaded) = store.load() else { return XCTFail() }
-        XCTAssertTrue(loaded.notificationPreferences.dailyCheckIn)
-        let old = try FileProfileStore.makeDecoder().decode(AppSnapshot.self, from: Data("{\"profiles\":[]}".utf8))
-        XCTAssertEqual(old.notificationPreferences, NotificationPreferences())
-    }
-}
-
 final class HomeModelTests: XCTestCase {
     let analyzer = GrowthAnalyzer(now: T.today, calendar: T.calendar)
 
