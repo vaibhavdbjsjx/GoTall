@@ -1,6 +1,7 @@
 #if os(iOS)
 import SwiftUI
 import GrowthCore
+import GrowthEngine
 import DesignSystem
 
 struct HomeView: View {
@@ -16,11 +17,23 @@ struct HomeView: View {
                         VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                             header(state)
                             HeightHeroCard(state: state).appearEffect()
-                            EstimateCardView(card: state.estimate).appearEffect(delay: 0.03)
-                            GrowthPlaceholderCard(state: state).appearEffect(delay: 0.06)
-                            QuickActionsRow(actions: state.quickActions, onAction: onAction).appearEffect(delay: 0.08)
-                            HabitBaselineSection(habits: state.habits)
+                            HomeEstimateCard(card: state.estimate, onTap: { onAction(.viewGrowth) }).appearEffect(delay: 0.03)
+                            HStack(alignment: .top, spacing: DS.Spacing.sm) {
+                                MetricCard(label: "Growth speed", value: state.velocityValue, caption: state.velocityValue == nil ? "Needs two measurements 6+ months apart" : "Based on your last measurements", systemImage: "speedometer", placeholder: "Not yet")
+                                if let family = state.family {
+                                    MetricCard(label: "Family height", value: family.value, caption: family.caption, systemImage: "person.2", placeholder: "Not set")
+                                }
+                            }
+                            .appearEffect(delay: 0.05)
+                            QuickActionsRow(actions: state.quickActions, onAction: onAction).appearEffect(delay: 0.07)
+                            if let next = state.nextMeasurement {
+                                InfoBanner(next, title: "Next step", tone: state.nextMeasurement?.hasPrefix("A new") == true ? .caution : .info)
+                            }
                             InsightCardView(insight: state.insight)
+                            if state.hasSafetyNote {
+                                InfoBanner(GrowthCopy.concernBody, title: "About growth concerns", tone: .info)
+                            }
+                            HabitBaselineSection(habits: state.habits)
                         }
                         .padding(.horizontal, DS.Spacing.page)
                         .padding(.bottom, DS.Spacing.xxl)
@@ -62,20 +75,32 @@ struct HeightHeroCard: View {
                     Text("Current height").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
                     Spacer()
                     if let height = state.height {
-                        Badge(height.measuredWhen, tone: height.method == .estimate ? .caution : .neutral)
+                        Badge(height.measuredWhen, tone: height.isEstimate ? .caution : .neutral)
                     }
                 }
-                if let height = state.height {
-                    Text(height.value)
-                        .font(DS.Typography.metricLarge)
-                        .foregroundStyle(DS.Colors.textPrimary)
-                        .contentTransition(.numericText())
-                        .accessibilityLabel("Current height, \(height.accessibleValue), measured \(height.measuredWhen)")
-                    if height.method == .estimate {
-                        Text("Estimated. Measure to make this more reliable.")
-                            .font(DS.Typography.footnote)
-                            .foregroundStyle(DS.Colors.caution)
+                HStack(alignment: .firstTextBaseline) {
+                    if let height = state.height {
+                        Text(height.value)
+                            .font(DS.Typography.metricLarge)
+                            .foregroundStyle(DS.Colors.textPrimary)
+                            .contentTransition(.numericText())
+                            .accessibilityLabel("Current height, \(height.accessibleValue), measured \(height.measuredWhen)")
                     }
+                    Spacer()
+                    if let p = state.percentile {
+                        Text(p.phrase)
+                            .font(DS.Typography.headline)
+                            .foregroundStyle(DS.Colors.accent)
+                            .padding(.horizontal, DS.Spacing.sm)
+                            .padding(.vertical, 6)
+                            .background(DS.Colors.accentSoft, in: Capsule())
+                    }
+                }
+                if let height = state.height, height.isEstimate {
+                    Text(GrowthCopy.estimatedNotice)
+                        .font(DS.Typography.footnote)
+                        .foregroundStyle(DS.Colors.caution)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Divider().padding(.vertical, 2)
                 if let change = state.change {
@@ -89,44 +114,53 @@ struct HeightHeroCard: View {
                 } else if let hint = state.changeHint {
                     Text(hint).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
                 }
+                if let reason = state.percentileUnavailableReason {
+                    Text(reason).font(DS.Typography.footnote).foregroundStyle(DS.Colors.textTertiary)
+                }
             }
         }
     }
 }
 
-struct EstimateCardView: View {
+struct HomeEstimateCard: View {
     let card: DashboardState.EstimateCard
+    let onTap: () -> Void
 
     var body: some View {
-        AppCard {
+        Button(action: onTap) {
             HStack(alignment: .top, spacing: DS.Spacing.md) {
-                Image(systemName: card.availability == .engineNotAvailable ? "hourglass" : "scope")
+                Image(systemName: "scope")
                     .font(.title3)
                     .foregroundStyle(DS.Colors.accent)
                     .frame(width: 40, height: 40)
                     .background(DS.Colors.accentSoft, in: RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous))
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 4) {
-                    HStack {
-                        Text(card.title).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
-                        if card.availability == .engineNotAvailable { Badge("Coming soon", tone: .accent) }
+                    switch card {
+                    case .range(let value, let accessible, let uncertainty, let caption):
+                        HStack {
+                            Text(GrowthCopy.estimateTitle).font(DS.Typography.subheadline.weight(.semibold)).foregroundStyle(DS.Colors.textSecondary)
+                            Spacer()
+                            Badge(GrowthCopy.uncertaintyLabel(uncertainty))
+                        }
+                        Text(value).font(DS.Typography.metric).foregroundStyle(DS.Colors.textPrimary)
+                            .accessibilityLabel("Estimated adult height, \(accessible)")
+                        Text(caption).font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
+                    case .message(let title, let body):
+                        Text(title).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
+                        Text(body).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    Text(card.message)
-                        .font(DS.Typography.subheadline)
-                        .foregroundStyle(DS.Colors.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
                 }
+                .multilineTextAlignment(.leading)
+                Image(systemName: "chevron.right").foregroundStyle(DS.Colors.textTertiary).accessibilityHidden(true)
             }
+            .padding(DS.Spacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .dsSurface()
         }
-        .accessibilityElement(children: .combine)
-    }
-}
-
-struct GrowthPlaceholderCard: View {
-    let state: DashboardState
-
-    var body: some View {
-        MetricCard(label: "Growth percentile", value: nil, caption: state.percentileMessage, systemImage: "chart.bar.xaxis", placeholder: "Not available yet")
+        .buttonStyle(PressableStyle())
+        .accessibilityHint("Opens Growth")
     }
 }
 
@@ -186,7 +220,7 @@ struct HabitBaselineSection: View {
                     }
                 }
             }
-            Text("Daily check-ins arrive in a coming update. These are your starting points.")
+            Text("Habits support healthy development. They don't change any height estimate. Daily check-ins arrive in a coming update.")
                 .font(DS.Typography.footnote)
                 .foregroundStyle(DS.Colors.textSecondary)
         }
@@ -202,7 +236,7 @@ struct HabitBaselineSection: View {
 }
 
 struct InsightCardView: View {
-    let insight: DashboardState.Insight
+    let insight: GrowthInsight
 
     var body: some View {
         HStack(alignment: .top, spacing: DS.Spacing.md) {
@@ -216,6 +250,7 @@ struct InsightCardView: View {
                 Text(insight.title).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
                 Text(insight.body).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary).fixedSize(horizontal: false, vertical: true)
             }
+            Spacer(minLength: 0)
         }
         .padding(DS.Spacing.md)
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -1,6 +1,7 @@
 #if os(iOS)
 import SwiftUI
 import GrowthCore
+import GrowthEngine
 import DesignSystem
 
 struct GoalsStepView: View {
@@ -10,16 +11,7 @@ struct GoalsStepView: View {
     var body: some View {
         let copy = controller.copy
         StepScaffold(controller: controller, title: copy.goalsTitle, subtitle: copy.goalsSubtitle, onCancel: onCancel) {
-            VStack(spacing: DS.Spacing.xs) {
-                ForEach(copy.availableGoals, id: \.self) { goal in
-                    MultiSelectCard(title: goal.title, systemImage: goal.symbol, isSelected: controller.draft.goals.contains(goal)) {
-                        controller.update { draft in
-                            // Selection order is kept: the first goal picked is treated as primary.
-                            if let index = draft.goals.firstIndex(of: goal) { draft.goals.remove(at: index) } else { draft.goals.append(goal) }
-                        }
-                    }
-                }
-            }
+            GoalsEditor(goals: controller.binding(\.goals), available: copy.availableGoals)
         }
     }
 }
@@ -118,7 +110,7 @@ struct SummaryStepView: View {
             primaryAction: { controller.finish() }
         ) {
             if let preview {
-                GrowthOverviewCard(profile: preview, estimateText: copy.estimatePlaceholder, percentileText: copy.percentilePlaceholder)
+                GrowthOverviewCard(profile: preview, analysis: GrowthAnalyzer(now: controller.today, calendar: controller.calendar).analyze(preview))
                     .appearEffect()
                 let summary = ProfileSummary(profile: preview, now: controller.today, calendar: controller.calendar)
                 ForEach(Array(summary.sections.enumerated()), id: \.element.id) { index, section in
@@ -140,41 +132,57 @@ struct SummaryStepView: View {
     }
 }
 
-/// Top of the summary: current height plus clearly labelled placeholders. No invented numbers.
+/// Top of the summary: the first real results (current percentile and, where eligible, the estimate range).
 struct GrowthOverviewCard: View {
     let profile: GrowthProfile
-    let estimateText: String
-    let percentileText: String
+    let analysis: GrowthAnalysis
 
     var body: some View {
+        let unit = profile.unitPreference
         AppCard(padding: DS.Spacing.lg) {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                if let latest = profile.latestMeasurement {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Current height").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
-                        Text(HeightFormatter.string(centimeters: latest.heightCm, unit: profile.unitPreference))
-                            .font(DS.Typography.metricLarge)
-                            .foregroundStyle(DS.Colors.textPrimary)
+                HStack(alignment: .top) {
+                    if let latest = analysis.latest {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Current height").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
+                            Text(HeightFormatter.string(centimeters: latest.heightCm, unit: unit))
+                                .font(DS.Typography.metricLarge)
+                                .foregroundStyle(DS.Colors.textPrimary)
+                        }
+                        .accessibilityElement(children: .combine)
                     }
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("Current height, \(HeightFormatter.accessibleString(centimeters: latest.heightCm, unit: profile.unitPreference))")
+                    Spacer()
+                    if let p = analysis.currentPercentile {
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text("Percentile").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
+                            Text(PercentileFormatter.ordinal(p.percentile)).font(DS.Typography.metric).foregroundStyle(DS.Colors.accent)
+                        }
+                        .accessibilityElement(children: .combine)
+                    }
                 }
                 Divider()
-                placeholderRow(symbol: "scope", title: "Adult height range", text: estimateText)
-                placeholderRow(symbol: "chart.bar.xaxis", title: "Percentile", text: percentileText)
+                if case .scenario(let s) = analysis.adultHeight {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack {
+                            Text(GrowthCopy.estimateTitle).font(DS.Typography.subheadline.weight(.semibold)).foregroundStyle(DS.Colors.textPrimary)
+                            Spacer()
+                            Badge(GrowthCopy.uncertaintyLabel(s.uncertainty))
+                        }
+                        Text(GrowthCopy.range(s.lowCm, s.highCm, unit: unit)).font(DS.Typography.metric).foregroundStyle(DS.Colors.textPrimary)
+                            .accessibilityLabel("Estimated adult height, \(GrowthCopy.accessibleRange(s.lowCm, s.highCm, unit: unit))")
+                        Text(GrowthCopy.estimateDisclaimer).font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
+                    }
+                } else if let message = GrowthCopy.outcomeMessage(analysis.adultHeight, isChild: profile.subject == .child) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(message.title).font(DS.Typography.subheadline.weight(.semibold)).foregroundStyle(DS.Colors.textPrimary)
+                        Text(message.body).font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary).fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                if analysis.latestIsEstimate {
+                    Text(GrowthCopy.estimatedNotice).font(DS.Typography.footnote).foregroundStyle(DS.Colors.caution)
+                }
             }
         }
-    }
-
-    private func placeholderRow(symbol: String, title: String, text: String) -> some View {
-        HStack(alignment: .top, spacing: DS.Spacing.sm) {
-            Image(systemName: symbol).foregroundStyle(DS.Colors.accent).frame(width: 24).accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(DS.Typography.subheadline.weight(.semibold)).foregroundStyle(DS.Colors.textPrimary)
-                Text(text).font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary).fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .accessibilityElement(children: .combine)
     }
 }
 

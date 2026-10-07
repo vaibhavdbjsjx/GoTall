@@ -222,21 +222,6 @@ public struct OnboardingCopy: Sendable {
     public var buildingTitle: String { "Putting your growth profile together" }
     public var summaryTitle: String { isChild ? "\(possessiveForm(Name)) growth profile" : "Your growth profile" }
     public var summarySubtitle: String { "Check everything looks right. Tap any section to change it." }
-    public var estimatePlaceholder: String {
-        switch ageBand {
-        case .child, .teen:
-            return "A height-range estimate with its method is coming in the next update. We'd rather show nothing than a guess."
-        case .youngAdult:
-            return "Close to adult height. A trend view arrives in the next update."
-        case .adult:
-            return "Adult height is your measured height. No estimate needed."
-        case .infant, .none:
-            return "Estimates aren't available for this age."
-        }
-    }
-    public var percentilePlaceholder: String {
-        ageBand == .adult ? "Percentile charts cover ages 2–20." : "CDC percentile is coming in the next update."
-    }
     public var finishAction: String { "Start tracking" }
 }
 
@@ -247,8 +232,12 @@ public enum CopyGuard {
         "% accurate", "ai knows", "you will reach", "boost growth hormone", "hgh", "increase your height", "true height"
     ]
 
+    /// Negated forms that are required honesty wording, removed before matching.
+    public static let allowedPhrases = ["not a guarantee", "no guarantee"]
+
     public static func violations(in text: String) -> [String] {
-        let lowered = text.lowercased()
+        var lowered = text.lowercased()
+        for allowed in allowedPhrases { lowered = lowered.replacingOccurrences(of: allowed, with: "") }
         return bannedPhrases.filter { lowered.contains($0) }
     }
 }

@@ -8,8 +8,11 @@ public struct AppRootView: View {
     @State private var repository: AppRepository
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    public init(repository: AppRepository) {
+    private let initialTab: AppTab
+
+    public init(repository: AppRepository, initialTab: AppTab = .home) {
         _repository = State(initialValue: repository)
+        self.initialTab = initialTab
     }
 
     public var body: some View {
@@ -22,7 +25,7 @@ public struct AppRootView: View {
                     OnboardingHost(repository: repository, mode: .firstRun)
                         .transition(.opacity)
                 } else {
-                    MainTabView(repository: repository)
+                    MainTabView(repository: repository, initialTab: initialTab)
                         .transition(.opacity)
                 }
             }

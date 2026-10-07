@@ -6,7 +6,7 @@ on:
 
 jobs:
   core-tests-linux:
-    name: GrowthCore tests (Linux)
+    name: Engine and core tests (Linux)
     runs-on: ubuntu-latest
     container: swift:6.1-noble
     steps:
@@ -15,7 +15,7 @@ jobs:
         run: swift test
 
   ios-build:
-    name: iOS app build (Xcode)
+    name: iOS build, tests and simulator screenshots
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +31,18 @@ jobs:
             -project App/GrowthApp.xcodeproj \
             -scheme GrowthApp \
             -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO
       - name: Core tests on macOS
         run: swift test
+      - name: Capture simulator screenshots
+        run: |
+          chmod +x scripts/capture_screenshots.sh
+          scripts/capture_screenshots.sh build/Build/Products/Debug-iphonesimulator/GrowthApp.app screenshots
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: screenshots
+          retention-days: 14

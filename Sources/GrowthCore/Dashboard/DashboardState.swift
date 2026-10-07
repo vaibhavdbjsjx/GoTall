@@ -1,13 +1,13 @@
 import Foundation
+import GrowthEngine
 
-/// Everything the Home screen shows, derived only from data the person entered.
-/// Placeholders say plainly that a feature is coming; nothing is simulated.
+/// Everything the Home screen shows, derived only from stored data via `GrowthAnalysis`.
 public struct DashboardState: Equatable, Sendable {
     public struct HeightSummary: Equatable, Sendable {
         public var value: String
         public var accessibleValue: String
         public var measuredWhen: String
-        public var method: MeasurementMethod
+        public var isEstimate: Bool
     }
 
     public struct ChangeSummary: Equatable, Sendable {
@@ -16,10 +16,23 @@ public struct DashboardState: Equatable, Sendable {
         public var accessibleValue: String
     }
 
-    public struct EstimateCard: Equatable, Sendable {
-        public var availability: EstimateAvailability
-        public var title: String
-        public var message: String
+    public struct PercentileSummary: Equatable, Sendable {
+        /// "63rd percentile"
+        public var phrase: String
+        public var percentile: Double
+        public var caption: String
+    }
+
+    public enum EstimateCard: Equatable, Sendable {
+        /// A scenario range with its uncertainty label.
+        case range(value: String, accessibleValue: String, uncertainty: UncertaintyLevel, caption: String)
+        /// No range for this person (age or data); explains why.
+        case message(title: String, body: String)
+    }
+
+    public struct FamilySummary: Equatable, Sendable {
+        public var value: String?
+        public var caption: String
     }
 
     public enum HabitKind: String, Sendable, CaseIterable {
@@ -29,15 +42,8 @@ public struct DashboardState: Equatable, Sendable {
     public struct HabitBaseline: Equatable, Sendable, Identifiable {
         public var kind: HabitKind
         public var title: String
-        /// `nil` when the person skipped this area in onboarding.
         public var value: String?
         public var id: HabitKind { kind }
-    }
-
-    public struct Insight: Equatable, Sendable {
-        public var symbol: String
-        public var title: String
-        public var body: String
     }
 
     public enum QuickAction: String, Sendable, CaseIterable, Identifiable {
@@ -64,10 +70,17 @@ public struct DashboardState: Equatable, Sendable {
     public var height: HeightSummary?
     public var change: ChangeSummary?
     public var changeHint: String?
+    public var percentile: PercentileSummary?
+    public var percentileUnavailableReason: String?
+    public var velocityText: String
+    /// Short value such as "5.8 cm/yr", or nil when growth speed isn't available yet.
+    public var velocityValue: String?
     public var estimate: EstimateCard
-    public var percentileMessage: String
+    public var family: FamilySummary?
+    public var nextMeasurement: String?
     public var habits: [HabitBaseline]
-    public var insight: Insight
+    public var insight: GrowthInsight
+    public var hasSafetyNote: Bool
     public var quickActions: [QuickAction]
 }
 
@@ -75,43 +88,84 @@ public struct DashboardBuilder: Sendable {
     public var now: Date
     public var calendar: Calendar
     public var locale: Locale
-    public var estimator: GrowthEstimating
 
-    public init(now: Date, calendar: Calendar, locale: Locale = .current, estimator: GrowthEstimating = PendingGrowthEstimator()) {
+    public init(now: Date, calendar: Calendar, locale: Locale = .current) {
         self.now = now
         self.calendar = calendar
         self.locale = locale
-        self.estimator = estimator
     }
 
     public func build(for profile: GrowthProfile) -> DashboardState {
-        let unit = profile.unitPreference
-        let measurements = profile.sortedMeasurements
+        build(for: profile, analysis: GrowthAnalyzer(now: now, calendar: calendar).analyze(profile))
+    }
 
-        let height = measurements.last.map { latest in
+    public func build(for profile: GrowthProfile, analysis: GrowthAnalysis) -> DashboardState {
+        let unit = profile.unitPreference
+        let points = analysis.series.points
+
+        let height = analysis.latest.map { latest in
             DashboardState.HeightSummary(
                 value: HeightFormatter.string(centimeters: latest.heightCm, unit: unit),
                 accessibleValue: HeightFormatter.accessibleString(centimeters: latest.heightCm, unit: unit),
                 measuredWhen: DisplayFormat.relative(latest.date, to: now, calendar: calendar),
-                method: latest.method
+                isEstimate: latest.quality == .estimate
             )
         }
 
         var change: DashboardState.ChangeSummary?
         var changeHint: String?
-        if let first = measurements.first, let last = measurements.last, measurements.count >= 2 {
+        if let first = points.first, let last = points.last, points.count >= 2 {
             let delta = last.heightCm - first.heightCm
-            change = DashboardState.ChangeSummary(
-                value: HeightFormatter.changeString(centimeters: delta, unit: unit),
-                since: "since " + DisplayFormat.monthYear(first.date, calendar: calendar, locale: locale),
-                accessibleValue: "Changed by \(HeightFormatter.accessibleString(centimeters: abs(delta), unit: unit)) since \(DisplayFormat.monthYear(first.date, calendar: calendar, locale: locale))"
-            )
+            let since = DisplayFormat.monthYear(first.date, calendar: calendar, locale: locale)
+            change = .init(value: HeightFormatter.changeString(centimeters: delta, unit: unit), since: "since " + since,
+                           accessibleValue: "Changed by \(HeightFormatter.accessibleString(centimeters: abs(delta), unit: unit)) since \(since)")
         } else {
-            changeHint = "Add another measurement in a few weeks to start seeing change over time."
+            changeHint = "Add another measurement in a few months to start seeing change over time."
         }
 
-        let availability = estimator.availability(for: profile, on: now, calendar: calendar)
-        let isAdult = availability == .adult
+        var percentile: DashboardState.PercentileSummary?
+        var percentileReason: String?
+        if let p = analysis.currentPercentile {
+            percentile = .init(phrase: PercentileFormatter.phrase(p.percentile), percentile: p.percentile,
+                               caption: "On the CDC growth chart for age\(analysis.latestIsEstimate ? ", from an estimated height" : "")")
+        } else {
+            percentileReason = (analysis.latest?.ageMonths ?? 0) > 240 ? "Growth percentiles cover ages 2–20." : "Growth percentiles start at age 2."
+        }
+
+        let velocityText: String
+        var velocityValue: String?
+        switch analysis.velocity {
+        case .available(let v):
+            velocityText = GrowthCopy.velocitySentence(v, unit: unit)
+            velocityValue = GrowthCopy.speed(v.cmPerYear, unit: unit) + "/yr"
+        case .needsMoreMeasurements, .needsMoreTime:
+            velocityText = GrowthCopy.velocityNeedsMore
+        }
+
+        let estimate: DashboardState.EstimateCard
+        if case .scenario(let s) = analysis.adultHeight {
+            estimate = .range(value: GrowthCopy.range(s.lowCm, s.highCm, unit: unit),
+                              accessibleValue: GrowthCopy.accessibleRange(s.lowCm, s.highCm, unit: unit),
+                              uncertainty: s.uncertainty, caption: GrowthCopy.estimateDisclaimer)
+        } else if let message = GrowthCopy.outcomeMessage(analysis.adultHeight, isChild: profile.subject == .child) {
+            estimate = .message(title: message.title, body: message.body)
+        } else {
+            estimate = .message(title: GrowthCopy.estimateTitle, body: "Add a measurement to see an estimate.")
+        }
+
+        var family: DashboardState.FamilySummary?
+        switch analysis.family {
+        case .available(let range):
+            family = .init(value: GrowthCopy.range(range.lowCm, range.highCm, unit: unit), caption: "Context only, not a prediction")
+        case .missingParentHeights:
+            family = .init(value: nil, caption: "Add both parents' heights to see it")
+        case .notApplicable:
+            family = nil
+        }
+
+        let next = analysis.nextMeasurement.map { next in
+            next.isDue ? "A new measurement is due" : "Next measurement around " + DisplayFormat.day(next.suggestedDate, calendar: calendar, locale: locale)
+        }
 
         return DashboardState(
             greeting: greeting(),
@@ -119,19 +173,23 @@ public struct DashboardBuilder: Sendable {
             height: height,
             change: change,
             changeHint: changeHint,
-            estimate: estimateCard(availability),
-            percentileMessage: isAdult
-                ? "Growth percentiles cover ages 2–20."
-                : "Your position on the CDC growth chart is coming in the next update.",
+            percentile: percentile,
+            percentileUnavailableReason: percentileReason,
+            velocityText: velocityText,
+            velocityValue: velocityValue,
+            estimate: estimate,
+            family: family,
+            nextMeasurement: next,
             habits: habits(for: profile),
-            insight: InsightEngine.insight(for: profile, measurements: measurements),
+            insight: analysis.insights.first ?? GrowthInsight(kind: .measureConsistently, symbol: "checkmark.seal", title: "Consistency beats frequency",
+                                                              body: "Measuring every few months, the same way each time, shows growth most clearly."),
+            hasSafetyNote: profile.intent == .concerned || !analysis.signposts.isEmpty,
             quickActions: quickActions(for: profile)
         )
     }
 
     func greeting() -> String {
-        let hour = calendar.component(.hour, from: now)
-        switch hour {
+        switch calendar.component(.hour, from: now) {
         case 5..<12: return "Good morning"
         case 12..<18: return "Good afternoon"
         default: return "Good evening"
@@ -142,71 +200,20 @@ public struct DashboardBuilder: Sendable {
         name.hasSuffix("s") ? name + "’" : name + "’s"
     }
 
-    func estimateCard(_ availability: EstimateAvailability) -> DashboardState.EstimateCard {
-        switch availability {
-        case .engineNotAvailable:
-            return .init(availability: availability, title: "Adult height range",
-                         message: "Coming in the next update: a height range with its method and limits explained. We'd rather show nothing than a guess.")
-        case .chartOnlyAge:
-            return .init(availability: availability, title: "Adult height range",
-                         message: "Estimates start at age 4. Until then, measurements build the growth chart.")
-        case .nearAdult:
-            return .init(availability: availability, title: "Near adult height",
-                         message: "Most growth is complete by now. Keep measuring every few months to see whether height is still changing.")
-        case .adult:
-            return .init(availability: availability, title: "Adult height",
-                         message: "Your measured height is your adult height, so there's nothing to estimate.")
-        }
-    }
-
     func habits(for profile: GrowthProfile) -> [DashboardState.HabitBaseline] {
-        let sleepValue: String? = {
-            if let minutes = profile.sleep.typicalDurationMinutes {
-                return "About \(DisplayFormat.duration(minutes: minutes)) on weeknights"
-            }
-            return profile.sleep.consistency?.title
-        }()
-        let activityValue: String? = {
-            let parts = [profile.activity.level?.title, profile.activity.frequency.map { "\($0.title) sessions a week" }].compactMap { $0 }
-            return parts.isEmpty ? nil : parts.joined(separator: " · ")
-        }()
-        let nutritionValue: String? = profile.nutrition.mealRegularity?.title ?? profile.nutrition.hydration?.title
+        let sleepValue: String? = profile.sleep.typicalDurationMinutes.map { "About \(DisplayFormat.duration(minutes: $0)) on weeknights" }
+            ?? profile.sleep.consistency?.title
+        let activityParts = [profile.activity.level?.title, profile.activity.frequency.map { "\($0.title) sessions a week" }].compactMap { $0 }
         return [
             .init(kind: .sleep, title: "Sleep", value: sleepValue),
-            .init(kind: .activity, title: "Activity", value: activityValue),
-            .init(kind: .nutrition, title: "Eating", value: nutritionValue)
+            .init(kind: .activity, title: "Activity", value: activityParts.isEmpty ? nil : activityParts.joined(separator: " · ")),
+            .init(kind: .nutrition, title: "Eating", value: profile.nutrition.mealRegularity?.title ?? profile.nutrition.hydration?.title)
         ]
     }
 
     func quickActions(for profile: GrowthProfile) -> [DashboardState.QuickAction] {
         let habitFirst: Set<Goal> = [.healthierRoutines, .sleepConsistency, .nutritionHabits]
-        if let primary = profile.primaryGoal, habitFirst.contains(primary) {
-            return [.measure, .habits, .viewGrowth]
-        }
+        if let primary = profile.primaryGoal, habitFirst.contains(primary) { return [.measure, .habits, .viewGrowth] }
         return [.measure, .viewGrowth, .habits]
-    }
-}
-
-/// One rule-based tip at a time, chosen from what the person told us. Guidance only; no numbers are invented.
-public enum InsightEngine {
-    public static func insight(for profile: GrowthProfile, measurements: [HeightMeasurement]) -> DashboardState.Insight {
-        if profile.intent == .concerned {
-            return .init(symbol: "stethoscope", title: "A clear record helps",
-                         body: "Measure the same way each time. A consistent record is the most useful thing to bring to a doctor.")
-        }
-        if measurements.last?.method == .estimate {
-            return .init(symbol: "ruler", title: "Swap the estimate for a measurement",
-                         body: "The current height is an estimate. A careful wall measurement makes everything here more reliable.")
-        }
-        if measurements.count == 1 {
-            return .init(symbol: "calendar.badge.clock", title: "The trend starts with your next measurement",
-                         body: "Measure again in about a month, at the same time of day. Change over months means more than day-to-day differences.")
-        }
-        if profile.goals.contains(.sleepConsistency), profile.sleep.consistency == .veryDifferent {
-            return .init(symbol: "moon.stars", title: "Steadier sleep",
-                         body: "Sleep times vary a lot through the week. Moving toward the same wake time every day is usually easier than one big change.")
-        }
-        return .init(symbol: "checkmark.seal", title: "Consistency beats frequency",
-                     body: "Measuring every month or two, the same way each time, shows growth more clearly than measuring often.")
     }
 }

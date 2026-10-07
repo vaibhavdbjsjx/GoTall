@@ -1,4 +1,5 @@
 import Foundation
+import GrowthEngine
 
 public struct Age: Equatable, Sendable {
     public var years: Int
@@ -41,8 +42,8 @@ public enum AgeCalculator {
         guard birthDate <= date else { return nil }
         let components = calendar.dateComponents([.year, .month], from: birthDate, to: date)
         guard let years = components.year, let months = components.month else { return nil }
-        let days = date.timeIntervalSince(birthDate) / 86_400
-        return Age(years: years, months: months, exactMonths: days / 30.4375)
+        // Same convention as the growth engine (completed days ÷ 30.4375).
+        return Age(years: years, months: months, exactMonths: AgeMath.exactAgeMonths(birthDate: birthDate, on: date, calendar: calendar))
     }
 }
 

@@ -97,6 +97,36 @@ public final class AppRepository {
         }
     }
 
+    public func updateMeasurement(_ measurement: HeightMeasurement, in profileID: UUID, at date: Date) {
+        update { snapshot in
+            guard let index = snapshot.profiles.firstIndex(where: { $0.id == profileID }),
+                  let m = snapshot.profiles[index].measurements.firstIndex(where: { $0.id == measurement.id }) else { return }
+            snapshot.profiles[index].measurements[m] = measurement
+            snapshot.profiles[index].measurements.sort { $0.date < $1.date }
+            snapshot.profiles[index].updatedAt = date
+        }
+    }
+
+    /// Replaces a profile (after an edit). Measurements are kept sorted.
+    public func updateProfile(_ profile: GrowthProfile, at date: Date) {
+        update { snapshot in
+            guard let index = snapshot.profiles.firstIndex(where: { $0.id == profile.id }) else { return }
+            var updated = profile
+            updated.measurements.sort { $0.date < $1.date }
+            updated.updatedAt = date
+            snapshot.profiles[index] = updated
+        }
+    }
+
+    /// Deletes one profile. If it was active, the first remaining profile becomes active.
+    /// Deleting the last profile returns the app to onboarding.
+    public func deleteProfile(_ id: UUID) {
+        update { snapshot in
+            snapshot.profiles.removeAll { $0.id == id }
+            if snapshot.activeProfileID == id { snapshot.activeProfileID = snapshot.profiles.first?.id }
+        }
+    }
+
     public func setUnitPreference(_ unit: HeightUnit, for profileID: UUID) {
         update { snapshot in
             guard let index = snapshot.profiles.firstIndex(where: { $0.id == profileID }) else { return }

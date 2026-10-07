@@ -18,7 +18,8 @@ final class DashboardTests: XCTestCase {
         XCTAssertEqual(state.height?.measuredWhen, "6 days ago")
         XCTAssertNil(state.change)
         XCTAssertNotNil(state.changeHint)
-        XCTAssertEqual(state.insight.title, "The trend starts with your next measurement")
+        XCTAssertEqual(state.insight.kind, .firstMeasurement)
+        XCTAssertEqual(state.velocityText, GrowthCopy.velocityNeedsMore)
     }
 
     func testChangeIsComputedFromRealMeasurementsOnly() {
@@ -31,27 +32,37 @@ final class DashboardTests: XCTestCase {
         XCTAssertEqual(state.change?.since, "since Mar 2025")
     }
 
-    func testNoPredictionNumberIsEverShown() {
-        for birth in [T.date(2023, 1, 1), T.date(2011, 3, 15), T.date(2007, 1, 1), T.date(1990, 1, 1)] {
-            let state = builder().build(for: profile(birth: birth))
-            XCTAssertFalse(state.estimate.message.contains(" cm"), "Estimate card must not contain a height")
-            XCTAssertFalse(state.percentileMessage.contains("%"))
+    func testPercentileShownWithoutFalsePrecision() {
+        let state = builder().build(for: profile())
+        let phrase = try! XCTUnwrap(state.percentile?.phrase)
+        XCTAssertTrue(phrase.hasSuffix("percentile"))
+        XCTAssertFalse(phrase.contains("."), "No decimals in displayed percentiles")
+    }
+
+    func testEstimateCardByAge() {
+        // 15-year-old: a range.
+        guard case .range(let value, _, _, let caption) = builder().build(for: profile()).estimate else { return XCTFail("Teen should get a range") }
+        XCTAssertTrue(value.hasSuffix("cm"))
+        XCTAssertEqual(caption, GrowthCopy.estimateDisclaimer)
+        // 3-year-old, 19-year-old and adult: messages, no numbers.
+        for (birth, height) in [(T.date(2023, 1, 1), 98.0), (T.date(2007, 1, 1), 165.0), (T.date(1990, 1, 1), 170.0)] {
+            let p = profile(birth: birth, measurements: [HeightMeasurement(date: T.date(2026, 10, 1), heightCm: height, method: .home, origin: .onboardingCurrent)])
+            guard case .message(_, let body) = builder().build(for: p).estimate else { return XCTFail("No range expected for \(birth)") }
+            XCTAssertFalse(body.contains(" cm "), body)
         }
     }
 
-    func testEstimateAvailabilityByAge() {
-        let estimator = PendingGrowthEstimator()
-        func availability(_ birth: Date) -> EstimateAvailability {
-            estimator.availability(for: profile(birth: birth), on: T.today, calendar: T.calendar)
-        }
-        XCTAssertEqual(availability(T.date(2023, 6, 1)), .chartOnlyAge)   // 3
-        XCTAssertEqual(availability(T.date(2020, 6, 1)), .engineNotAvailable) // 6
-        XCTAssertEqual(availability(T.date(2007, 6, 1)), .nearAdult)       // 19
-        XCTAssertEqual(availability(T.date(1990, 6, 1)), .adult)
+    func testFamilyRangeOnlyWithBothParents() {
+        var p = profile()
+        XCTAssertNil(builder().build(for: p).family?.value)
+        p.parentHeights = ParentHeights(mother: .known(heightCm: 165, source: .measured), father: .known(heightCm: 180, source: .estimated))
+        XCTAssertEqual(builder().build(for: p).family?.value, "158–175 cm")
+        p.birthDate = T.date(1990, 1, 1)
+        XCTAssertNil(builder().build(for: p).family, "Not shown for adults")
     }
 
     func testChildTitleUsesNickname() {
-        XCTAssertEqual(builder().build(for: profile(birth: T.date(2017, 1, 1), subject: .child)).title, "Maya’s growth")
+        XCTAssertEqual(builder().build(for: profile(birth: T.date(2017, 1, 1), measurements: [HeightMeasurement(date: T.date(2026, 10, 1), heightCm: 125, method: .home, origin: .manual)], subject: .child)).title, "Maya’s growth")
     }
 
     func testHabitBaselinesComeFromOnboardingOrStayEmpty() {
@@ -75,7 +86,9 @@ final class DashboardTests: XCTestCase {
     func testConcernedIntentPrioritisesRecordKeepingInsight() {
         var p = profile()
         p.intent = .concerned
-        XCTAssertEqual(builder().build(for: p).insight.symbol, "stethoscope")
+        let state = builder().build(for: p)
+        XCTAssertEqual(state.insight.symbol, "stethoscope")
+        XCTAssertTrue(state.hasSafetyNote)
     }
 
     func testRelativeDates() {
@@ -107,8 +120,7 @@ final class CopyTests: XCTestCase {
             copy.parentHeightsFooter, copy.historyQuestionTitle, copy.historyQuestionSubtitle, copy.historyEntrySubtitle,
             copy.growthChangeTitle, copy.growthChangeSubtitle, copy.sleepTitle, copy.sleepSubtitle, copy.activityTitle,
             copy.activitySubtitle, copy.nutritionTitle, copy.nutritionSubtitle, copy.goalsTitle, copy.goalsSubtitle,
-            copy.intentTitle, copy.intentSubtitle, copy.concernTitle, copy.buildingTitle, copy.summaryTitle,
-            copy.estimatePlaceholder, copy.percentilePlaceholder
+            copy.intentTitle, copy.intentSubtitle, copy.concernTitle, copy.buildingTitle, copy.summaryTitle
         ]
         strings += copy.welcomePoints.flatMap { [$0.title, $0.detail] }
         strings += copy.privacyPoints.flatMap { [$0.title, $0.detail] }
@@ -132,6 +144,8 @@ final class CopyTests: XCTestCase {
     func testCopyGuardCatchesViolations() {
         XCTAssertEqual(CopyGuard.violations(in: "Unlock your true height!"), ["unlock your", "true height"])
         XCTAssertEqual(CopyGuard.violations(in: "95% accurate"), ["% accurate"])
+        XCTAssertEqual(CopyGuard.violations(in: "This is not a guarantee."), [])
+        XCTAssertEqual(CopyGuard.violations(in: "Guaranteed results"), ["guarantee"])
     }
 
     func testParentLanguageUsesChildName() {
