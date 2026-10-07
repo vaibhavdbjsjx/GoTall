@@ -109,13 +109,13 @@ final class StoreKitIntegrationTests: XCTestCase {
     }
 
     func testFailedVerificationNeverUnlocks() async throws {
-        try session.setSimulatedError(.verification(.invalidSignature), forAPI: .verification)
+        try await session.setSimulatedError(.verification(.invalidSignature), forAPI: .verification)
         let service = StoreKitSubscriptionService()
         let outcome = await service.purchase(planID: SubscriptionProductID.yearly)
         if case .purchased(let state) = outcome { XCTAssertFalse(state.isPremium, "unverified purchase must not unlock") }
         let state = await service.currentEntitlement()
         XCTAssertFalse(state.isPremium)
-        try session.setSimulatedError(nil, forAPI: .verification)
+        try await session.setSimulatedError(nil, forAPI: .verification)
     }
 
     func testEntitlementStoreAppliesPurchaseAndFollowsExpiry() async throws {
