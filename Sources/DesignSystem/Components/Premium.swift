@@ -274,8 +274,18 @@ public struct RestorePurchaseButton: View {
     }
 
     public var body: some View {
-        AppButton("Restore purchases", kind: .tertiary, isLoading: isLoading, fullWidth: false, action: action)
-            .accessibilityIdentifier("paywall.restore")
+        // Same size as the Terms and Privacy links beside it; a quiet, always-available action.
+        Button(action: action) {
+            HStack(spacing: 6) {
+                if isLoading { ProgressView().controlSize(.small) }
+                Text("Restore purchases")
+            }
+            .frame(minHeight: DS.minimumTapTarget)
+            .contentShape(Rectangle())
+        }
+        .disabled(isLoading)
+        .accessibilityLabel(isLoading ? "Restore purchases, in progress" : "Restore purchases")
+        .accessibilityIdentifier("paywall.restore")
     }
 }
 
@@ -302,13 +312,15 @@ public struct SubscriptionCard: View {
     let title: String
     let detail: String
     let isPremium: Bool
+    let badge: String?
     let actionTitle: String?
     let action: (() -> Void)?
 
-    public init(title: String, detail: String, isPremium: Bool, actionTitle: String? = nil, action: (() -> Void)? = nil) {
+    public init(title: String, detail: String, isPremium: Bool, badge: String? = nil, actionTitle: String? = nil, action: (() -> Void)? = nil) {
         self.title = title
         self.detail = detail
         self.isPremium = isPremium
+        self.badge = badge
         self.actionTitle = actionTitle
         self.action = action
     }
@@ -326,7 +338,7 @@ public struct SubscriptionCard: View {
                 VStack(alignment: .leading, spacing: 3) {
                     AdaptiveStack(horizontalAlignment: .firstTextBaseline, spacing: DS.Spacing.xs) {
                         Text(title).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
-                        if isPremium { Badge("Active", tone: .accent) }
+                        if let badge { Badge(badge, tone: isPremium ? .accent : .caution) }
                     }
                     Text(detail).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)

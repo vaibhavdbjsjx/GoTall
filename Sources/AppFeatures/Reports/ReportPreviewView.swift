@@ -49,7 +49,8 @@ struct ReportPreviewView: View {
         let now = Date()
         let selectedUnit = unit ?? profile.unitPreference
         let report = GrowthReportBuilder(now: now, calendar: .current).build(profile: profile, unit: selectedUnit)
-        return ScrollView {
+        return ScrollViewReader { proxy in
+        ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
                 header(profile, report: report)
                     .appearEffect()
@@ -68,9 +69,16 @@ struct ReportPreviewView: View {
                 dataSummary(profile, report: report)
                 QuietNote(title: "Not a diagnosis", message: "The report presents measurements and growth-chart context for a conversation with a healthcare professional. It states clearly that it isn't a diagnosis and that estimates aren't guarantees.", symbol: "stethoscope")
                 actionArea(profile)
+                    .id("action")
             }
             .padding(.horizontal, DS.Spacing.page)
             .padding(.vertical, DS.Spacing.md)
+        }
+        .onChange(of: phase) { _, newPhase in
+            // Bring the result into view when the report is ready (or failed).
+            if case .generating = newPhase { return }
+            if newPhase != .idle { withAnimation(Motion.standard) { proxy.scrollTo("action", anchor: .bottom) } }
+        }
         }
     }
 
@@ -79,12 +87,11 @@ struct ReportPreviewView: View {
             ReportPreview(compact: true)
                 .hiddenAtAccessibilitySizes()
             VStack(alignment: .leading, spacing: 4) {
-                AdaptiveStack(horizontalAlignment: .firstTextBaseline, spacing: DS.Spacing.xs) {
-                    Text("Doctor-ready report").font(DS.Typography.title).foregroundStyle(DS.Colors.textPrimary)
-                        .accessibilityAddTraits(.isHeader)
-                    if !entitlements.isPremium { PremiumBadge() }
-                }
-                Text("For \(profile.displayLabel) · \(report.sections.count) sections · US Letter PDF")
+                if !entitlements.isPremium { PremiumBadge() }
+                Text("Doctor-ready report").font(DS.Typography.title).foregroundStyle(DS.Colors.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityAddTraits(.isHeader)
+                Text("For \(profile.subject == .myself ? "you" : profile.displayLabel) · \(report.sections.count) sections · US Letter PDF")
                     .font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
                 if let latest = profile.latestMeasurement {
                     Text("Data up to \(DisplayFormat.day(latest.date, calendar: .current))")

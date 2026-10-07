@@ -145,6 +145,7 @@ struct ProfileView: View {
             SubscriptionCard(title: BrandConfig.current.displayName + " Premium",
                              detail: entitlements.statusDescription(),
                              isPremium: entitlements.isPremium,
+                             badge: badge(for: state.status),
                              actionTitle: entitlements.isPremium ? nil : "Explore Premium",
                              action: entitlements.isPremium ? nil : { navigator.showPaywall(.general) })
                 .listRowInsets(EdgeInsets())
@@ -177,6 +178,16 @@ struct ProfileView: View {
             .accessibilityIdentifier("profile.restore")
         } footer: {
             if let restoreMessage { Text(restoreMessage).accessibilityIdentifier("profile.restoreMessage") }
+        }
+    }
+
+    private func badge(for status: EntitlementState.Status) -> String? {
+        switch status {
+        case .active: return "Active"
+        case .cancelled: return "Ending"
+        case .gracePeriod, .billingRetry: return "Payment issue"
+        case .expired: return "Ended"
+        case .none, .revoked: return nil
         }
     }
 

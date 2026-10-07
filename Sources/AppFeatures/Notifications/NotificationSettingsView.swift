@@ -112,10 +112,12 @@ struct NotificationSettingsView: View {
                     Text(months == 1 ? "Every month" : (months == 12 ? "Every year" : "Every \(months) months")).tag(MeasurementReminderInterval.months(months))
                 }
             } label: {
-                Text("How often").font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textPrimary)
+                Text("How often")
             }
+            .pickerStyle(.menu)
             .tint(DS.Colors.accent)
             .accessibilityIdentifier("notifications.interval")
+            .modifier(LabeledMenuRow(title: "How often"))
             Text(prefs.measurementInterval == .recommended
                  ? "Recommended: every 3 months while growing (ages 2–17), every 6 months at 18–20. Measuring more often mostly shows measuring differences."
                  : "Counted from the latest measurement. A new measurement moves the reminder automatically.")
@@ -198,6 +200,18 @@ struct NotificationSettingsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(DS.Colors.accentSoft.opacity(0.6), in: RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous))
         .accessibilityElement(children: .combine)
+    }
+}
+
+/// Puts a visible label before a menu picker (menu pickers outside a Form show only the selection).
+private struct LabeledMenuRow: ViewModifier {
+    let title: String
+    func body(content: Content) -> some View {
+        AdaptiveStack(horizontalAlignment: .center, spacing: DS.Spacing.xs) {
+            Text(title).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textPrimary)
+            Spacer(minLength: 0).hiddenAtAccessibilitySizes()
+            content
+        }
     }
 }
 

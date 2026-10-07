@@ -150,11 +150,8 @@ struct PaywallView: View {
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("Loading prices")
             case .failed(let message):
-                VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-                    InfoBanner(message, tone: .caution)
-                    AppButton("Try again", systemImage: "arrow.clockwise", kind: .secondary) { Task { await model.loadPlans() } }
-                }
-                .accessibilityIdentifier("paywall.plansFailed")
+                InfoBanner(message, title: "Prices aren't available", tone: .caution)
+                    .accessibilityIdentifier("paywall.plansFailed")
             case .loaded(let plans):
                 ForEach(plans) { plan in
                     PriceOption(plan: plan, detail: detail(for: plan, monthly: model.monthlyPlan),
@@ -214,6 +211,24 @@ struct PaywallView: View {
 
     @ViewBuilder
     private func purchaseArea(_ model: PaywallModel) -> some View {
+        if case .failed(let message) = model.plans {
+            // Prices couldn't load: say why here, where the button is, instead of showing a dead button.
+            VStack(spacing: DS.Spacing.xs) {
+                Text(message)
+                    .font(DS.Typography.footnote.weight(.medium))
+                    .foregroundStyle(DS.Colors.caution)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                AppButton("Try again", systemImage: "arrow.clockwise") { Task { await model.loadPlans() } }
+                    .accessibilityIdentifier("paywall.retryPlans")
+            }
+        } else {
+            purchaseControls(model)
+        }
+    }
+
+    @ViewBuilder
+    private func purchaseControls(_ model: PaywallModel) -> some View {
         VStack(spacing: DS.Spacing.xs) {
             if let message = model.statusMessage {
                 Text(message)
@@ -238,7 +253,7 @@ struct PaywallView: View {
 
     private func purchaseTitle(_ model: PaywallModel) -> String {
         if case .purchasing = model.purchase { return "Confirming with the App Store" }
-        guard let plan = model.selectedPlan else { return "Subscribe" }
+        guard let plan = model.selectedPlan else { return model.plans == .loading ? "Loading prices" : "Subscribe" }
         if case .failed = model.purchase { return "Try again · \(plan.displayPrice)/\(plan.periodNoun)" }
         return "Subscribe · \(plan.displayPrice)/\(plan.periodNoun)"
     }

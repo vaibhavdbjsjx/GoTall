@@ -118,7 +118,9 @@ struct GrowthView: View {
         .onAppear {
             #if DEBUG
             // Screenshot harness: `-growthScrollTo estimate` and `-openExplanation YES` launch arguments.
-            if let target = UserDefaults.standard.string(forKey: "growthScrollTo") { proxy.scrollTo(target, anchor: .top) }
+            if let target = UserDefaults.standard.string(forKey: "growthScrollTo") {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { proxy.scrollTo(target, anchor: .top) }
+            }
             if UserDefaults.standard.bool(forKey: "openExplanation") { showsExplanation = true }
             #endif
         }
@@ -511,10 +513,8 @@ private struct ReportLinkCard: View {
                     .accessibilityHidden(true)
                     .hiddenAtAccessibilitySizes()
                 VStack(alignment: .leading, spacing: 2) {
-                    AdaptiveStack(horizontalAlignment: .firstTextBaseline, spacing: DS.Spacing.xs) {
-                        Text("Doctor-ready report").font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
-                        if !entitlements.isPremium { PremiumBadge() }
-                    }
+                    if !entitlements.isPremium { PremiumBadge() }
+                    Text("Doctor-ready report").font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
                     Text("A PDF of the chart, measurements and methods for a check-up. See what's included.")
                         .font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
                         .multilineTextAlignment(.leading)

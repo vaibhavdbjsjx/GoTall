@@ -470,8 +470,8 @@ private struct PremiumMomentCard: View {
                 }
                 Spacer(minLength: 0)
                 ReportPreview(compact: true)
-                    .scaleEffect(0.8)
-                    .frame(width: 100, height: 110)
+                    .scaleEffect(0.62)
+                    .frame(width: 80, height: 92)
                     .hiddenAtAccessibilitySizes()
             }
             AdaptiveStack(horizontalAlignment: .center, spacing: DS.Spacing.xs) {

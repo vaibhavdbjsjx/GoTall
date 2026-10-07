@@ -45,8 +45,10 @@ jobs:
           mkdir -p small
           for f in screenshots/*.png report-pages/*.png; do
             [ -f "$f" ] || continue
+            # Phase 1–4 screens were reviewed earlier; printing only new screens keeps the log under the size limit.
+            echo "$(basename "$f")" | grep -Eq '^(light-(0[0-9]|1[014-8])|se-(0|15)|max-0|dark-(0|1[0-5])|ax-(0|1[0-3]))' && continue
             n=$(basename "$f" .png)
-            sips -Z 640 -s format jpeg -s formatOptions 55 "$f" --out "small/$n.jpg" >/dev/null
+            sips -Z 600 -s format jpeg -s formatOptions 50 "$f" --out "small/$n.jpg" >/dev/null
             echo "IMG:$n:$(base64 -i "small/$n.jpg" | tr -d '\n')"
           done
       - name: StoreKit and UI tests (iOS Simulator)
