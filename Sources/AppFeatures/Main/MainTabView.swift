@@ -13,6 +13,9 @@ struct MainTabView: View {
     let repository: AppRepository
     @State private var selection: AppTab
     @State private var showsAddMeasurement = false
+    @State private var showsSwitcher = false
+    @State private var editingFamily: GrowthProfile?
+    @State private var explanationRequest = 0
 
     init(repository: AppRepository, initialTab: AppTab = .home) {
         self.repository = repository
@@ -24,7 +27,7 @@ struct MainTabView: View {
             HomeView(repository: repository, onAction: handle)
                 .tabItem { Label("Home", systemImage: "house") }
                 .tag(AppTab.home)
-            GrowthView(repository: repository)
+            GrowthView(repository: repository, explanationRequest: explanationRequest)
                 .tabItem { Label("Growth", systemImage: "chart.xyaxis.line") }
                 .tag(AppTab.growth)
             HabitsView(repository: repository)
@@ -34,10 +37,19 @@ struct MainTabView: View {
                 .tabItem { Label("Profile", systemImage: "person.crop.circle") }
                 .tag(AppTab.profile)
         }
+        .sensoryFeedback(.selection, trigger: selection)
         .sheet(isPresented: $showsAddMeasurement) {
             if let profile = repository.activeProfile {
-                MeasurementEditorSheet(repository: repository, profile: profile, route: .add)
+                AddMeasurementFlow(repository: repository, profile: profile)
             }
+        }
+        .sheet(isPresented: $showsSwitcher) {
+            ProfileSwitcherSheet(repository: repository)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(item: $editingFamily) { profile in
+            EditProfileView(repository: repository, profile: profile, focus: nil)
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             if repository.lastSaveError != nil {
@@ -45,38 +57,39 @@ struct MainTabView: View {
                     .padding(.horizontal, DS.Spacing.page)
             }
         }
+        .onAppear(perform: applyLaunchOptions)
     }
 
-    private func handle(_ action: DashboardState.QuickAction) {
+    private func handle(_ action: HomeAction) {
         switch action {
         case .measure: showsAddMeasurement = true
-        case .viewGrowth: selection = .growth
+        case .growth: selection = .growth
         case .habits: selection = .habits
+        case .explanation:
+            selection = .growth
+            explanationRequest += 1
+        case .editFamily: editingFamily = repository.activeProfile
+        case .switchProfile: showsSwitcher = true
         }
+    }
+
+    private func applyLaunchOptions() {
+        #if DEBUG
+        // Screenshot harness only.
+        if UserDefaults.standard.bool(forKey: "openAddMeasurement") { showsAddMeasurement = true }
+        if UserDefaults.standard.bool(forKey: "openProfileSwitcher") { showsSwitcher = true }
+        #endif
     }
 }
 
-/// Avatar menu for switching between profiles (parents with several children).
-struct ProfileSwitcher: View {
+/// Header button that opens the profile switcher. Hidden when there's only one profile.
+struct ProfileSwitcherButton: View {
     let repository: AppRepository
+    let action: () -> Void
 
     var body: some View {
         if repository.profiles.count > 1, let active = repository.activeProfile {
-            Menu {
-                Section("Switch profile") {
-                    ForEach(repository.profiles) { profile in
-                        Button {
-                            withAnimation(Motion.standard) { repository.setActiveProfile(profile.id) }
-                        } label: {
-                            if profile.id == active.id {
-                                Label(profile.displayLabel, systemImage: "checkmark")
-                            } else {
-                                Text(profile.displayLabel)
-                            }
-                        }
-                    }
-                }
-            } label: {
+            Button(action: action) {
                 HStack(spacing: 6) {
                     ProfileAvatar(profile: active, size: 30)
                     Text(active.displayLabel).font(DS.Typography.subheadline.weight(.semibold))
@@ -88,7 +101,79 @@ struct ProfileSwitcher: View {
                 .background(DS.Colors.surfaceSecondary, in: Capsule())
                 .foregroundStyle(DS.Colors.textPrimary)
             }
+            .buttonStyle(PressableStyle())
             .accessibilityLabel("Switch profile, current: \(active.displayLabel)")
+        }
+    }
+}
+
+/// Compact switcher for toolbars (Growth, Habits): same sheet, smaller control.
+struct ProfileSwitcher: View {
+    let repository: AppRepository
+    @State private var showsSheet = false
+
+    var body: some View {
+        ProfileSwitcherButton(repository: repository) { showsSheet = true }
+            .sheet(isPresented: $showsSheet) {
+                ProfileSwitcherSheet(repository: repository)
+                    .presentationDetents([.medium, .large])
+                    .presentationDragIndicator(.visible)
+            }
+    }
+}
+
+/// Cards for each profile: avatar, name, age, current height and a data-justified status.
+struct ProfileSwitcherSheet: View {
+    let repository: AppRepository
+    @Environment(\.dismiss) private var dismiss
+    @State private var showsAddProfile = false
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: DS.Spacing.sm) {
+                    ForEach(repository.profiles) { profile in
+                        let summary = ProfileCardSummary(profile: profile, now: Date(), calendar: .current)
+                        let isActive = profile.id == repository.activeProfile?.id
+                        Button {
+                            withAnimation(Motion.standard) { repository.setActiveProfile(profile.id) }
+                            dismiss()
+                        } label: {
+                            HStack(spacing: DS.Spacing.md) {
+                                ProfileAvatar(profile: profile, size: 48)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(summary.name).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
+                                    Text([summary.ageText, summary.heightText].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))
+                                        .font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
+                                    Text(summary.statusText).font(DS.Typography.caption).foregroundStyle(DS.Colors.accent)
+                                }
+                                Spacer(minLength: 0)
+                                Image(systemName: isActive ? "checkmark.circle.fill" : "circle")
+                                    .font(.title2)
+                                    .foregroundStyle(isActive ? DS.Colors.accent : DS.Colors.separator)
+                            }
+                            .padding(DS.Spacing.md)
+                            .background(DS.Colors.surface, in: RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous)
+                                .strokeBorder(isActive ? DS.Colors.accent : DS.Colors.separator, lineWidth: isActive ? 2 : 1))
+                        }
+                        .buttonStyle(PressableStyle())
+                        .accessibilityAddTraits(isActive ? [.isButton, .isSelected] : .isButton)
+                    }
+                    AppButton("Add a child", systemImage: "plus", kind: .secondary) { showsAddProfile = true }
+                        .padding(.top, DS.Spacing.xs)
+                }
+                .padding(DS.Spacing.page)
+            }
+            .dsPageBackground()
+            .navigationTitle("Profiles")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .fullScreenCover(isPresented: $showsAddProfile) {
+                OnboardingHost(repository: repository, mode: .additionalProfile,
+                               onCancel: { showsAddProfile = false },
+                               onFinish: { showsAddProfile = false; dismiss() })
+            }
         }
     }
 }
@@ -102,14 +187,15 @@ struct ProfileAvatar: View {
         let initial = profile.subject == .myself ? "Me" : String(profile.displayLabel.prefix(1)).uppercased()
         Text(initial)
             .font(.system(size: size * (initial.count > 1 ? 0.36 : 0.45), weight: .bold, design: .rounded))
-            .foregroundStyle(DS.Colors.onAccent)
+            .foregroundStyle(.white)
             .frame(width: size, height: size)
             .background(color, in: Circle())
             .accessibilityHidden(true)
     }
 
     private var color: Color {
-        let palette: [Color] = [DS.Colors.accent, DS.Colors.warm, Color(red: 0.36, green: 0.42, blue: 0.75), Color(red: 0.55, green: 0.38, blue: 0.62)]
+        let palette: [Color] = [Color(red: 0.04, green: 0.44, blue: 0.37), Color(red: 0.66, green: 0.31, blue: 0.15),
+                                Color(red: 0.30, green: 0.36, blue: 0.70), Color(red: 0.50, green: 0.33, blue: 0.58)]
         // Stable across launches (hashValue is randomised per process).
         let index = profile.id.uuidString.unicodeScalars.reduce(0) { $0 + Int($1.value) } % palette.count
         return palette[index]

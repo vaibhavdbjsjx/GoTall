@@ -127,6 +127,25 @@ public final class AppRepository {
         }
     }
 
+    /// Toggles a habit check-in for a day (today or the past week).
+    public func toggleHabit(_ kind: HabitKind, on date: Date, for profileID: UUID, today: Date, calendar: Calendar) {
+        update { snapshot in
+            guard let index = snapshot.profiles.firstIndex(where: { $0.id == profileID }) else { return }
+            snapshot.profiles[index] = HabitEngine(today: today, calendar: calendar).toggling(kind, on: date, in: snapshot.profiles[index])
+        }
+    }
+
+    public func setActiveHabits(_ habits: [HabitKind], for profileID: UUID) {
+        update { snapshot in
+            guard let index = snapshot.profiles.firstIndex(where: { $0.id == profileID }) else { return }
+            snapshot.profiles[index].activeHabits = Array(habits.prefix(HabitEngine.maximumActive))
+        }
+    }
+
+    public func setNotificationPreferences(_ preferences: NotificationPreferences) {
+        update { $0.notificationPreferences = preferences }
+    }
+
     public func setUnitPreference(_ unit: HeightUnit, for profileID: UUID) {
         update { snapshot in
             guard let index = snapshot.profiles.firstIndex(where: { $0.id == profileID }) else { return }

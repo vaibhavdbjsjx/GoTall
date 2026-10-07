@@ -70,6 +70,11 @@ struct GrowthChartView: View {
     let model: GrowthChartModel
     @Binding var selected: SeriesPoint?
     @State private var rawSelection: Double?
+    /// Number of the person's points drawn so far: the line draws on once when the chart appears.
+    @State private var revealed = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var visiblePoints: [SeriesPoint] { Array(model.points.prefix(revealed)) }
 
     var body: some View {
         Chart {
@@ -89,13 +94,13 @@ struct GrowthChartView: View {
                     .lineStyle(StrokeStyle(lineWidth: 1, dash: [4, 4]))
                     .interpolationMethod(.monotone)
             }
-            ForEach(model.points) { point in
+            ForEach(visiblePoints) { point in
                 LineMark(x: .value("Age", point.ageMonths / 12), y: .value("Height", model.display(point.heightCm)), series: .value("Line", "you"))
                     .foregroundStyle(DS.Colors.accent)
                     .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
                     .interpolationMethod(.monotone)
             }
-            ForEach(model.points) { point in
+            ForEach(visiblePoints) { point in
                 PointMark(x: .value("Age", point.ageMonths / 12), y: .value("Height", model.display(point.heightCm)))
                     .foregroundStyle(point.quality == .estimate ? DS.Colors.accent.opacity(0.45) : DS.Colors.accent)
                     .symbolSize(point.id == selected?.id ? 160 : 70)
@@ -120,6 +125,20 @@ struct GrowthChartView: View {
         }
         .frame(height: 260)
         .accessibilityChartDescriptor(GrowthChartDescriptor(model: model))
+        .task(id: model.points.count) { await reveal() }
+    }
+
+    /// Draws the person's line point by point (reference curves don't animate). Instant under Reduce Motion.
+    private func reveal() async {
+        if reduceMotion || revealed >= model.points.count {
+            revealed = model.points.count
+            return
+        }
+        let step = min(0.12, 0.6 / Double(max(model.points.count, 1)))
+        while revealed < model.points.count {
+            try? await Task.sleep(nanoseconds: UInt64(step * 1_000_000_000))
+            withAnimation(.easeOut(duration: step)) { revealed += 1 }
+        }
     }
 
     private func accessibilityValue(for point: SeriesPoint) -> String {
@@ -163,7 +182,7 @@ struct SelectedPointDetail: View {
             Spacer(minLength: 0)
         }
         .padding(DS.Spacing.sm)
-        .background(DS.Colors.surfaceSecondary, in: RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous))
+        .background(DS.Colors.accentSoft.opacity(0.6), in: RoundedRectangle(cornerRadius: DS.Radius.md, style: .continuous))
         .overlay(alignment: .topTrailing) {
             if point.quality == .estimate { Badge("Estimate", tone: .caution).padding(6) }
         }

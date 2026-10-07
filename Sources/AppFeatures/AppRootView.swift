@@ -7,6 +7,7 @@ import DesignSystem
 public struct AppRootView: View {
     @State private var repository: AppRepository
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
 
     private let initialTab: AppTab
 
@@ -32,6 +33,7 @@ public struct AppRootView: View {
         }
         .animation(Motion.resolved(Motion.reveal, reduceMotion: reduceMotion), value: repository.profiles.isEmpty)
         .tint(DS.Colors.accent)
+        .preferredColorScheme(AppAppearance(rawValue: appearance)?.colorScheme)
     }
 }
 

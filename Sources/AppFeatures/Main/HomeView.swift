@@ -1,43 +1,20 @@
 #if os(iOS)
 import SwiftUI
+import Charts
 import GrowthCore
 import GrowthEngine
 import DesignSystem
 
+/// Home answers three questions, in order: How am I doing? What's changed? What should I do next?
 struct HomeView: View {
     let repository: AppRepository
-    let onAction: (DashboardState.QuickAction) -> Void
+    let onAction: (HomeAction) -> Void
 
     var body: some View {
         NavigationStack {
             Group {
                 if let profile = repository.activeProfile {
-                    let state = DashboardBuilder(now: Date(), calendar: .current).build(for: profile)
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-                            header(state)
-                            HeightHeroCard(state: state).appearEffect()
-                            HomeEstimateCard(card: state.estimate, onTap: { onAction(.viewGrowth) }).appearEffect(delay: 0.03)
-                            AdaptiveStack(horizontalAlignment: .top, spacing: DS.Spacing.sm) {
-                                MetricCard(label: "Growth speed", value: state.velocityValue, caption: state.velocityValue == nil ? "Needs two measurements 6+ months apart" : "Based on your last measurements", systemImage: "speedometer", placeholder: "Not yet")
-                                if let family = state.family {
-                                    MetricCard(label: "Family height", value: family.value, caption: family.caption, systemImage: "person.2", placeholder: "Not set")
-                                }
-                            }
-                            .appearEffect(delay: 0.05)
-                            QuickActionsRow(actions: state.quickActions, onAction: onAction).appearEffect(delay: 0.07)
-                            if let next = state.nextMeasurement {
-                                InfoBanner(next, title: "Next step", tone: state.nextMeasurement?.hasPrefix("A new") == true ? .caution : .info)
-                            }
-                            InsightCardView(insight: state.insight)
-                            if state.hasSafetyNote {
-                                InfoBanner(GrowthCopy.concernBody, title: "About growth concerns", tone: .info)
-                            }
-                            HabitBaselineSection(habits: state.habits)
-                        }
-                        .padding(.horizontal, DS.Spacing.page)
-                        .padding(.bottom, DS.Spacing.xxl)
-                    }
+                    HomeContent(repository: repository, profile: profile, onAction: onAction)
                 } else {
                     LoadingStateView()
                 }
@@ -46,9 +23,74 @@ struct HomeView: View {
             .toolbar(.hidden, for: .navigationBar)
         }
     }
+}
 
-    private func header(_ state: DashboardState) -> some View {
-        HStack(alignment: .center) {
+enum HomeAction {
+    case measure, growth, habits, explanation, editFamily, switchProfile
+}
+
+private struct HomeContent: View {
+    let repository: AppRepository
+    let profile: GrowthProfile
+    let onAction: (HomeAction) -> Void
+
+    var body: some View {
+        let now = Date()
+        let analysis = GrowthAnalyzer(now: now, calendar: .current).analyze(profile)
+        let state = DashboardBuilder(now: now, calendar: .current).build(for: profile, analysis: analysis)
+        let status = GrowthStatus.from(analysis)
+        let next = NextActionEngine.next(profile: profile, analysis: analysis, now: now, calendar: .current)
+        ScrollViewReader { proxy in
+        ScrollView {
+            VStack(alignment: .leading, spacing: DS.Spacing.lg) {
+                HomeHeader(state: state, repository: repository, onSwitch: { onAction(.switchProfile) })
+                HomeHero(state: state, analysis: analysis, status: status)
+                    .appearEffect()
+                if case .range = state.estimate {
+                    HomeEstimateCard(card: state.estimate, onTap: { onAction(.explanation) })
+                        .appearEffect(delay: 0.04)
+                }
+                TrajectoryPreview(analysis: analysis, unit: profile.unitPreference, onTap: { onAction(.growth) })
+                    .appearEffect(delay: 0.06)
+                TodayCard(repository: repository, profile: profile, analysis: analysis, onOpenHabits: { onAction(.habits) })
+                    .id("today")
+                InsightCardView(insight: state.insight)
+                    .id("insight")
+                NextActionCard(action: next) { kind in
+                    switch kind {
+                    case .measureNow: onAction(.measure)
+                    case .checkIn: onAction(.habits)
+                    case .addParentHeights: onAction(.editFamily)
+                    case .reviewGrowth, .measureLater: onAction(.growth)
+                    }
+                }
+                if case .message(let title, let body) = state.estimate {
+                    QuietNote(title: title, message: body, symbol: "scope")
+                }
+                if state.hasSafetyNote {
+                    QuietNote(title: "About growth concerns", message: GrowthCopy.concernBody, symbol: "stethoscope")
+                }
+            }
+            .padding(.horizontal, DS.Spacing.page)
+            .padding(.bottom, DS.Spacing.xxl)
+        }
+        .onAppear {
+            #if DEBUG
+            if let target = UserDefaults.standard.string(forKey: "homeScrollTo") { proxy.scrollTo(target, anchor: .top) }
+            #endif
+        }
+        }
+        .animation(Motion.standard, value: profile.id)
+    }
+}
+
+private struct HomeHeader: View {
+    let state: DashboardState
+    let repository: AppRepository
+    let onSwitch: () -> Void
+
+    var body: some View {
+        AdaptiveStack(horizontalAlignment: .center) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(state.greeting)
                     .font(DS.Typography.subheadline)
@@ -57,69 +99,77 @@ struct HomeView: View {
                     .font(DS.Typography.display)
                     .foregroundStyle(DS.Colors.textPrimary)
                     .accessibilityAddTraits(.isHeader)
+                    .contentTransition(.opacity)
             }
-            Spacer()
-            ProfileSwitcher(repository: repository)
+            Spacer(minLength: 0)
+            ProfileSwitcherButton(repository: repository, action: onSwitch)
         }
         .padding(.top, DS.Spacing.md)
     }
 }
 
-struct HeightHeroCard: View {
+/// The dominant growth state: height, percentile position on the door-frame ruler, and a data-justified status.
+private struct HomeHero: View {
     let state: DashboardState
+    let analysis: GrowthAnalysis
+    let status: GrowthStatus
 
     var body: some View {
-        AppCard(padding: DS.Spacing.lg) {
+        HStack(alignment: .top, spacing: DS.Spacing.md) {
             VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-                HStack {
-                    Text("Current height").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
-                    Spacer()
-                    if let height = state.height {
-                        Badge(height.measuredWhen, tone: height.isEstimate ? .caution : .neutral)
-                    }
-                }
-                AdaptiveStack(horizontalAlignment: .firstTextBaseline) {
-                    if let height = state.height {
+                Label(status.title, systemImage: status.symbol)
+                    .font(DS.Typography.caption)
+                    .foregroundStyle(DS.Colors.accent)
+                    .padding(.horizontal, DS.Spacing.xs)
+                    .padding(.vertical, 5)
+                    .background(DS.Colors.accentSoft, in: Capsule())
+                if let height = state.height {
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("Height today").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
                         Text(height.value)
-                            .font(DS.Typography.metricLarge)
+                            .font(.system(size: 44, weight: .semibold, design: .rounded).monospacedDigit())
+                            .minimumScaleFactor(0.6)
+                            .lineLimit(1)
                             .foregroundStyle(DS.Colors.textPrimary)
                             .contentTransition(.numericText())
-                            .accessibilityLabel("Current height, \(height.accessibleValue), measured \(height.measuredWhen)")
-                    }
-                    Spacer(minLength: 0)
-                    if let p = state.percentile {
-                        Text(p.phrase)
-                            .font(DS.Typography.headline)
-                            .foregroundStyle(DS.Colors.accent)
-                            .padding(.horizontal, DS.Spacing.sm)
-                            .padding(.vertical, 6)
-                            .background(DS.Colors.accentSoft, in: Capsule())
-                    }
-                }
-                if let height = state.height, height.isEstimate {
-                    Text(GrowthCopy.estimatedNotice)
-                        .font(DS.Typography.footnote)
-                        .foregroundStyle(DS.Colors.caution)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                Divider().padding(.vertical, 2)
-                if let change = state.change {
-                    HStack(spacing: DS.Spacing.xs) {
-                        Image(systemName: change.direction > 0 ? "arrow.up.right" : (change.direction < 0 ? "arrow.down.right" : "arrow.right"))
-                            .foregroundStyle(DS.Colors.accent).accessibilityHidden(true)
-                        Text(change.value).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
-                        Text(change.since).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
                     }
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(change.accessibleValue)
-                } else if let hint = state.changeHint {
-                    Text(hint).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
+                    .accessibilityLabel("Height, \(height.accessibleValue), measured \(height.measuredWhen)")
                 }
-                if let reason = state.percentileUnavailableReason {
-                    Text(reason).font(DS.Typography.footnote).foregroundStyle(DS.Colors.textTertiary)
+                if let p = state.percentile {
+                    Text(p.phrase.prefix(1).uppercased() + p.phrase.dropFirst())
+                        .font(DS.Typography.headline)
+                        .foregroundStyle(DS.Colors.textPrimary)
+                } else if let reason = state.percentileUnavailableReason {
+                    Text(reason).font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    if let change = state.change {
+                        Label {
+                            Text("\(change.value) \(change.since)")
+                        } icon: {
+                            Image(systemName: change.direction > 0 ? "arrow.up.right" : (change.direction < 0 ? "arrow.down.right" : "arrow.right"))
+                        }
+                        .font(DS.Typography.subheadline)
+                        .foregroundStyle(DS.Colors.textSecondary)
+                        .accessibilityLabel(change.accessibleValue)
+                    }
+                    if let height = state.height {
+                        Text(height.isEstimate ? "Estimated \(height.measuredWhen.lowercased())" : "Measured \(height.measuredWhen.lowercased())")
+                            .font(DS.Typography.footnote)
+                            .foregroundStyle(height.isEstimate ? DS.Colors.caution : DS.Colors.textTertiary)
+                    }
                 }
             }
+            Spacer(minLength: 0)
+            if let p = analysis.currentPercentile {
+                DoorFrameRuler(z: p.z, markerLabel: PercentileFormatter.ordinal(p.percentile))
+                    .frame(height: 176)
+                    .hiddenAtAccessibilitySizes()
+            }
         }
+        .padding(DS.Spacing.lg)
+        .heroSurface()
     }
 }
 
@@ -129,68 +179,217 @@ struct HomeEstimateCard: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack(alignment: .top, spacing: DS.Spacing.md) {
-                Image(systemName: "scope")
-                    .font(.title3)
-                    .foregroundStyle(DS.Colors.accent)
-                    .frame(width: 40, height: 40)
-                    .background(DS.Colors.accentSoft, in: RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous))
-                    .accessibilityHidden(true)
-                    .hiddenAtAccessibilitySizes()
-                VStack(alignment: .leading, spacing: 4) {
-                    switch card {
-                    case .range(let value, let accessible, let uncertainty, let caption):
+            VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+                if case .range(let value, let accessible, let uncertainty, let caption) = card {
+                    HStack {
                         Text(GrowthCopy.estimateTitle).font(DS.Typography.subheadline.weight(.semibold)).foregroundStyle(DS.Colors.textSecondary)
+                        Spacer(minLength: DS.Spacing.xs)
                         Badge(GrowthCopy.uncertaintyLabel(uncertainty))
-                        Text(value).font(DS.Typography.metric).foregroundStyle(DS.Colors.textPrimary)
-                            .accessibilityLabel("Estimated adult height, \(accessible)")
+                    }
+                    Text(value)
+                        .font(DS.Typography.metric)
+                        .foregroundStyle(DS.Colors.textPrimary)
+                        .accessibilityLabel("Estimated adult height, \(accessible)")
+                    HStack {
                         Text(caption).font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
-                    case .message(let title, let body):
-                        Text(title).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
-                        Text(body).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: DS.Spacing.xs)
+                        Text("Why?").font(DS.Typography.footnote.weight(.semibold)).foregroundStyle(DS.Colors.accent)
                     }
                 }
-                .multilineTextAlignment(.leading)
-                Image(systemName: "chevron.right").foregroundStyle(DS.Colors.textTertiary).accessibilityHidden(true)
             }
             .padding(DS.Spacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)
             .dsSurface()
         }
         .buttonStyle(PressableStyle())
+        .accessibilityHint("Explains the estimate")
+    }
+}
+
+/// A small chart preview: the person's line over the 25th–75th band. Taps through to Growth.
+private struct TrajectoryPreview: View {
+    let analysis: GrowthAnalysis
+    let unit: HeightUnit
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+                HStack {
+                    Text("Growth chart").font(DS.Typography.subheadline.weight(.semibold)).foregroundStyle(DS.Colors.textSecondary)
+                    Spacer()
+                    Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(DS.Colors.textTertiary)
+                }
+                if analysis.series.chartablePoints.isEmpty {
+                    Text("Growth charts cover ages 2–20. Your measurements are kept in your history.")
+                        .font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
+                } else {
+                    let model = GrowthChartModel(series: analysis.series, sex: analysis.sex, unit: unit,
+                                                 ageNowYears: (analysis.age?.exactMonths ?? 0) / 12, window: .focus)
+                    Chart {
+                        ForEach(model.innerBand) { p in
+                            AreaMark(x: .value("Age", p.ageYears), yStart: .value("Low", p.low), yEnd: .value("High", p.high), series: .value("Band", "inner"))
+                                .foregroundStyle(DS.Colors.accent.opacity(0.10))
+                                .interpolationMethod(.monotone)
+                        }
+                        ForEach(model.points) { point in
+                            LineMark(x: .value("Age", point.ageMonths / 12), y: .value("Height", model.display(point.heightCm)), series: .value("Line", "you"))
+                                .foregroundStyle(DS.Colors.accent)
+                                .lineStyle(StrokeStyle(lineWidth: 2.5, lineCap: .round))
+                                .interpolationMethod(.monotone)
+                        }
+                        if let last = model.points.last {
+                            PointMark(x: .value("Age", last.ageMonths / 12), y: .value("Height", model.display(last.heightCm)))
+                                .foregroundStyle(DS.Colors.accent)
+                                .symbolSize(60)
+                        }
+                    }
+                    .chartXScale(domain: model.xDomain)
+                    .chartYScale(domain: model.yDomain)
+                    .chartXAxis(.hidden)
+                    .chartYAxis(.hidden)
+                    .frame(height: 96)
+                    .accessibilityHidden(true)
+                    Text(model.points.count < 2 ? "Your line appears after your next measurement." : "\(model.points.count) measurements on the CDC chart")
+                        .font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
+                }
+            }
+            .padding(DS.Spacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .dsSurface()
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityLabel("Growth chart, \(analysis.series.chartablePoints.count) measurements")
         .accessibilityHint("Opens Growth")
     }
 }
 
-struct QuickActionsRow: View {
-    let actions: [DashboardState.QuickAction]
-    let onAction: (DashboardState.QuickAction) -> Void
+/// Today's small actions: habit check-ins (inline) and the measurement interval when relevant.
+private struct TodayCard: View {
+    let repository: AppRepository
+    let profile: GrowthProfile
+    let analysis: GrowthAnalysis
+    let onOpenHabits: () -> Void
 
     var body: some View {
-        AdaptiveStack(spacing: DS.Spacing.sm) {
-            ForEach(actions) { action in
-                Button { onAction(action) } label: {
-                    VStack(spacing: DS.Spacing.xs) {
-                        Image(systemName: action.symbol)
-                            .font(.title3)
-                            .foregroundStyle(action == .measure ? DS.Colors.onAccent : DS.Colors.accent)
-                            .frame(width: 44, height: 44)
-                            .background(action == .measure ? DS.Colors.accent : DS.Colors.accentSoft, in: Circle())
-                        Text(action.title)
-                            .font(DS.Typography.caption)
-                            .foregroundStyle(DS.Colors.textPrimary)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(2)
+        let engine = HabitEngine(today: Date(), calendar: .current)
+        let habits = HabitEngine.activeHabits(for: profile)
+        VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+            SectionHeader("Today", actionTitle: "Habits", action: onOpenHabits)
+            AppCard(padding: 0) {
+                VStack(spacing: 0) {
+                    VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+                        Text(engine.encouragement(in: profile))
+                            .font(DS.Typography.subheadline)
+                            .foregroundStyle(DS.Colors.textSecondary)
+                            .contentTransition(.opacity)
+                        WeekDots(days: weekDays(engine: engine))
                     }
-                    .frame(maxWidth: .infinity, minHeight: 88)
-                    .padding(.vertical, DS.Spacing.xs)
-                    .dsSurface(radius: DS.Radius.md)
+                    .padding(DS.Spacing.md)
+                    Divider()
+                    ForEach(Array(habits.enumerated()), id: \.element) { index, kind in
+                        CheckInRow(title: kind.title, subtitle: kind.prompt, symbol: kind.symbol,
+                                   isDone: engine.isCompleted(kind, on: Date(), in: profile)) {
+                            withAnimation(Motion.standard) {
+                                repository.toggleHabit(kind, on: Date(), for: profile.id, today: Date(), calendar: .current)
+                            }
+                        }
+                        if index < habits.count - 1 { Divider().padding(.leading, 72) }
+                    }
+                    if let row = measurementRow() {
+                        Divider()
+                        row.padding(DS.Spacing.md)
+                    }
                 }
-                .buttonStyle(PressableStyle())
-                .accessibilityLabel(action.title)
             }
         }
+    }
+
+    private func weekDays(engine: HabitEngine) -> [WeekDots.Day] {
+        let formatter = DateFormatter()
+        formatter.setLocalizedDateFormatFromTemplate("EEEEE")
+        return engine.recentDays(7, in: profile).map {
+            WeekDots.Day(id: $0.date, letter: formatter.string(from: $0.date), fraction: $0.fraction, isToday: $0.isToday)
+        }
+    }
+
+    private func measurementRow() -> AnyView? {
+        guard let next = analysis.nextMeasurement, let latest = analysis.latest,
+              let band = analysis.age?.band, let months = GrowthAnalyzer.recommendedIntervalMonths(for: band) else { return nil }
+        let total = Double(months) * 30.4375
+        let elapsed = Double(AgeMath.days(from: latest.date, to: Date(), calendar: .current))
+        let remaining = max(0, Int((total - elapsed).rounded()))
+        return AnyView(HStack(spacing: DS.Spacing.md) {
+            IntervalRing(fraction: elapsed / total, label: next.isDue ? "Due" : "\(remaining)d")
+            VStack(alignment: .leading, spacing: 2) {
+                Text(next.isDue ? "Measurement due" : "Next measurement").font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
+                Text(next.isDue ? "A new measurement keeps the chart current." : "In about \(remaining) days. Every \(months) months is plenty.")
+                    .font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
+            }
+            Spacer(minLength: 0)
+        }
+        .accessibilityElement(children: .combine))
+    }
+}
+
+private struct NextActionCard: View {
+    let action: NextAction
+    let perform: (NextAction.Kind) -> Void
+
+    var body: some View {
+        if action.isActionable {
+            VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+                Text("Next step").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
+                Text(action.detail).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+                AppButton(action.title, systemImage: action.symbol) { perform(action.kind) }
+            }
+            .padding(DS.Spacing.md)
+            .dsSurface()
+        } else {
+            QuietNote(title: action.title, message: action.detail, symbol: action.symbol)
+        }
+    }
+}
+
+/// Low-emphasis information row (no card chrome), for context that shouldn't compete with the hero.
+struct QuietNote: View {
+    let title: String
+    let message: String
+    let symbol: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: DS.Spacing.sm) {
+            Image(systemName: symbol).foregroundStyle(DS.Colors.textTertiary).frame(width: 24).accessibilityHidden(true)
+                .hiddenAtAccessibilitySizes()
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(DS.Typography.subheadline.weight(.semibold)).foregroundStyle(DS.Colors.textPrimary)
+                Text(message).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, DS.Spacing.xs)
+        .accessibilityElement(children: .combine)
+    }
+}
+
+struct InsightCardView: View {
+    let insight: GrowthInsight
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+            Label("Insight", systemImage: "sparkle")
+                .font(DS.Typography.caption)
+                .foregroundStyle(DS.Colors.warm)
+            Text(insight.title).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
+            Text(insight.body).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(DS.Spacing.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DS.Colors.warmSoft.opacity(0.55), in: RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -199,63 +398,26 @@ struct HabitBaselineSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-            SectionHeader("Daily habits")
+            SectionHeader("Starting points")
             AppCard(padding: 0) {
                 VStack(spacing: 0) {
                     ForEach(Array(habits.enumerated()), id: \.element.id) { index, habit in
-                        HStack(spacing: DS.Spacing.sm) {
-                            Image(systemName: symbol(habit.kind)).foregroundStyle(DS.Colors.accent).frame(width: 28).accessibilityHidden(true)
+                        AdaptiveStack {
                             Text(habit.title).font(DS.Typography.body).foregroundStyle(DS.Colors.textPrimary)
-                            Spacer()
+                            Spacer(minLength: 0)
                             Text(habit.value ?? "Not set")
                                 .font(DS.Typography.subheadline)
                                 .foregroundStyle(habit.value == nil ? DS.Colors.textTertiary : DS.Colors.textSecondary)
-                                .multilineTextAlignment(.trailing)
                         }
                         .padding(.horizontal, DS.Spacing.md)
-                        .frame(minHeight: 52)
+                        .padding(.vertical, DS.Spacing.sm)
+                        .frame(minHeight: 48)
                         .accessibilityElement(children: .combine)
-                        if index < habits.count - 1 { Divider().padding(.leading, 52) }
+                        if index < habits.count - 1 { Divider().padding(.leading, DS.Spacing.md) }
                     }
                 }
             }
-            Text("Habits support healthy development. They don't change any height estimate. Daily check-ins arrive in a coming update.")
-                .font(DS.Typography.footnote)
-                .foregroundStyle(DS.Colors.textSecondary)
         }
-    }
-
-    private func symbol(_ kind: DashboardState.HabitKind) -> String {
-        switch kind {
-        case .sleep: return "moon"
-        case .activity: return "figure.run"
-        case .nutrition: return "fork.knife"
-        }
-    }
-}
-
-struct InsightCardView: View {
-    let insight: GrowthInsight
-
-    var body: some View {
-        HStack(alignment: .top, spacing: DS.Spacing.md) {
-            Image(systemName: insight.symbol)
-                .font(.title3)
-                .foregroundStyle(DS.Colors.warm)
-                .frame(width: 40, height: 40)
-                .background(DS.Colors.warmSoft, in: RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous))
-                .accessibilityHidden(true)
-                .hiddenAtAccessibilitySizes()
-            VStack(alignment: .leading, spacing: 4) {
-                Text(insight.title).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
-                Text(insight.body).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary).fixedSize(horizontal: false, vertical: true)
-            }
-            Spacer(minLength: 0)
-        }
-        .padding(DS.Spacing.md)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .dsSurface()
-        .accessibilityElement(children: .combine)
     }
 }
 #endif

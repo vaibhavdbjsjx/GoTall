@@ -96,38 +96,114 @@ struct BuildingProfileStepView: View {
 struct SummaryStepView: View {
     @Bindable var controller: OnboardingController
     let onCancel: (() -> Void)?
+    @State private var revealing = false
 
     var body: some View {
         let copy = controller.copy
         let preview = try? ProfileBuilder(flow: controller.flow).build(from: controller.draft)
-        StepScaffold(
-            controller: controller,
-            title: copy.summaryTitle,
-            subtitle: copy.summarySubtitle,
-            primaryTitle: copy.finishAction,
-            primaryEnabled: preview != nil,
-            onCancel: onCancel,
-            primaryAction: { controller.finish() }
-        ) {
-            if let preview {
-                GrowthOverviewCard(profile: preview, analysis: GrowthAnalyzer(now: controller.today, calendar: controller.calendar).analyze(preview))
-                    .appearEffect()
-                let summary = ProfileSummary(profile: preview, now: controller.today, calendar: controller.calendar)
-                ForEach(Array(summary.sections.enumerated()), id: \.element.id) { index, section in
-                    SummarySectionCard(section: section) {
-                        if let step = section.editStep { controller.edit(step) }
+        ZStack {
+            StepScaffold(
+                controller: controller,
+                title: copy.summaryTitle,
+                subtitle: copy.summarySubtitle,
+                primaryTitle: copy.finishAction,
+                primaryEnabled: preview != nil,
+                onCancel: onCancel,
+                primaryAction: { withAnimation(Motion.standard) { revealing = true } }
+            ) {
+                if let preview {
+                    GrowthOverviewCard(profile: preview, analysis: GrowthAnalyzer(now: controller.today, calendar: controller.calendar).analyze(preview))
+                        .appearEffect()
+                    let summary = ProfileSummary(profile: preview, now: controller.today, calendar: controller.calendar)
+                    ForEach(Array(summary.sections.enumerated()), id: \.element.id) { index, section in
+                        SummarySectionCard(section: section) {
+                            if let step = section.editStep { controller.edit(step) }
+                        }
+                        .appearEffect(delay: min(0.15, Double(index) * 0.02))
                     }
-                    .appearEffect(delay: min(0.15, Double(index) * 0.02))
+                    Text("Only what's shown here is saved, on this device.")
+                        .font(DS.Typography.footnote)
+                        .foregroundStyle(DS.Colors.textSecondary)
+                } else {
+                    InfoBanner("A required answer is missing. Go back to complete it.", tone: .caution)
                 }
-                Text("Only what's shown here is saved, on this device.")
-                    .font(DS.Typography.footnote)
-                    .foregroundStyle(DS.Colors.textSecondary)
+                if controller.finishError != nil {
+                    InfoBanner("We couldn't save the profile. Please check the answers above and try again.", tone: .caution)
+                }
+            }
+            if revealing, let preview {
+                ProfileRevealView(profile: preview, analysis: GrowthAnalyzer(now: controller.today, calendar: controller.calendar).analyze(preview)) {
+                    controller.finish()
+                }
+                .transition(.opacity)
+            }
+        }
+    }
+}
+
+/// A short, honest hand-off into Home: each line is a fact from the profile just built.
+/// Nothing is "calculated on a server"; the whole sequence takes under two seconds.
+struct ProfileRevealView: View {
+    let profile: GrowthProfile
+    let analysis: GrowthAnalysis
+    let onFinished: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var shown = 0
+
+    private var lines: [(symbol: String, text: String)] {
+        var result: [(symbol: String, text: String)] = []
+        let who = profile.subject == .child ? (profile.nickname ?? "Your child") + "’s" : "Your"
+        result.append(("person.crop.circle.badge.checkmark", "\(who) profile is set up"))
+        if analysis.latest?.percentile != nil {
+            result.append(("chart.xyaxis.line", "Growth chart: CDC, \(profile.chartSex == .female ? "female" : "male"), ages 2–20"))
+        }
+        if let p = analysis.currentPercentile {
+            result.append(("ruler", "Current position: \(PercentileFormatter.phrase(p.percentile))"))
+        } else if let latest = analysis.latest {
+            result.append(("ruler", "Height recorded: \(HeightFormatter.string(centimeters: latest.heightCm, unit: profile.unitPreference))"))
+        }
+        result.append(("house", "Your home screen is ready"))
+        return result
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.xl) {
+            Spacer()
+            BrandMark(size: 56)
+            Text("Building your growth profile")
+                .font(DS.Typography.question)
+                .foregroundStyle(DS.Colors.textPrimary)
+            VStack(alignment: .leading, spacing: DS.Spacing.md) {
+                ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
+                    if index < shown {
+                        Label {
+                            Text(line.text).font(DS.Typography.body).foregroundStyle(DS.Colors.textPrimary)
+                        } icon: {
+                            Image(systemName: "checkmark.circle.fill").foregroundStyle(DS.Colors.accent)
+                        }
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
+                    }
+                }
+            }
+            Spacer()
+            Spacer()
+        }
+        .padding(DS.Spacing.page)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .dsPageBackground()
+        .accessibilityElement(children: .combine)
+        .task {
+            if reduceMotion {
+                shown = lines.count
+                try? await Task.sleep(nanoseconds: 600_000_000)
             } else {
-                InfoBanner("A required answer is missing. Go back to complete it.", tone: .caution)
+                for _ in lines {
+                    try? await Task.sleep(nanoseconds: 380_000_000)
+                    withAnimation(Motion.standard) { shown += 1 }
+                }
+                try? await Task.sleep(nanoseconds: 450_000_000)
             }
-            if controller.finishError != nil {
-                InfoBanner("We couldn't save the profile. Please check the answers above and try again.", tone: .caution)
-            }
+            onFinished()
         }
     }
 }

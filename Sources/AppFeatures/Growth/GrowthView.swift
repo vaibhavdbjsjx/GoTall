@@ -8,7 +8,10 @@ import DesignSystem
 /// Order follows the questions a parent or teen asks; details are behind sheets and disclosures.
 struct GrowthView: View {
     let repository: AppRepository
+    /// Incremented by Home's "Why?" to open the explanation.
+    var explanationRequest: Int = 0
     @State private var window: ChartWindow = .focus
+    @State private var showsAdd = false
     @State private var selectedPoint: SeriesPoint?
     @State private var editor: MeasurementEditorRoute?
     @State private var showsExplanation = false
@@ -29,7 +32,7 @@ struct GrowthView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) { ProfileSwitcher(repository: repository) }
                 ToolbarItem(placement: .primaryAction) {
-                    Button { editor = .add } label: { Image(systemName: "plus") }
+                    Button { showsAdd = true } label: { Image(systemName: "plus.circle.fill").font(.title3) }
                         .accessibilityLabel("Add measurement")
                 }
             }
@@ -39,6 +42,10 @@ struct GrowthView: View {
                 }
             }
             .sheet(isPresented: $showsGuide) { MeasurementGuideView() }
+            .sheet(isPresented: $showsAdd) {
+                if let profile = repository.activeProfile { AddMeasurementFlow(repository: repository, profile: profile) }
+            }
+            .onChange(of: explanationRequest) { _, _ in showsExplanation = true }
             .navigationDestination(isPresented: $showsHistory) {
                 MeasurementHistoryView(repository: repository)
             }
@@ -52,11 +59,17 @@ struct GrowthView: View {
         ScrollViewReader { proxy in
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.lg) {
-                CurrentStatusCard(analysis: analysis, unit: unit, onMeasure: { editor = .add }, onGuide: { showsGuide = true })
+                CurrentStatusCard(analysis: analysis, unit: unit, onMeasure: { showsAdd = true }, onGuide: { showsGuide = true })
                     .appearEffect()
 
                 chartSection(profile: profile, analysis: analysis)
                     .appearEffect(delay: 0.03)
+
+                Text("Understanding the numbers")
+                    .font(DS.Typography.title)
+                    .foregroundStyle(DS.Colors.textPrimary)
+                    .accessibilityAddTraits(.isHeader)
+                    .padding(.top, DS.Spacing.xs)
 
                 VelocityCard(velocity: analysis.velocity, unit: unit)
                     .appearEffect(delay: 0.05)
@@ -175,14 +188,22 @@ struct CurrentStatusCard: View {
     let unit: HeightUnit
     let onMeasure: () -> Void
     let onGuide: () -> Void
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
-        AppCard(padding: DS.Spacing.lg) {
-            VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                AdaptiveStack(horizontalAlignment: .top) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Current height").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
-                        if let latest = analysis.latest {
+        let status = GrowthStatus.from(analysis)
+        VStack(alignment: .leading, spacing: DS.Spacing.md) {
+            HStack(alignment: .top, spacing: DS.Spacing.md) {
+                VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+                    Label(status.title, systemImage: status.symbol)
+                        .font(DS.Typography.caption)
+                        .foregroundStyle(DS.Colors.accent)
+                        .padding(.horizontal, DS.Spacing.xs)
+                        .padding(.vertical, 5)
+                        .background(DS.Colors.accentSoft, in: Capsule())
+                    if let latest = analysis.latest {
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("Current height").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
                             Text(HeightFormatter.string(centimeters: latest.heightCm, unit: unit))
                                 .font(DS.Typography.metricLarge)
                                 .foregroundStyle(DS.Colors.textPrimary)
@@ -191,36 +212,40 @@ struct CurrentStatusCard: View {
                                 .font(DS.Typography.footnote)
                                 .foregroundStyle(DS.Colors.textSecondary)
                         }
-                    }
-                    Spacer(minLength: 0)
-                    if let p = analysis.currentPercentile {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Percentile").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
-                            Text(PercentileFormatter.ordinal(p.percentile))
-                                .font(DS.Typography.metric)
-                                .foregroundStyle(DS.Colors.accent)
-                                .contentTransition(.numericText())
-                        }
                         .accessibilityElement(children: .combine)
                     }
-                }
-                if let p = analysis.currentPercentile, (1...99).contains(Int(p.percentile.rounded())) {
-                    Text("Out of 100 people of the same age and sex on the CDC chart, about \(Int(p.percentile.rounded())) would be shorter.")
-                        .font(DS.Typography.footnote)
-                        .foregroundStyle(DS.Colors.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                if analysis.latestIsEstimate {
-                    VStack(alignment: .leading, spacing: DS.Spacing.xs) {
-                        InfoBanner(GrowthCopy.estimatedNotice, tone: .caution)
-                        HStack {
-                            AppButton("Measure", systemImage: "ruler", kind: .secondary, fullWidth: false, action: onMeasure)
-                            AppButton("How to measure", kind: .tertiary, fullWidth: false, action: onGuide)
+                    if let p = analysis.currentPercentile {
+                        // The ruler shows the position; the sentence explains it. At accessibility sizes (ruler hidden) the phrase carries it.
+                        if dynamicTypeSize.isAccessibilitySize {
+                            Text(PercentileFormatter.phrase(p.percentile)).font(DS.Typography.headline).foregroundStyle(DS.Colors.accent)
                         }
+                        if (1...99).contains(Int(p.percentile.rounded())) {
+                            Text("Of 100 people the same age and sex, about \(Int(p.percentile.rounded())) are shorter.")
+                                .font(DS.Typography.footnote)
+                                .foregroundStyle(DS.Colors.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+                Spacer(minLength: 0)
+                if let p = analysis.currentPercentile {
+                    DoorFrameRuler(z: p.z, markerLabel: PercentileFormatter.ordinal(p.percentile))
+                        .frame(height: 170)
+                        .hiddenAtAccessibilitySizes()
+                }
+            }
+            if analysis.latestIsEstimate {
+                VStack(alignment: .leading, spacing: DS.Spacing.xs) {
+                    InfoBanner(GrowthCopy.estimatedNotice, tone: .caution)
+                    HStack {
+                        AppButton("Measure", systemImage: "ruler", kind: .secondary, fullWidth: false, action: onMeasure)
+                        AppButton("How to measure", kind: .tertiary, fullWidth: false, action: onGuide)
                     }
                 }
             }
         }
+        .padding(DS.Spacing.lg)
+        .heroSurface()
     }
 }
 

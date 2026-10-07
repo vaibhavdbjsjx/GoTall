@@ -25,6 +25,10 @@ public struct GrowthProfile: Codable, Identifiable, Hashable, Sendable {
     /// Ordered by the order the person selected them; the first is treated as primary.
     public var goals: [Goal]
     public var intent: UserIntent?
+    /// Daily habit check-ins (Phase 4). One entry per day with at least one completed habit.
+    public var habitLog: [HabitDay]
+    /// Habits the person chose to track. `nil` = defaults chosen from goals.
+    public var activeHabits: [HabitKind]?
     public var createdAt: Date
     public var updatedAt: Date
 
@@ -43,6 +47,8 @@ public struct GrowthProfile: Codable, Identifiable, Hashable, Sendable {
         nutrition: NutritionBaseline = NutritionBaseline(),
         goals: [Goal] = [],
         intent: UserIntent? = nil,
+        habitLog: [HabitDay] = [],
+        activeHabits: [HabitKind]? = nil,
         createdAt: Date,
         updatedAt: Date
     ) {
@@ -61,6 +67,8 @@ public struct GrowthProfile: Codable, Identifiable, Hashable, Sendable {
         self.nutrition = nutrition
         self.goals = goals
         self.intent = intent
+        self.habitLog = habitLog
+        self.activeHabits = activeHabits
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -75,7 +83,7 @@ public struct GrowthProfile: Codable, Identifiable, Hashable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case schemaVersion, id, subject, nickname, birthDate, chartSex, unitPreference, measurements,
-             parentHeights, recentGrowthChange, sleep, activity, nutrition, goals, intent, createdAt, updatedAt
+             parentHeights, recentGrowthChange, sleep, activity, nutrition, goals, intent, habitLog, activeHabits, createdAt, updatedAt
     }
 
     public init(from decoder: Decoder) throws {
@@ -95,6 +103,8 @@ public struct GrowthProfile: Codable, Identifiable, Hashable, Sendable {
         nutrition = try c.decodeIfPresent(NutritionBaseline.self, forKey: .nutrition) ?? NutritionBaseline()
         goals = try c.decodeIfPresent([Goal].self, forKey: .goals) ?? []
         intent = try c.decodeIfPresent(UserIntent.self, forKey: .intent)
+        habitLog = try c.decodeIfPresent([HabitDay].self, forKey: .habitLog) ?? []
+        activeHabits = try c.decodeIfPresent([HabitKind].self, forKey: .activeHabits)
         createdAt = try c.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date(timeIntervalSince1970: 0)
         updatedAt = try c.decodeIfPresent(Date.self, forKey: .updatedAt) ?? createdAt
     }
@@ -121,6 +131,8 @@ public struct AppSnapshot: Codable, Hashable, Sendable {
     public var activeProfileID: UUID?
     public var onboardingDraft: OnboardingDraft?
     public var privacyAcknowledgement: PrivacyAcknowledgement?
+    /// Device-wide reminder choices (Phase 4). Scheduling arrives later; choices are kept now.
+    public var notificationPreferences: NotificationPreferences
 
     public init(profiles: [GrowthProfile] = [], activeProfileID: UUID? = nil, onboardingDraft: OnboardingDraft? = nil, privacyAcknowledgement: PrivacyAcknowledgement? = nil) {
         self.schemaVersion = Self.currentSchemaVersion
@@ -128,6 +140,7 @@ public struct AppSnapshot: Codable, Hashable, Sendable {
         self.activeProfileID = activeProfileID
         self.onboardingDraft = onboardingDraft
         self.privacyAcknowledgement = privacyAcknowledgement
+        self.notificationPreferences = NotificationPreferences()
     }
 
     public static let empty = AppSnapshot()
@@ -139,7 +152,7 @@ public struct AppSnapshot: Codable, Hashable, Sendable {
     public var hasCompletedOnboarding: Bool { !profiles.isEmpty }
 
     enum CodingKeys: String, CodingKey {
-        case schemaVersion, profiles, activeProfileID, onboardingDraft, privacyAcknowledgement
+        case schemaVersion, profiles, activeProfileID, onboardingDraft, privacyAcknowledgement, notificationPreferences
     }
 
     public init(from decoder: Decoder) throws {
@@ -149,5 +162,6 @@ public struct AppSnapshot: Codable, Hashable, Sendable {
         activeProfileID = try c.decodeIfPresent(UUID.self, forKey: .activeProfileID)
         onboardingDraft = try c.decodeIfPresent(OnboardingDraft.self, forKey: .onboardingDraft)
         privacyAcknowledgement = try c.decodeIfPresent(PrivacyAcknowledgement.self, forKey: .privacyAcknowledgement)
+        notificationPreferences = try c.decodeIfPresent(NotificationPreferences.self, forKey: .notificationPreferences) ?? NotificationPreferences()
     }
 }
