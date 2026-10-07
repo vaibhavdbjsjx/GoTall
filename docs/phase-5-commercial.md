@@ -45,6 +45,7 @@ Views ask only `entitlements.access(.doctorReport)`. No `if premium` checks are 
   - family-shared (flag)
   - upgraded transactions ignored
   - unknown product IDs ignored
+- **Apple's status is authoritative.** If every verified subscription status for a product says expired or revoked, that product grants nothing, even when `currentEntitlements` still returns a cached transaction with a later expiry date. The app-hosted StoreKit tests found this lag after an expiry and a refund. Unverified statuses are ignored, so they can neither grant nor remove access.
 - **Launch / relaunch / offline:**
   - `EntitlementStore` starts as free and unlocks nothing before verification.
   - `start()` recomputes from `Transaction.currentEntitlements`, which the OS caches on the device, so Premium is recovered offline without a server.
