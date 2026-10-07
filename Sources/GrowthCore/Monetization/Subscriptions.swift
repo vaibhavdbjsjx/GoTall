@@ -133,19 +133,28 @@ public enum Verified<Value: Sendable & Equatable>: Sendable, Equatable {
 /// - unverified transactions and renewal info are ignored (they can never unlock anything);
 /// - unknown product IDs, upgraded (superseded) and revoked transactions don't grant access;
 /// - a transaction is active until its expiration date, or until the grace-period end while Apple retries billing;
+/// - Apple's verified subscription status is authoritative: if every verified status for a product says expired or
+///   revoked, that product grants nothing even if a cached transaction still shows a later expiration date
+///   (found in StoreKit testing: `currentEntitlements` can lag behind an expiry or refund);
 /// - when several are active, the one with the latest expiration wins.
 public enum EntitlementResolver {
     public static func resolve(transactions: [Verified<TransactionSnapshot>], renewals: [Verified<RenewalSnapshot>],
                                now: Date, knownProducts: [String] = SubscriptionProductID.all) -> EntitlementState {
         let trusted = transactions.compactMap(\.trustedValue).filter { knownProducts.contains($0.productID) }
-        let renewalsByProduct = Dictionary(renewals.compactMap(\.trustedValue).map { ($0.productID, $0) }, uniquingKeysWith: { a, _ in a })
+        let trustedRenewals = renewals.compactMap(\.trustedValue)
+        let renewalsByProduct = Dictionary(trustedRenewals.map { ($0.productID, $0) }, uniquingKeysWith: { a, _ in a })
+        func statusEnded(_ productID: String) -> RenewalSnapshot.State? {
+            let statuses = trustedRenewals.filter { $0.productID == productID }
+            guard !statuses.isEmpty, statuses.allSatisfy({ $0.state == .expired || $0.state == .revoked }) else { return nil }
+            return statuses.contains { $0.state == .revoked } ? .revoked : .expired
+        }
 
         func graceEnd(_ t: TransactionSnapshot) -> Date? {
             guard let r = renewalsByProduct[t.productID], r.state == .inGracePeriod else { return nil }
             return r.gracePeriodExpirationDate ?? t.expirationDate
         }
         func isActive(_ t: TransactionSnapshot) -> Bool {
-            guard t.revocationDate == nil, !t.isUpgraded else { return false }
+            guard t.revocationDate == nil, !t.isUpgraded, statusEnded(t.productID) == nil else { return false }
             guard let expiration = t.expirationDate else { return true }
             if expiration > now { return true }
             if let grace = graceEnd(t), grace > now { return true }
@@ -167,7 +176,7 @@ public enum EntitlementResolver {
         }
 
         let latest = trusted.max { $0.purchaseDate < $1.purchaseDate }
-        if let latest, latest.revocationDate != nil {
+        if let latest, latest.revocationDate != nil || statusEnded(latest.productID) == .revoked {
             return EntitlementState(status: .revoked, productID: latest.productID, expirationDate: latest.expirationDate, isFamilyShared: latest.isFamilyShared)
         }
         if let latest, renewalsByProduct[latest.productID]?.state == .inBillingRetryPeriod {

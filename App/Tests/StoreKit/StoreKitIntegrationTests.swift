@@ -23,6 +23,19 @@ final class StoreKitIntegrationTests: XCTestCase {
         session.clearTransactions()
     }
 
+    /// Test-session changes (expire, refund, auto-renew off) reach StoreKit asynchronously, as they would arrive
+    /// through `Transaction.updates` in the app. Polls until the state matches or the timeout passes.
+    private func awaitState(of service: StoreKitSubscriptionService, within seconds: Double = 10,
+                       until predicate: (EntitlementState) -> Bool) async -> EntitlementState {
+        var state = await service.currentEntitlement()
+        let deadline = Date().addingTimeInterval(seconds)
+        while !predicate(state) && Date() < deadline {
+            try? await Task.sleep(nanoseconds: 300_000_000)
+            state = await service.currentEntitlement()
+        }
+        return state
+    }
+
     func testLoadsBothPlansFromConfiguration() async throws {
         let plans = try await StoreKitSubscriptionService().loadPlans()
         XCTAssertEqual(Set(plans.map(\.id)), Set(SubscriptionProductID.all))
@@ -55,7 +68,7 @@ final class StoreKitIntegrationTests: XCTestCase {
         let service = StoreKitSubscriptionService()
         _ = await service.purchase(planID: SubscriptionProductID.monthly)
         try session.expireSubscription(productIdentifier: SubscriptionProductID.monthly)
-        let state = await service.currentEntitlement()
+        let state = await awaitState(of: service) { !$0.isPremium }
         XCTAssertFalse(state.isPremium)
         XCTAssertEqual(state.status, .expired)
     }
@@ -65,7 +78,7 @@ final class StoreKitIntegrationTests: XCTestCase {
         _ = await service.purchase(planID: SubscriptionProductID.yearly)
         let transaction = try XCTUnwrap(session.allTransactions().first)
         try session.disableAutoRenewForTransaction(identifier: transaction.identifier)
-        let state = await service.currentEntitlement()
+        let state = await awaitState(of: service) { $0.status == .cancelled }
         XCTAssertTrue(state.isPremium)
         XCTAssertEqual(state.status, .cancelled)
     }
@@ -75,7 +88,7 @@ final class StoreKitIntegrationTests: XCTestCase {
         _ = await service.purchase(planID: SubscriptionProductID.yearly)
         let transaction = try XCTUnwrap(session.allTransactions().first)
         try session.refundTransaction(identifier: transaction.identifier)
-        let state = await service.currentEntitlement()
+        let state = await awaitState(of: service) { !$0.isPremium }
         XCTAssertFalse(state.isPremium)
         XCTAssertEqual(state.status, .revoked)
     }
@@ -129,6 +142,8 @@ final class StoreKitIntegrationTests: XCTestCase {
         XCTAssertTrue(store.isPremium)
         XCTAssertEqual(store.access(.doctorReport), .available)
         try session.expireSubscription(productIdentifier: SubscriptionProductID.yearly)
+        let service = StoreKitSubscriptionService()
+        _ = await awaitState(of: service) { !$0.isPremium }
         await store.refresh()
         XCTAssertFalse(store.isPremium)
         XCTAssertEqual(store.access(.doctorReport), .preview)

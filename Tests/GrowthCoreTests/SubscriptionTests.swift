@@ -120,6 +120,26 @@ final class EntitlementResolverTests: XCTestCase {
         XCTAssertTrue(state.isPremium)
     }
 
+    func testVerifiedStatusOverridesStaleTransaction() {
+        // A cached transaction still says it runs for 300 days, but Apple's verified status says it ended.
+        let expired = EntitlementResolver.resolve(transactions: [.verified(tx(expires: 300))],
+                                                  renewals: [.verified(RenewalSnapshot(productID: SubscriptionProductID.yearly, state: .expired, willAutoRenew: false))], now: now)
+        XCTAssertEqual(expired.status, .expired)
+        XCTAssertFalse(expired.isPremium)
+        let refunded = EntitlementResolver.resolve(transactions: [.verified(tx(expires: 300))],
+                                                   renewals: [.verified(RenewalSnapshot(productID: SubscriptionProductID.yearly, state: .revoked, willAutoRenew: false))], now: now)
+        XCTAssertEqual(refunded.status, .revoked)
+        // An unverified "expired" status can't remove access either.
+        let forged = EntitlementResolver.resolve(transactions: [.verified(tx(expires: 300))],
+                                                 renewals: [.unverified(RenewalSnapshot(productID: SubscriptionProductID.yearly, state: .expired, willAutoRenew: false), reason: "x")], now: now)
+        XCTAssertTrue(forged.isPremium)
+        // Mixed statuses (e.g. own + family-shared) keep access while any is still subscribed.
+        let mixed = EntitlementResolver.resolve(transactions: [.verified(tx(expires: 300))], renewals: [
+            .verified(RenewalSnapshot(productID: SubscriptionProductID.yearly, state: .expired, willAutoRenew: false)),
+            .verified(RenewalSnapshot(productID: SubscriptionProductID.yearly, state: .subscribed, willAutoRenew: true))], now: now)
+        XCTAssertTrue(mixed.isPremium)
+    }
+
     func testFamilySharingRecorded() {
         let state = EntitlementResolver.resolve(transactions: [.verified(tx(expires: 100, family: true))], renewals: [], now: now)
         XCTAssertTrue(state.isFamilyShared)
