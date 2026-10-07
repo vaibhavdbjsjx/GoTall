@@ -12,6 +12,13 @@ public struct GrowthInsight: Sendable, Equatable, Identifiable {
     public var title: String
     public var body: String
     public var id: String { kind.rawValue }
+
+    public init(kind: Kind, symbol: String, title: String, body: String) {
+        self.kind = kind
+        self.symbol = symbol
+        self.title = title
+        self.body = body
+    }
 }
 
 /// Deterministic insights. Every sentence is built from stored data; nothing is invented and nothing praises
