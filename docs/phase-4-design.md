@@ -100,3 +100,18 @@ The Profile tab shows the premium items as "Planned", with the line "Your growth
 - **A "growth score":** not scientifically meaningful. Rejected.
 - **Pinch-zoom chart:** the range toggle is clearer and accessible. Deferred.
 - **Notification delivery:** deferred to Phase 5 by design.
+
+## 8. Visual QA log
+
+Simulator screenshots are taken in CI and decoded from the job log: 38 per run across light, dark, accessibility XL, iPhone SE and Pro Max.
+- **Pass 1 (2ba1f07) found:**
+  - the ruler's 50th/25th/3rd labels overlapped the marker pill
+  - the "Building your growth history" chip wrapped to two lines
+  - Profile used grouped grey instead of the app background
+  - at accessibility sizes, the hero height didn't scale and several headers hyphenated ("Estimat-ed", "Mea-sured", "Next measure-ment", "Growth chart" beside the range control)
+  - Home's next-step card repeated today's check-in
+  - the adult chart card repeated the hero's age-range line
+- **Pass 2 (dcfee0a)** fixed all of these, confirmed in the re-rendered screenshots.
+- **Known remaining:**
+  - at accessibility sizes the system List still hyphenates "Measurements" in Profile
+  - demo avatar colours change between launches because demo UUIDs are random
