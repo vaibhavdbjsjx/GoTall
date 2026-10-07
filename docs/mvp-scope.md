@@ -12,7 +12,7 @@
 |---|---|---|
 | Onboarding | Role (parent / teen 13–17 / adult), birth date, chart sex, height + measuring guide, optional parents' heights (measured/reported/unknown), units. ≤10 required steps. Apple Declared Age Range signal where available | Weight, ethnicity, puberty quiz, relatives' heights |
 | Age policy | Under-13 = parent-managed profile only. 18–20 near-adult messaging. 21+ no prediction | Child self-accounts |
-| Prediction | CDC percentile **scenario** range (or the **conditional model** if Gate G1 passes), family-height range (Tanner) as context, qualitative uncertainty + drivers, Methods page | Khamis–Roche, any averaging, numeric confidence |
+| Prediction | CDC percentile **scenario** range, implemented in Phase 3 as the percentile *channel* (`growth-engine.md` §7) (or the **conditional model** if Gate G1 passes), family-height range (Tanner) as context, qualitative uncertainty + drivers, Methods page | Khamis–Roche, any averaging, numeric confidence |
 | Tracking | Measurement log, repeat-and-average, plausibility checks, CDC 2–20 stature chart, current percentile, velocity (≥6-month interval) | Weight/BMI charts, velocity percentiles |
 | Safety | Signpost rules approved by the medical reviewer, disclaimers, copy lint list | Diagnosis, velocity-based red flags (no licensed velocity reference) |
 | Habits | 4 simple daily check-ins (sleep, activity, food groups, posture) vs user-chosen targets. Gentle streak | Plans, XP/badges, exercise library, nutrition analysis |

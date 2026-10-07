@@ -2,7 +2,8 @@
 
 > Purpose: lock a scientifically defensible prediction design before any code is written.
 > Status: architecture validation only. **No formulas are implemented in this phase.**
-> Research date: 2026-10-07. Research limits: the cloud environment blocks direct page fetches for many sites, so sources were read through search-engine extracts. Every figure below gives its source and a verification status. **Figures marked "verify" must be checked against the primary paper by a human before they are used in code or copy.**
+> Research date: 2026-10-07.
+> **Phase 3 update:** the scenario range is now the CDC *percentile channel* (widened one line each side when uncertainty is wider). This deviates from §1/§5's "no numeric width until Gate G1" and needs medical-reviewer approval; see `growth-engine.md` §7.5. Gate G1 remains open. Research limits: the cloud environment blocks direct page fetches for many sites, so sources were read through search-engine extracts. Every figure below gives its source and a verification status. **Figures marked "verify" must be checked against the primary paper by a human before they are used in code or copy.**
 
 ## 0. Summary of decisions
 
