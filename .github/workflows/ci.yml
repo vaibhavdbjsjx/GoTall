@@ -39,6 +39,15 @@ jobs:
         run: |
           chmod +x scripts/capture_screenshots.sh
           scripts/capture_screenshots.sh build/Build/Products/Debug-iphonesimulator/GrowthApp.app screenshots
+      - name: Print downscaled screenshots to the log
+        # Lets reviewers without artifact-storage access inspect the screenshots (base64 JPEG, ~600 px).
+        run: |
+          mkdir -p small
+          for f in screenshots/*.png; do
+            n=$(basename "$f" .png)
+            sips -Z 640 -s format jpeg -s formatOptions 55 "$f" --out "small/$n.jpg" >/dev/null
+            echo "IMG:$n:$(base64 -i "small/$n.jpg" | tr -d '\n')"
+          done
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4
