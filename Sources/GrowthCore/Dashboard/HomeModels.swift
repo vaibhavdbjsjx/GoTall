@@ -22,7 +22,7 @@ public enum GrowthStatus: Sendable, Equatable {
         case .growing: return "Growing"
         case .littleChange: return "Little change recently"
         case .worthRemeasuring: return "Worth re-measuring"
-        case .buildingHistory: return "Building your growth history"
+        case .buildingHistory: return "Building history"
         case .adultHeight: return "Adult height"
         }
     }

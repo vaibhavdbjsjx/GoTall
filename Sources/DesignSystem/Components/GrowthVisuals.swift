@@ -48,7 +48,8 @@ public struct DoorFrameRuler: View {
                         .fill(DS.Colors.textTertiary.opacity(isMajor ? 0.8 : 0.4))
                         .frame(width: isMajor ? 14 : 8, height: 1)
                         .offset(x: isMajor ? 4 : 7, y: y(line.0, height: h))
-                    if let label = line.1 {
+                    // Labels that would sit under the marker pill are dropped so they never overlap it.
+                    if let label = line.1, z.map({ abs(y($0, height: h) - y(line.0, height: h)) > 13 }) ?? true {
                         Text(label)
                             .font(.system(size: 10, weight: .medium, design: .rounded))
                             .foregroundStyle(DS.Colors.textTertiary)

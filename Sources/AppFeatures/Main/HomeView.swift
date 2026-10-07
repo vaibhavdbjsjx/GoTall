@@ -56,6 +56,8 @@ private struct HomeContent: View {
                     .id("today")
                 InsightCardView(insight: state.insight)
                     .id("insight")
+                // Today's check-in is already one tap away in the Today card; don't repeat it as a next step.
+                if next.kind != .checkIn {
                 NextActionCard(action: next) { kind in
                     switch kind {
                     case .measureNow: onAction(.measure)
@@ -63,6 +65,7 @@ private struct HomeContent: View {
                     case .addParentHeights: onAction(.editFamily)
                     case .reviewGrowth, .measureLater: onAction(.growth)
                     }
+                }
                 }
                 if case .message(let title, let body) = state.estimate {
                     QuietNote(title: title, message: body, symbol: "scope")
@@ -113,12 +116,15 @@ private struct HomeHero: View {
     let state: DashboardState
     let analysis: GrowthAnalysis
     let status: GrowthStatus
+    @ScaledMetric(relativeTo: .largeTitle) private var heroSize: CGFloat = 44
 
     var body: some View {
         HStack(alignment: .top, spacing: DS.Spacing.md) {
             VStack(alignment: .leading, spacing: DS.Spacing.sm) {
                 Label(status.title, systemImage: status.symbol)
                     .font(DS.Typography.caption)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
                     .foregroundStyle(DS.Colors.accent)
                     .padding(.horizontal, DS.Spacing.xs)
                     .padding(.vertical, 5)
@@ -127,7 +133,7 @@ private struct HomeHero: View {
                     VStack(alignment: .leading, spacing: 0) {
                         Text("Height today").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
                         Text(height.value)
-                            .font(.system(size: 44, weight: .semibold, design: .rounded).monospacedDigit())
+                            .font(.system(size: heroSize, weight: .semibold, design: .rounded).monospacedDigit())
                             .minimumScaleFactor(0.6)
                             .lineLimit(1)
                             .foregroundStyle(DS.Colors.textPrimary)
@@ -181,9 +187,9 @@ struct HomeEstimateCard: View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: DS.Spacing.sm) {
                 if case .range(let value, let accessible, let uncertainty, let caption) = card {
-                    HStack {
+                    AdaptiveStack(spacing: DS.Spacing.xs) {
                         Text(GrowthCopy.estimateTitle).font(DS.Typography.subheadline.weight(.semibold)).foregroundStyle(DS.Colors.textSecondary)
-                        Spacer(minLength: DS.Spacing.xs)
+                        Spacer(minLength: DS.Spacing.xs).hiddenAtAccessibilitySizes()
                         Badge(GrowthCopy.uncertaintyLabel(uncertainty))
                     }
                     Text(value)
@@ -221,7 +227,7 @@ private struct TrajectoryPreview: View {
                     Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(DS.Colors.textTertiary)
                 }
                 if analysis.series.chartablePoints.isEmpty {
-                    Text("Growth charts cover ages 2–20. Your measurements are kept in your history.")
+                    Text("Your measurements are kept in your history, even outside the chart's age range.")
                         .font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
                 } else {
                     let model = GrowthChartModel(series: analysis.series, sex: analysis.sex, unit: unit,
@@ -321,6 +327,7 @@ private struct TodayCard: View {
         let remaining = max(0, Int((total - elapsed).rounded()))
         return AnyView(HStack(spacing: DS.Spacing.md) {
             IntervalRing(fraction: elapsed / total, label: next.isDue ? "Due" : "\(remaining)d")
+                .hiddenAtAccessibilitySizes()
             VStack(alignment: .leading, spacing: 2) {
                 Text(next.isDue ? "Measurement due" : "Next measurement").font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
                 Text(next.isDue ? "A new measurement keeps the chart current." : "In about \(remaining) days. Every \(months) months is plenty.")

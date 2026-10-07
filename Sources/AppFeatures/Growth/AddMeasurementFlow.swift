@@ -171,9 +171,12 @@ struct AddMeasurementFlow: View {
 
     private func reviewRow(_ label: String, _ value: String, step target: Step) -> some View {
         HStack {
-            Text(label).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
-            Spacer()
-            Text(value).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
+            AdaptiveStack(horizontalAlignment: .firstTextBaseline, spacing: 2) {
+                Text(label).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
+                Spacer(minLength: DS.Spacing.xs).hiddenAtAccessibilitySizes()
+                Text(value).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
+            }
+            Spacer(minLength: DS.Spacing.xs)
             Button("Edit") { move(to: target, forward: false) }
                 .font(DS.Typography.subheadline.weight(.semibold))
                 .foregroundStyle(DS.Colors.accent)

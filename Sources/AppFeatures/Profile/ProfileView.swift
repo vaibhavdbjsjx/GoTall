@@ -82,6 +82,8 @@ struct ProfileView: View {
                         .foregroundStyle(DS.Colors.textSecondary)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(DS.Colors.background)
             .navigationTitle("Profile")
             .confirmationDialog("Delete all data?", isPresented: $confirmsDeleteAll, titleVisibility: .visible) {
                 Button("Delete everything", role: .destructive) {
@@ -106,7 +108,7 @@ struct ProfileView: View {
         HStack {
             Label(title, systemImage: symbol).foregroundStyle(DS.Colors.textPrimary)
             Spacer()
-            if let value { Text(value).foregroundStyle(DS.Colors.textSecondary) }
+            if let value { Text(value).foregroundStyle(DS.Colors.textSecondary).hiddenAtAccessibilitySizes() }
         }
     }
 
@@ -158,6 +160,7 @@ private struct ProfileHeaderCard: View {
         let summary = ProfileCardSummary(profile: profile, now: Date(), calendar: .current)
         HStack(spacing: DS.Spacing.md) {
             ProfileAvatar(profile: profile, size: 60)
+                .hiddenAtAccessibilitySizes()
             VStack(alignment: .leading, spacing: 2) {
                 Text(summary.name).font(DS.Typography.title).foregroundStyle(DS.Colors.textPrimary)
                 Text([summary.ageText, summary.heightText].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · "))

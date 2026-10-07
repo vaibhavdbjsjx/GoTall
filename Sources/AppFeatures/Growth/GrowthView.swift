@@ -10,6 +10,7 @@ struct GrowthView: View {
     let repository: AppRepository
     /// Incremented by Home's "Why?" to open the explanation.
     var explanationRequest: Int = 0
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var window: ChartWindow = .focus
     @State private var showsAdd = false
     @State private var selectedPoint: SeriesPoint?
@@ -124,12 +125,12 @@ struct GrowthView: View {
     private func chartSection(profile: GrowthProfile, analysis: GrowthAnalysis) -> some View {
         AppCard {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                HStack {
+                AdaptiveStack {
                     Text("Growth chart").font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary).accessibilityAddTraits(.isHeader)
-                    Spacer()
+                    Spacer().hiddenAtAccessibilitySizes()
                     if !analysis.series.chartablePoints.isEmpty {
                         SegmentedChoice("Chart range", options: ChartWindow.allCases, selection: $window) { $0.title }
-                            .frame(maxWidth: 200)
+                            .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : 200)
                     }
                 }
                 if analysis.series.chartablePoints.isEmpty {

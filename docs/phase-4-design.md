@@ -42,7 +42,7 @@
 
 - **Home:**
   - Header (greeting, profile switcher).
-  - Hero: height, the percentile ruler, and a **data-justified status** (`GrowthStatus`). "Growing steadily" appears only with increasing speed *and* a steady percentile path; otherwise "Growing", "Little change recently", "Worth re-measuring", "Building your growth history" or "Adult height".
+  - Hero: height, the percentile ruler, and a **data-justified status** (`GrowthStatus`). "Growing steadily" appears only with increasing speed *and* a steady percentile path; otherwise "Growing", "Little change recently", "Worth re-measuring", "Building history" or "Adult height".
   - Estimate card with a "Why?" link to the explanation.
   - Trajectory preview that opens Growth.
   - **Today**: encouragement, week dots, inline check-ins, and the measurement-interval ring.
