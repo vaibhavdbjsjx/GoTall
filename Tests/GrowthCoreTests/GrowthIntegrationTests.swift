@@ -116,7 +116,19 @@ final class GrowthAnalysisTests: XCTestCase {
 
     func testRangeFormattingHasNoFalsePrecision() {
         XCTAssertEqual(GrowthCopy.range(163.38, 168.04, unit: .centimeters), "163–168 cm")
-        XCTAssertEqual(GrowthCopy.range(152.4, 167.6, unit: .feetInches), "5 ft 0 in – 5 ft 6 in")
+        XCTAssertEqual(GrowthCopy.range(152.4, 167.6, unit: .feetInches), "5′ 0″–5′ 6″")
+        XCTAssertEqual(GrowthCopy.range(158.8, 163.8, unit: .feetInches), "5′ 2½″–5′ 4½″")
+    }
+
+    func testDashboardSpeedOnlyShowsValueForRealGrowth() {
+        let adult = profile(birth: T.date(1996, 1, 1), measurements: [(T.date(2025, 8, 1), 178.2, .home), (T.date(2026, 9, 1), 178.0, .home)])
+        let state = DashboardBuilder(now: T.today, calendar: T.calendar, locale: T.locale).build(for: adult)
+        XCTAssertEqual(state.velocityValue, "Little change")
+        XCTAssertEqual(state.change?.direction, 0)
+        let teen = profile(measurements: [(T.date(2025, 9, 1), 150, .home), (T.date(2026, 9, 1), 157, .home)])
+        let teenState = DashboardBuilder(now: T.today, calendar: T.calendar, locale: T.locale).build(for: teen)
+        XCTAssertEqual(teenState.velocityValue, "7.0 cm/yr")
+        XCTAssertEqual(teenState.change?.direction, 1)
     }
 }
 

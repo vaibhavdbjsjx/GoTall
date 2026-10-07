@@ -18,7 +18,7 @@ public enum GrowthCopy {
         case .centimeters:
             return "\(Int(low.rounded()))–\(Int(high.rounded())) cm"
         case .feetInches:
-            return "\(HeightFormatter.string(centimeters: low, unit: .feetInches)) – \(HeightFormatter.string(centimeters: high, unit: .feetInches))"
+            return "\(HeightFormatter.compactImperial(centimeters: low))–\(HeightFormatter.compactImperial(centimeters: high))"
         }
     }
 

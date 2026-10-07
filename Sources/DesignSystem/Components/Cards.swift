@@ -31,12 +31,12 @@ public struct SectionHeader: View {
     }
 
     public var body: some View {
-        HStack(alignment: .firstTextBaseline) {
+        AdaptiveStack(horizontalAlignment: .firstTextBaseline) {
             Text(title)
                 .font(DS.Typography.headline)
                 .foregroundStyle(DS.Colors.textPrimary)
                 .accessibilityAddTraits(.isHeader)
-            Spacer()
+            Spacer(minLength: 0)
             if let actionTitle, let action {
                 Button(actionTitle, action: action)
                     .font(DS.Typography.subheadline.weight(.semibold))
@@ -109,7 +109,7 @@ public struct MeasurementRow: View {
     }
 
     public var body: some View {
-        HStack(alignment: .center, spacing: DS.Spacing.sm) {
+        AdaptiveStack(spacing: DS.Spacing.xs) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(date)
                     .font(DS.Typography.body)
@@ -120,7 +120,7 @@ public struct MeasurementRow: View {
                         .foregroundStyle(DS.Colors.textSecondary)
                 }
             }
-            Spacer(minLength: DS.Spacing.sm)
+            Spacer(minLength: 0)
             Text(value)
                 .font(DS.Typography.metricSmall)
                 .foregroundStyle(DS.Colors.textPrimary)
@@ -146,6 +146,8 @@ public struct Badge: View {
     public var body: some View {
         Text(text)
             .font(DS.Typography.caption)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
             .padding(.horizontal, DS.Spacing.xs)
             .padding(.vertical, 4)
             .foregroundStyle(foreground)

@@ -18,7 +18,7 @@ struct HomeView: View {
                             header(state)
                             HeightHeroCard(state: state).appearEffect()
                             HomeEstimateCard(card: state.estimate, onTap: { onAction(.viewGrowth) }).appearEffect(delay: 0.03)
-                            HStack(alignment: .top, spacing: DS.Spacing.sm) {
+                            AdaptiveStack(horizontalAlignment: .top, spacing: DS.Spacing.sm) {
                                 MetricCard(label: "Growth speed", value: state.velocityValue, caption: state.velocityValue == nil ? "Needs two measurements 6+ months apart" : "Based on your last measurements", systemImage: "speedometer", placeholder: "Not yet")
                                 if let family = state.family {
                                     MetricCard(label: "Family height", value: family.value, caption: family.caption, systemImage: "person.2", placeholder: "Not set")
@@ -78,7 +78,7 @@ struct HeightHeroCard: View {
                         Badge(height.measuredWhen, tone: height.isEstimate ? .caution : .neutral)
                     }
                 }
-                HStack(alignment: .firstTextBaseline) {
+                AdaptiveStack(horizontalAlignment: .firstTextBaseline) {
                     if let height = state.height {
                         Text(height.value)
                             .font(DS.Typography.metricLarge)
@@ -86,7 +86,7 @@ struct HeightHeroCard: View {
                             .contentTransition(.numericText())
                             .accessibilityLabel("Current height, \(height.accessibleValue), measured \(height.measuredWhen)")
                     }
-                    Spacer()
+                    Spacer(minLength: 0)
                     if let p = state.percentile {
                         Text(p.phrase)
                             .font(DS.Typography.headline)
@@ -105,7 +105,8 @@ struct HeightHeroCard: View {
                 Divider().padding(.vertical, 2)
                 if let change = state.change {
                     HStack(spacing: DS.Spacing.xs) {
-                        Image(systemName: "arrow.up.right").foregroundStyle(DS.Colors.accent).accessibilityHidden(true)
+                        Image(systemName: change.direction > 0 ? "arrow.up.right" : (change.direction < 0 ? "arrow.down.right" : "arrow.right"))
+                            .foregroundStyle(DS.Colors.accent).accessibilityHidden(true)
                         Text(change.value).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
                         Text(change.since).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
                     }
@@ -135,14 +136,12 @@ struct HomeEstimateCard: View {
                     .frame(width: 40, height: 40)
                     .background(DS.Colors.accentSoft, in: RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous))
                     .accessibilityHidden(true)
+                    .hiddenAtAccessibilitySizes()
                 VStack(alignment: .leading, spacing: 4) {
                     switch card {
                     case .range(let value, let accessible, let uncertainty, let caption):
-                        HStack {
-                            Text(GrowthCopy.estimateTitle).font(DS.Typography.subheadline.weight(.semibold)).foregroundStyle(DS.Colors.textSecondary)
-                            Spacer()
-                            Badge(GrowthCopy.uncertaintyLabel(uncertainty))
-                        }
+                        Text(GrowthCopy.estimateTitle).font(DS.Typography.subheadline.weight(.semibold)).foregroundStyle(DS.Colors.textSecondary)
+                        Badge(GrowthCopy.uncertaintyLabel(uncertainty))
                         Text(value).font(DS.Typography.metric).foregroundStyle(DS.Colors.textPrimary)
                             .accessibilityLabel("Estimated adult height, \(accessible)")
                         Text(caption).font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
@@ -169,7 +168,7 @@ struct QuickActionsRow: View {
     let onAction: (DashboardState.QuickAction) -> Void
 
     var body: some View {
-        HStack(spacing: DS.Spacing.sm) {
+        AdaptiveStack(spacing: DS.Spacing.sm) {
             ForEach(actions) { action in
                 Button { onAction(action) } label: {
                     VStack(spacing: DS.Spacing.xs) {
@@ -246,6 +245,7 @@ struct InsightCardView: View {
                 .frame(width: 40, height: 40)
                 .background(DS.Colors.warmSoft, in: RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous))
                 .accessibilityHidden(true)
+                .hiddenAtAccessibilitySizes()
             VStack(alignment: .leading, spacing: 4) {
                 Text(insight.title).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
                 Text(insight.body).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary).fixedSize(horizontal: false, vertical: true)

@@ -11,6 +11,8 @@ public struct DashboardState: Equatable, Sendable {
     }
 
     public struct ChangeSummary: Equatable, Sendable {
+        /// -1 lower, 0 within ±0.5 cm, +1 higher. Drives the arrow icon.
+        public var direction: Int
         public var value: String
         public var since: String
         public var accessibleValue: String
@@ -117,7 +119,8 @@ public struct DashboardBuilder: Sendable {
         if let first = points.first, let last = points.last, points.count >= 2 {
             let delta = last.heightCm - first.heightCm
             let since = DisplayFormat.monthYear(first.date, calendar: calendar, locale: locale)
-            change = .init(value: HeightFormatter.changeString(centimeters: delta, unit: unit), since: "since " + since,
+            change = .init(direction: delta > 0.5 ? 1 : (delta < -0.5 ? -1 : 0),
+                           value: HeightFormatter.changeString(centimeters: delta, unit: unit), since: "since " + since,
                            accessibleValue: "Changed by \(HeightFormatter.accessibleString(centimeters: abs(delta), unit: unit)) since \(since)")
         } else {
             changeHint = "Add another measurement in a few months to start seeing change over time."
@@ -137,7 +140,11 @@ public struct DashboardBuilder: Sendable {
         switch analysis.velocity {
         case .available(let v):
             velocityText = GrowthCopy.velocitySentence(v, unit: unit)
-            velocityValue = GrowthCopy.speed(v.cmPerYear, unit: unit) + "/yr"
+            switch v.direction {
+            case .increasing: velocityValue = GrowthCopy.speed(v.cmPerYear, unit: unit) + "/yr"
+            case .littleChange: velocityValue = "Little change"
+            case .decreasing: velocityValue = "Re-measure"
+            }
         case .needsMoreMeasurements, .needsMoreTime:
             velocityText = GrowthCopy.velocityNeedsMore
         }

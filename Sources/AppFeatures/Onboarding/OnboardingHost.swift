@@ -46,11 +46,12 @@ struct OnboardingFlowView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             stepView(for: controller.currentStep)
                 .id(controller.currentStep)
                 .transition(Motion.stepTransition(forward: controller.direction == .forward, reduceMotion: reduceMotion))
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .animation(Motion.resolved(Motion.page, reduceMotion: reduceMotion), value: controller.currentStep)
     }
 

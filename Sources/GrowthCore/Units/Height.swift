@@ -81,6 +81,14 @@ public enum HeightFormatter {
         }
     }
 
+    /// Compact imperial for tight layouts and ranges: 5′ 4½″.
+    public static func compactImperial(centimeters: Double) -> String {
+        let value = HeightConversion.feetInches(fromCentimeters: centimeters)
+        let whole = Int(value.inches.rounded(.down))
+        let half = value.inches - Double(whole) >= 0.5 ? "½" : ""
+        return "\(value.feet)′ \(whole)\(half)″"
+    }
+
     static func inchString(_ inches: Double) -> String {
         inches.truncatingRemainder(dividingBy: 1) == 0 ? String(Int(inches)) : String(format: "%.1f", inches)
     }

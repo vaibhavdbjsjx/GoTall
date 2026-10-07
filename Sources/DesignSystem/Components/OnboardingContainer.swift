@@ -82,7 +82,9 @@ public struct OnboardingContainer<Content: View, Footer: View>: View {
                 .frame(maxWidth: .infinity)
             }
             .scrollDismissesKeyboard(.interactively)
+            .frame(maxHeight: .infinity)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             VStack(spacing: DS.Spacing.xs) {
                 footer

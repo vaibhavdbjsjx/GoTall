@@ -199,6 +199,7 @@ public struct FeatureRow: View {
                 .frame(width: 40, height: 40)
                 .background(DS.Colors.accentSoft, in: RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous))
                 .accessibilityHidden(true)
+                .hiddenAtAccessibilitySizes()
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(DS.Typography.headline)

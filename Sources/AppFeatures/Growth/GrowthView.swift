@@ -179,7 +179,7 @@ struct CurrentStatusCard: View {
     var body: some View {
         AppCard(padding: DS.Spacing.lg) {
             VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                HStack(alignment: .top) {
+                AdaptiveStack(horizontalAlignment: .top) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Current height").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
                         if let latest = analysis.latest {
@@ -192,9 +192,9 @@ struct CurrentStatusCard: View {
                                 .foregroundStyle(DS.Colors.textSecondary)
                         }
                     }
-                    Spacer()
+                    Spacer(minLength: 0)
                     if let p = analysis.currentPercentile {
-                        VStack(alignment: .trailing, spacing: 2) {
+                        VStack(alignment: .leading, spacing: 2) {
                             Text("Percentile").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
                             Text(PercentileFormatter.ordinal(p.percentile))
                                 .font(DS.Typography.metric)
@@ -214,7 +214,7 @@ struct CurrentStatusCard: View {
                     VStack(alignment: .leading, spacing: DS.Spacing.xs) {
                         InfoBanner(GrowthCopy.estimatedNotice, tone: .caution)
                         HStack {
-                            AppButton("Measure now", systemImage: "ruler", kind: .secondary, fullWidth: false, action: onMeasure)
+                            AppButton("Measure", systemImage: "ruler", kind: .secondary, fullWidth: false, action: onMeasure)
                             AppButton("How to measure", kind: .tertiary, fullWidth: false, action: onGuide)
                         }
                     }
@@ -236,13 +236,19 @@ struct VelocityCard: View {
                     .foregroundStyle(DS.Colors.textPrimary)
                 switch velocity {
                 case .available(let v):
-                    HStack(alignment: .firstTextBaseline, spacing: 6) {
-                        Text(GrowthCopy.speed(v.cmPerYear, unit: unit))
-                            .font(DS.Typography.metric)
+                    if v.direction == .increasing {
+                        HStack(alignment: .firstTextBaseline, spacing: 6) {
+                            Text(GrowthCopy.speed(v.cmPerYear, unit: unit))
+                                .font(DS.Typography.metric)
+                                .foregroundStyle(DS.Colors.textPrimary)
+                            Text("per year").font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
+                        }
+                        .accessibilityElement(children: .combine)
+                    } else {
+                        Text(v.direction == .littleChange ? "Little change" : "Lower than before")
+                            .font(DS.Typography.metricSmall)
                             .foregroundStyle(DS.Colors.textPrimary)
-                        Text("per year").font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
                     }
-                    .accessibilityElement(children: .combine)
                     Text(GrowthCopy.velocitySentence(v, unit: unit))
                         .font(DS.Typography.subheadline)
                         .foregroundStyle(DS.Colors.textSecondary)
@@ -277,9 +283,9 @@ struct AdultHeightCard: View {
         AppCard(padding: DS.Spacing.lg) {
             VStack(alignment: .leading, spacing: DS.Spacing.sm) {
                 if case .scenario(let s) = outcome {
-                    HStack {
+                    AdaptiveStack {
                         Text(GrowthCopy.estimateTitle).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
-                        Spacer()
+                        Spacer(minLength: 0)
                         Badge(GrowthCopy.uncertaintyLabel(s.uncertainty), tone: s.uncertainty == .narrower ? .accent : .neutral)
                     }
                     Text(GrowthCopy.range(s.lowCm, s.highCm, unit: unit))

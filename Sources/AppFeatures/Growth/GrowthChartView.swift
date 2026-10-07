@@ -156,7 +156,7 @@ struct SelectedPointDetail: View {
     let unit: HeightUnit
 
     var body: some View {
-        HStack(spacing: DS.Spacing.lg) {
+        AdaptiveStack(spacing: DS.Spacing.lg) {
             detail("Age", GrowthCopy.ageText(months: point.ageMonths))
             detail("Height", HeightFormatter.string(centimeters: point.heightCm, unit: unit))
             detail("Percentile", point.percentile.map { PercentileFormatter.ordinal($0.percentile) } ?? "—")
