@@ -340,7 +340,7 @@ public struct SubscriptionCard: View {
         }
         .padding(DS.Spacing.md)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .heroSurface()
+        .dsSurface()
         .accessibilityElement(children: .contain)
     }
 }
