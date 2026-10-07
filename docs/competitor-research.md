@@ -2,6 +2,7 @@
 
 > Phase 1 deliverable. Status: research only. No code, assets, copy, or UI from the competitor were used or will be used.
 > Research date: 2026-10-07.
+> **Phase 1.5 note:** Phase 1 research did **not** record whether the competitor asks for ethnicity. That is unverified and is item 4 of `manual-competitor-checklist.md`. Matrix rows 3 (relatives: do not collect), 4 (puberty: education only, P2, no prediction input), 37 (clinician export: **MVP Premium**) and 31 (referral: do not build unless validated) are updated by `mvp-scope.md`.
 
 ## 0. Method and limits (read first)
 

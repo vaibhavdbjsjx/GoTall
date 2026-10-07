@@ -1,6 +1,7 @@
 # Technical Architecture
 
 > Phase 1 deliverable. Design only. No dependencies are added in Phase 1. Library and vendor names below are **proposals** to confirm in Phase 3, after checking current pricing and terms.
+> **Phase 1.5 update (supersedes conflicting parts below):** the MVP is **local-first** (SwiftData + optional iCloud/CloudKit private-database sync) with **no Supabase or RevenueCat** (both move to P1 with the AI coach). StoreKit 2 handles entitlements on the device. **Engine B (Khamis–Roche) is not planned** (`scientific-prediction-review.md` §3). Weight is not collected. Velocity needs measurements ≥6 months apart. Combining rules are in `scientific-prediction-review.md` §6 (no union of ranges). References go through the Growth Reference Layer (`growth-reference-architecture.md`). WHO data needs permission for commercial use.
 
 ## 1. Overview
 
@@ -107,7 +108,7 @@ Predictions are **not stored on the server**. They are recomputed locally from i
 
 ### 5.5 Engine C: Personal trend
 - Inputs: the measurement series.
-- Outputs: velocity (cm/yr) from a robust slope over measurements ≥3 months apart, percentile trajectory (z over time), "growth likely complete" detection (no meaningful gain over ≥12 months at a late adolescent age; thresholds set with the reviewer), and a noise score.
+- Outputs: velocity (cm/yr) from a robust slope over measurements ≥6 months apart (Phase 1.5), percentile trajectory (z over time), "growth likely complete" detection (no meaningful gain over ≥12 months at a late adolescent age; thresholds set with the reviewer), and a noise score.
 - Effect on the prediction: **only** through better z estimates for Engine A (averaging) and the completion detection. It never extrapolates velocity linearly to adulthood.
 
 ### 5.6 Engine D: Lifestyle (habits). Never adds cm
@@ -117,7 +118,7 @@ Predictions are **not stored on the server**. They are recomputed locally from i
 - Test: property-based test that predictions are identical for any habit input.
 
 ### 5.7 Combining for display
-- **Primary card:** Engine B if eligible and enabled, else Engine A.
+- **Primary card:** ~~Engine B if eligible and enabled, else Engine A.~~ Phase 1.5: Engine A scenario, or the Gate G1 conditional model (see `scientific-prediction-review.md` §6).
 - **Overall range:** union of the eligible engine ranges, clamped to plausible adult bounds, plus the mid-parental range shown separately for context.
 - **Confidence (low/medium/high):** rules based on age (closer to adult → higher), measurement count/consistency, parent heights known/measured, and engine agreement. No percentage "accuracy" claims.
 - Always display: "Estimates can be off by several centimeters. Puberty timing, health and genetics vary."
@@ -126,7 +127,7 @@ Predictions are **not stored on the server**. They are recomputed locally from i
 Candidate triggers, each showing a calm "consider talking to a pediatrician" card with no diagnosis:
 1. Current height below the 3rd or above the 97th percentile.
 2. Downward crossing of ≥2 major percentile lines over ≥12 months.
-3. Very low velocity for age over ≥12 months (threshold from published pediatric referral guidance, e.g., NICE/AAP; **not invented here**).
+3. *(Phase 1.5: not in MVP. Needs a licensed velocity reference.)* Very low velocity for age over ≥12 months (threshold from published pediatric referral guidance, e.g., NICE/AAP; **not invented here**).
 4. A large gap between the current percentile and the mid-parental target percentile.
 5. Implausible entries → first prompt "re-measure", not a red flag.
 

@@ -2,6 +2,7 @@
 
 > Phase 1 deliverable. Each phase ends with a **stop-and-review gate**: the owner approves before the next phase starts. Durations are not estimated here because they depend on the owner's availability. Dependencies define order.
 > References: PRD = `product-requirements.md`, TA = `technical-architecture.md`, MON = `monetization.md`, CR = `competitor-research.md`.
+> **Phase 1.5 update:** the phase **order and MVP boundary are superseded by `mvp-scope.md` §3** (local-first, no backend in MVP, Engine B removed, PDF export moved into MVP, AI coach/backend in P1). Per-phase details below (risks, testing, DoD) remain valid where they don't conflict.
 
 ## Phase map
 

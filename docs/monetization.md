@@ -1,6 +1,7 @@
 # Monetization Strategy
 
 > Phase 1 deliverable. **No prices are fixed here.** Final price points are chosen in Phase 10 from storefront research and controlled tests. Competitor prices are reference observations only (see `competitor-research.md` §3, third-party sourced).
+> **Phase 1.5 update:** the free/premium split, launch plan set and infrastructure in this document are **superseded by `monetization-strategy.md`** (StoreKit 2 only in MVP. Clinician PDF and multi-profile are MVP Premium. Lifetime only as an AI-excluded "Core" test). Principles §1, §4 and §9 still apply.
 
 ## 1. Principles
 

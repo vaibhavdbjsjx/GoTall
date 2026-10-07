@@ -2,6 +2,7 @@
 
 > Phase 1 deliverable. Working title: **"Upward"** (placeholder. A trademark and App Store name search is required in Phase 2. We will not use "Tall"/"GoTall" in the name to avoid confusion with the competitor and its clones).
 > Platform: iOS (iPhone first, iPad compatible). Companion docs: `competitor-research.md`, `technical-architecture.md`, `monetization.md`, `implementation-roadmap.md`.
+> **Phase 1.5 update:** scope is locked in `mvp-scope.md`, which overrides §4 where they differ. Key changes: US storefront only, no weight, no Engine B, velocity needs ≥6-month intervals, clinician PDF + multi-profile are **MVP Premium**, AI coach is P1, local-first with no accounts in MVP (FR-8 becomes "delete all data", covering local + iCloud), ethnicity is never collected, 21+ get no prediction.
 
 ## 1. Vision
 
@@ -39,13 +40,13 @@ The most **honest and useful** height-growth companion for teens and parents. It
 
 | Area | Requirement |
 |---|---|
-| Onboarding | ≤12 required steps to a free result: role (teen / parent / 18+), age gate, sex at birth (for reference charts, explained), birthdate, current height (+ guide), weight (optional), parents' heights (optional "don't know"), units |
+| Onboarding | ≤12 required steps to a free result: role (teen / parent / 18+), age gate, sex at birth (for reference charts, explained), birthdate, current height (+ guide), parents' heights (optional "don't know"), units |
 | Age gate & consent | Self-declared birthdate. Under 13 → must be set up by a parent (parent account flow). 13–17 → teen flow with privacy explainer and optional parent link. No AI coach under 13 |
 | Prediction | Engine A (reference/percentile projection) + mid-parental target, plus Engine B only if it passes the verification gate (Tech Arch §5.4) and inputs allow, shown as a **range**, with a "How we estimate" sheet. Engine D lifestyle **never changes cm** |
 | Results screen | Range, most-likely band, method cards, confidence level (low/medium/high based on inputs), disclaimers, share card (range only) |
 | Measurement log | Add/edit/delete measurements. Time-of-day note. Averaging of repeated entries |
 | Charts | CDC 2–20 stature-for-age percentile chart (P3–P97 lines), user's points, current percentile |
-| Velocity | cm/yr from ≥2 measurements ≥3 months apart. "Too noisy" state otherwise |
+| Velocity | cm/yr from ≥2 measurements ≥6 months apart (Phase 1.5). "Too noisy" state otherwise |
 | Safety signposting | Red-flag rules (Tech Arch §5.6) → neutral "consider talking to a pediatrician" card |
 | Habits | 4 categories (sleep, activity, nutrition, posture), daily check-in, forgiving streak |
 | Content | 5–10 short cited articles (how growth works, growth plates, sleep, nutrition basics, measuring correctly, myths) |
