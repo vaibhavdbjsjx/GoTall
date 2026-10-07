@@ -271,14 +271,14 @@ public struct HeroSurface: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
     public func body(content: Content) -> some View {
         content
-            .background(
+            .background {
                 ZStack {
                     DS.Colors.surface
                     LinearGradient(colors: [DS.Colors.accentSoft.opacity(colorScheme == .dark ? 0.9 : 0.75), DS.Colors.surface.opacity(0)],
                                    startPoint: .topLeading, endPoint: .center)
-                },
-                in: RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous)
-            )
+                }
+                .clipShape(RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous))
+            }
             .overlay(RoundedRectangle(cornerRadius: DS.Radius.xl, style: .continuous).strokeBorder(DS.Colors.separator.opacity(colorScheme == .dark ? 1 : 0.6), lineWidth: 0.5))
             .shadow(color: .black.opacity(colorScheme == .dark ? 0 : 0.06), radius: 16, x: 0, y: 6)
     }
