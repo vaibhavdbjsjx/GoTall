@@ -1,6 +1,7 @@
 #if os(iOS)
 import SwiftUI
 import GrowthCore
+import GrowthEngine
 import DesignSystem
 
 enum MeasurementEditorRoute: Identifiable {
@@ -137,46 +138,10 @@ struct MeasurementHistoryView: View {
     var body: some View {
         Group {
             if let profile = repository.activeProfile {
-                let analysis = GrowthAnalyzer(now: Date(), calendar: .current).analyze(profile)
-                let percentileByDay = Dictionary(uniqueKeysWithValues: analysis.series.points.map { ($0.date, $0) })
-                let grouped = Dictionary(grouping: profile.sortedMeasurements.reversed()) { Calendar.current.component(.year, from: $0.date) }
-                List {
-                    ForEach(grouped.keys.sorted(by: >), id: \.self) { year in
-                        Section(String(year)) {
-                            ForEach(grouped[year] ?? []) { m in
-                                let point = percentileByDay[Calendar.current.startOfDay(for: m.date)]
-                                Button { editor = .edit(m) } label: {
-                                    MeasurementRow(
-                                        value: HeightFormatter.string(centimeters: m.heightCm, unit: profile.unitPreference),
-                                        accessibleValue: HeightFormatter.accessibleString(centimeters: m.heightCm, unit: profile.unitPreference),
-                                        date: DisplayFormat.day(m.date, calendar: .current),
-                                        detail: [m.method.title,
-                                                 point?.percentile.map { PercentileFormatter.phrase($0.percentile) },
-                                                 (point?.count ?? 1) > 1 ? "averaged with \((point?.count ?? 1) - 1) other" : nil]
-                                            .compactMap { $0 }.joined(separator: " · ")
-                                    )
-                                }
-                                .buttonStyle(.plain)
-                                .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                    if profile.measurements.count > 1 {
-                                        Button(role: .destructive) {
-                                            repository.deleteMeasurement(m.id, from: profile.id, at: Date())
-                                        } label: { Label("Delete", systemImage: "trash") }
-                                    }
-                                }
-                            }
-                        }
+                HistoryList(repository: repository, profile: profile, onEdit: { editor = .edit($0) })
+                    .sheet(item: $editor) { route in
+                        MeasurementEditorSheet(repository: repository, profile: profile, route: route)
                     }
-                    Section {
-                        Text("Measurements on the same day are averaged. A profile always keeps at least one measurement.")
-                            .font(DS.Typography.footnote)
-                            .foregroundStyle(DS.Colors.textSecondary)
-                    }
-                }
-                .scrollContentBackground(.hidden)
-                .sheet(item: $editor) { route in
-                    MeasurementEditorSheet(repository: repository, profile: profile, route: route)
-                }
             } else {
                 LoadingStateView()
             }
@@ -189,6 +154,74 @@ struct MeasurementHistoryView: View {
                     .accessibilityLabel("Add measurement")
             }
         }
+    }
+}
+
+private struct HistoryList: View {
+    let repository: AppRepository
+    let profile: GrowthProfile
+    let onEdit: (HeightMeasurement) -> Void
+
+    private var pointsByDay: [Date: SeriesPoint] {
+        let analysis = GrowthAnalyzer(now: Date(), calendar: .current).analyze(profile)
+        return Dictionary(uniqueKeysWithValues: analysis.series.points.map { ($0.date, $0) })
+    }
+
+    private var years: [(year: Int, items: [HeightMeasurement])] {
+        let grouped = Dictionary(grouping: profile.sortedMeasurements.reversed()) { Calendar.current.component(.year, from: $0.date) }
+        return grouped.keys.sorted(by: >).map { (year: $0, items: grouped[$0] ?? []) }
+    }
+
+    var body: some View {
+        let points = pointsByDay
+        List {
+            ForEach(years, id: \.year) { group in
+                Section(String(group.year)) {
+                    ForEach(group.items) { m in
+                        HistoryRow(measurement: m, point: points[Calendar.current.startOfDay(for: m.date)], unit: profile.unitPreference)
+                            .contentShape(Rectangle())
+                            .onTapGesture { onEdit(m) }
+                            .accessibilityAddTraits(.isButton)
+                            .accessibilityHint("Edit this measurement")
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                if profile.measurements.count > 1 {
+                                    Button(role: .destructive) {
+                                        repository.deleteMeasurement(m.id, from: profile.id, at: Date())
+                                    } label: { Label("Delete", systemImage: "trash") }
+                                }
+                            }
+                    }
+                }
+            }
+            Section {
+                Text("Measurements on the same day are averaged. A profile always keeps at least one measurement.")
+                    .font(DS.Typography.footnote)
+                    .foregroundStyle(DS.Colors.textSecondary)
+            }
+        }
+        .scrollContentBackground(.hidden)
+    }
+}
+
+private struct HistoryRow: View {
+    let measurement: HeightMeasurement
+    let point: SeriesPoint?
+    let unit: HeightUnit
+
+    private var detail: String {
+        var parts: [String] = [measurement.method.title]
+        if let p = point?.percentile { parts.append(PercentileFormatter.phrase(p.percentile)) }
+        if let count = point?.count, count > 1 { parts.append("averaged with \(count - 1) other") }
+        return parts.joined(separator: " · ")
+    }
+
+    var body: some View {
+        MeasurementRow(
+            value: HeightFormatter.string(centimeters: measurement.heightCm, unit: unit),
+            accessibleValue: HeightFormatter.accessibleString(centimeters: measurement.heightCm, unit: unit),
+            date: DisplayFormat.day(measurement.date, calendar: .current),
+            detail: detail
+        )
     }
 }
 #endif
