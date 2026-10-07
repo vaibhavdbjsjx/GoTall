@@ -42,6 +42,9 @@ final class GrowthReportTests: XCTestCase {
         let report = builder.build(profile: ReportFixtures.teen())
         XCTAssertEqual(report.title, "Growth Report")
         XCTAssertEqual(report.subjectName, "Maya")
+        XCTAssertEqual(report.subtitle, "Maya")
+        XCTAssertGreaterThanOrEqual(report.estimateTable.rows.count, 2)
+        XCTAssertTrue(report.methodology[0].contains("sha256:"))
         XCTAssertEqual(report.sections.map(\.number), Array(1...10))
         XCTAssertEqual(report.sections.filter { $0.status != .included }, [], "teen fixture has data for every section")
         XCTAssertTrue(report.cover.contains { $0.label == "Date of birth" })
@@ -106,6 +109,11 @@ final class GrowthReportTests: XCTestCase {
         XCTAssertTrue(limited.contains(6))
         XCTAssertTrue(report.percentileHistory.rows.first?[3].contains("estimate") == true)
         XCTAssertEqual(report.subjectName, "Not recorded")
+        XCTAssertEqual(report.subtitle, "Personal growth record")
+        if let chart = report.chart {
+            XCTAssertEqual(chart.ageRange.lowerBound, chart.ageRange.lowerBound.rounded(), "whole-year axis")
+            XCTAssertGreaterThanOrEqual(chart.ageRange.upperBound - chart.ageRange.lowerBound, 5)
+        }
 
         let adult = builder.build(profile: ReportFixtures.adult())
         XCTAssertTrue(adult.current.contains { $0.label == "Percentile" && $0.value.hasPrefix("Not available") })

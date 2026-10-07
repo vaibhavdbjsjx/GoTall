@@ -52,6 +52,8 @@ public struct GrowthReport: Sendable, Equatable {
 
     public var title: String
     public var subjectName: String
+    /// Line under the title and in page headers: the name, or a neutral label when no name is stored.
+    public var subtitle: String
     public var reportDate: Date
     public var reportDateText: String
     public var unit: HeightUnit
@@ -65,6 +67,8 @@ public struct GrowthReport: Sendable, Equatable {
     public var velocityTable: Table
     public var family: [String]
     public var scenario: [String]
+    /// How the estimate looked after each measurement day (only data available that day).
+    public var estimateTable: Table
     public var methodology: [String]
     public var limitations: [String]
     public var questions: [String]
@@ -83,7 +87,7 @@ public struct GrowthReport: Sendable, Equatable {
     public var allText: String {
         var parts: [String] = [title, subjectName, reportDateText, percentileSummary]
         parts += (cover + current).flatMap { [$0.label, $0.value] }
-        parts += [measurements, percentileHistory, velocityTable].flatMap { $0.columns + $0.rows.flatMap { $0 } }
+        parts += [measurements, percentileHistory, velocityTable, estimateTable].flatMap { $0.columns + $0.rows.flatMap { $0 } }
         parts += velocity + family + scenario + methodology + limitations + questions + disclaimer
         parts += sections.map(\.title)
         return parts.joined(separator: "\n")
@@ -212,14 +216,16 @@ public struct GrowthReportBuilder: Sendable {
         } else {
             scenario.append("Not shown for this profile.")
         }
+        var estimateRows: [[String]] = []
         if advanced.estimateHistory.count >= 2 {
-            let parts = advanced.estimateHistory.map { "\(day($0.date)): \(GrowthCopy.range($0.lowCm, $0.highCm, unit: unit))" }
-            scenario.append("How the estimate changed as measurements were added: " + parts.joined(separator: "; ") + ".")
+            scenario.append("How the estimate changed as measurements were added (each row uses only the data available on that date):")
+            estimateRows = advanced.estimateHistory.reversed().map { [day($0.date), GrowthCopy.range($0.lowCm, $0.highCm, unit: unit)] }
         }
+        let estimateTable = GrowthReport.Table(columns: ["After measurement on", "Estimate"], rows: estimateRows)
 
         // 8–10
         let methodology = [
-            "Reference: \(analysis.referenceName), stature-for-age, ages 2–20 (Kuczmarski et al., 2002). Data version \(String(ReferenceRegistry.cdc2000.dataVersion.prefix(12))).",
+            "Reference: \(analysis.referenceName), stature-for-age, ages 2–20 (Kuczmarski et al., 2002). Source table: \(ReferenceRegistry.cdc2000.dataVersion).",
             "Percentiles and z-scores use the published LMS parameters: z = ((height ÷ M)^L − 1) ÷ (L × S), with age in days ÷ 30.4375, interpolated between tabulated ages.",
             "Measurements taken on the same day are averaged. Heights marked “Estimate” were entered as best guesses.",
             "Growth speed uses measurements at least 6 months apart, preferring an interval close to 12 months.",
@@ -274,10 +280,12 @@ public struct GrowthReportBuilder: Sendable {
         ]
 
         return GrowthReport(
-            title: "Growth Report", subjectName: name, reportDate: now, reportDateText: day(now), unit: unit,
+            title: "Growth Report", subjectName: name,
+            subtitle: profile.nickname?.trimmingCharacters(in: .whitespaces).nilIfEmpty ?? (profile.subject == .myself ? "Personal growth record" : "Child growth record"),
+            reportDate: now, reportDateText: day(now), unit: unit,
             cover: cover, current: current, chart: chart, measurements: measurements,
             percentileHistory: percentileHistory, percentileSummary: advanced.summary,
-            velocity: velocity, velocityTable: velocityTable, family: family, scenario: scenario,
+            velocity: velocity, velocityTable: velocityTable, family: family, scenario: scenario, estimateTable: estimateTable,
             methodology: methodology, limitations: limitations, questions: questions, disclaimer: disclaimer,
             sections: sections)
     }
@@ -288,12 +296,14 @@ public struct GrowthReportBuilder: Sendable {
         let reference = ReferenceRegistry.cdc2000
         let toUnit = { (cm: Double) in unit == .centimeters ? cm : cm / HeightConversion.centimetersPerInch }
         let ages = points.map { $0.ageMonths / 12 }
+        // Whole-year bounds, at least 5 years wide, inside the chart's 2–20.
         var lo = max(2, (ages.min() ?? 2).rounded(.down) - 1)
         var hi = min(20, (ages.max() ?? 20).rounded(.up) + 2)
         if hi - lo < 5 {
-            let pad = (5 - (hi - lo)) / 2
+            let pad = ((5 - (hi - lo)) / 2).rounded(.up)
             lo = max(2, lo - pad)
-            hi = min(20, lo + 5)
+            hi = min(20, max(hi, lo + 5))
+            lo = max(2, min(lo, hi - 5))
         }
         var curves: [GrowthReport.ChartCurve] = []
         var minV = Double.greatestFiniteMagnitude, maxV = -Double.greatestFiniteMagnitude

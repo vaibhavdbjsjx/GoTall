@@ -60,7 +60,7 @@ private final class PDFLayout {
 
     func render() throws -> (data: Data, pages: Int) {
         var box = CGRect(origin: .zero, size: ReportPDFRenderer.pageSize)
-        let info = [kCGPDFContextTitle as String: "\(report.title) – \(report.subjectName)",
+        let info = [kCGPDFContextTitle as String: "\(report.title) – \(report.subtitle)",
                     kCGPDFContextCreator as String: BrandConfig.current.displayName] as CFDictionary
         guard let consumer = CGDataConsumer(data: data as CFMutableData),
               let context = CGContext(consumer: consumer, mediaBox: &box, info) else {
@@ -185,7 +185,7 @@ private final class PDFLayout {
     // MARK: Page furniture
 
     func drawHeader() {
-        let label = text("\(report.title) · \(report.subjectName)", size: 8.5, color: Ink.secondary)
+        let label = text("\(report.title) · \(report.subtitle)", size: 8.5, color: Ink.secondary)
         draw(label, x: left, y: 38, width: width * 0.65)
         let date = text("Report date \(report.reportDateText)", size: 8.5, color: Ink.secondary, alignment: .right)
         draw(date, x: left + width * 0.5, y: 38, width: width * 0.5)
@@ -209,7 +209,7 @@ private final class PDFLayout {
         y += draw(text(BrandConfig.current.displayName.uppercased() + "  ·  GROWTH RECORD", size: 8.5, weight: .bold, color: Ink.accent, kern: 1.4),
                   x: left, y: y, width: width) + 8
         y += draw(text(report.title, size: 30, weight: .bold), x: left, y: y, width: width) + 2
-        y += draw(text(report.subjectName, size: 15, color: Ink.secondary), x: left, y: y, width: width) + 18
+        y += draw(text(report.subtitle, size: 15, color: Ink.secondary), x: left, y: y, width: width) + 18
 
         // Profile details grid
         let columns = 2
@@ -245,7 +245,9 @@ private final class PDFLayout {
         for (i, f) in glance.enumerated() {
             let x = left + CGFloat(i) * glanceWidth
             let lh = draw(text(f.label, size: 8.5, color: Ink.tertiary), x: x, y: y, width: glanceWidth - 12)
-            let vh = draw(text(f.value, size: 13, weight: .bold), x: x, y: y + lh, width: glanceWidth - 12)
+            // The z-score stays in section 1; the cover keeps the plain percentile.
+            let value = f.value.components(separatedBy: " (z =").first ?? f.value
+            let vh = draw(text(value, size: 13, weight: .bold), x: x, y: y + lh, width: glanceWidth - 12)
             glanceHeight = max(glanceHeight, lh + vh)
         }
         if glance.isEmpty { glanceHeight = draw(text("No measurement recorded yet.", size: 10.5, color: Ink.secondary), x: left, y: y, width: width) }
@@ -262,20 +264,27 @@ private final class PDFLayout {
         draw(body, x: left + 20, y: y + 30, width: width - 40)
         y += boxHeight + 20
 
-        // Contents
+        // Contents, in two columns so the cover stays on one page.
         y += draw(text("Contents", size: 12, weight: .bold), x: left, y: y, width: width) + 6
-        for section in report.sections {
+        let columnWidth = (width - 24) / 2
+        let half = (report.sections.count + 1) / 2
+        let top = y
+        var columnBottom = y
+        for (index, section) in report.sections.enumerated() {
+            let column = index < half ? 0 : 1
+            if index == half { y = top }
+            let x = left + CGFloat(column) * (columnWidth + 24)
             var note = ""
             if case .limited(let reason) = section.status { note = reason }
-            let titleText = text("\(section.number)   \(section.title)", size: 10)
-            let h = measure(titleText, width: width * 0.6)
-            ensureSpace(h + 4)
-            draw(titleText, x: left, y: y, width: width * 0.6)
-            if !note.isEmpty { draw(text(note, size: 9, color: Ink.tertiary, alignment: .right), x: left + width * 0.55, y: y + 1, width: width * 0.45) }
-            y += h + 4
-            line(from: CGPoint(x: left, y: y), to: CGPoint(x: right, y: y), Ink.grid, width: 0.5)
+            draw(text(String(section.number), size: 9.5, weight: .bold, color: Ink.accent), x: x, y: y, width: 18)
+            var h = draw(text(section.title, size: 9.5), x: x + 20, y: y, width: columnWidth - 20)
+            if !note.isEmpty { h += draw(text(note, size: 8, color: Ink.tertiary), x: x + 20, y: y + h, width: columnWidth - 20) }
+            y += h + 3
+            line(from: CGPoint(x: x, y: y), to: CGPoint(x: x + columnWidth, y: y), Ink.grid, width: 0.5)
             y += 4
+            columnBottom = max(columnBottom, y)
         }
+        y = columnBottom
     }
 
     // MARK: Sections
@@ -309,6 +318,9 @@ private final class PDFLayout {
 
         sectionHeading(7, "Adult-height scenario")
         report.scenario.forEach { paragraph($0) }
+        if !report.estimateTable.isEmpty {
+            table(report.estimateTable, widths: [0.5, 0.5], empty: "")
+        }
 
         sectionHeading(8, "Methodology")
         bullets(report.methodology)
