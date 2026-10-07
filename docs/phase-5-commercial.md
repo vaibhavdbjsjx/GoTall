@@ -207,3 +207,29 @@ Other launch blockers:
   - Notifications: planner, reconciler and coordinator (permission once, denied, disable cancels, repeated sync no duplicates, measurement reschedule, preference and profile changes, foreign requests untouched), routes, decoding.
 - **App-hosted StoreKit tests** (`App/Tests/StoreKit`, `SKTestSession` + `Products.storekit`): plans load, free before purchase, verified purchase → Premium, relaunch recovery, expiry, cancellation, refund, restore, nothing to restore, Ask to Buy → approval via updates, simulated verification failure, store + paywall model end to end.
 - **UI tests** (`App/Tests/UI`): open Profile → Premium → paywall (prices, terms, restore, plan switch) → close; purchase progress → success; cancelled is neutral; failure → retry; notification settings enable/disable against the real notification center with the system permission prompt; report preview → generate → ready; free report → paywall; core result free.
+
+## 13. Visual QA and test log
+
+- **Inspected:** PDF pages rendered in CI (metric, imperial, sparse: 17 pages) and simulator screenshots of the paywall (all states), Profile (free, premium, cancelled), the report (free, premium, ready), reminders (on/off), Home (offer, premium), Growth (locked, advanced), the weekly summary and the gated switcher. Covered in light, dark, accessibility XL, iPhone SE and Pro Max.
+- **Fixed after inspection:**
+  - Report: the cover spilled onto a nearly empty page 2 (now a two-column contents list).
+  - Report: the z-score wrapped on the cover.
+  - Report: the estimate history was a run-on sentence (now a table).
+  - Report: the data version was truncated.
+  - Report: the axis started at a half year.
+  - Report: the subtitle read "Not recorded" for profiles with no name.
+  - Paywall: the price-load failure showed a dead disabled button (now an explanation plus Try again).
+  - Paywall: Restore was set in headline type next to footnote links.
+  - The Premium badge squeezed the report title ("Doctor / -ready").
+  - Profile: the cancelled plan showed "Active".
+  - Profile: two hero cards sat on one screen.
+  - Home: the card illustration squeezed the copy.
+  - Reminders: the interval menu had no visible label.
+  - The percentile chart started at age 0.
+  - The ready state wasn't scrolled into view.
+- **Bug found by the app-hosted StoreKit tests:** expiry and refund kept Premium because `currentEntitlements` lagged. The resolver now gives precedence to the verified subscription status.
+- **Test bug:** the Ask to Buy expectation was over-fulfilled because the approval arrives on two update streams. That crashed the test process and hid the cancellation test's result.
+- **Known remaining:**
+  - At accessibility XL the system menu picker hyphenates "Recommended".
+  - The Ask to Buy test is slow in the simulator: the purchase call can take minutes before reporting pending.
+  - Nothing has been tested on a physical device or against the App Store sandbox.
