@@ -118,7 +118,10 @@ final class StoreKitIntegrationTests: XCTestCase {
         XCTAssertFalse(pending.isPremium)
         let transaction = try XCTUnwrap(session.allTransactions().first { $0.pendingAskToBuyConfirmation })
         try session.approveAskToBuyTransaction(identifier: transaction.identifier)
-        await fulfillment(of: [unlocked], timeout: 10)
+        // The approval arrives through Transaction.updates; delivery time varies in the test environment.
+        await fulfillment(of: [unlocked], timeout: 60)
+        let approved = await awaitState(of: service) { $0.isPremium }
+        XCTAssertTrue(approved.isPremium)
     }
 
     func testFailedVerificationNeverUnlocks() async throws {

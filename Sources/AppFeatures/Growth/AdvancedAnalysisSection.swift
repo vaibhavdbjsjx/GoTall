@@ -43,6 +43,14 @@ private struct PremiumAnalysisContent: View {
     let unit: HeightUnit
     @State private var showsAll = false
 
+    /// Whole years around the measured ages, so the line fills the chart instead of starting at age 0.
+    private var ageDomain: ClosedRange<Double> {
+        let ages = advanced.percentileHistory.map { $0.ageMonths / 12 }
+        let lo = (ages.min() ?? 0).rounded(.down)
+        let hi = max((ages.max() ?? 1).rounded(.up), lo + 1)
+        return lo...hi
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.md) {
             AdaptiveStack(horizontalAlignment: .firstTextBaseline, spacing: DS.Spacing.xs) {
@@ -69,6 +77,7 @@ private struct PremiumAnalysisContent: View {
                         }
                     }
                     .chartYScale(domain: 0...100)
+                    .chartXScale(domain: ageDomain)
                     .chartYAxis { AxisMarks(values: [3, 25, 50, 75, 97]) { value in
                         AxisGridLine().foregroundStyle(DS.Colors.separator.opacity(0.6))
                         AxisValueLabel { if let v = value.as(Int.self) { Text(PercentileFormatter.ordinalNumber(v)) } }
