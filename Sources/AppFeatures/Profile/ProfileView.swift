@@ -1,11 +1,15 @@
 #if os(iOS)
 import SwiftUI
+import StoreKit
 import GrowthCore
 import DesignSystem
 
-/// Personal settings hub: who this is, their growth data, preferences, privacy, and what's coming.
+/// Personal hub, grouped by purpose: who this is, Premium, tools (reports, reminders), profiles,
+/// growth data, preferences, privacy & data, about.
 struct ProfileView: View {
     let repository: AppRepository
+    @Environment(EntitlementStore.self) private var entitlements
+    @Environment(AppNavigator.self) private var navigator
     @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
     @State private var editingProfile: GrowthProfile?
     @State private var showsSwitcher = false
@@ -13,15 +17,40 @@ struct ProfileView: View {
     @State private var deleteFailed = false
     @State private var exportURL: URL?
     @State private var exportFailed = false
+    @State private var showsManageSubscriptions = false
+    @State private var restoring = false
+    @State private var restoreMessage: String?
+    @State private var path: [ProfileDestination] = []
+
+    enum ProfileDestination: Hashable { case report, reminders }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
             List {
                 if let profile = repository.activeProfile {
                     Section {
                         ProfileHeaderCard(profile: profile, onEdit: { editingProfile = profile })
                             .listRowInsets(EdgeInsets())
                             .listRowBackground(Color.clear)
+                    }
+
+                    premiumSection
+
+                    Section("Tools") {
+                        NavigationLink(value: ProfileDestination.report) {
+                            HStack {
+                                row("Doctor-ready report", symbol: "doc.richtext", value: nil)
+                                if !entitlements.isPremium { PremiumBadge() }
+                            }
+                        }
+                        .accessibilityIdentifier("profile.reports")
+                        NavigationLink(value: ProfileDestination.reminders) {
+                            row("Reminders", symbol: "bell", value: repository.snapshot.notificationPreferences.anyEnabled ? "On" : "Off")
+                        }
+                        .accessibilityIdentifier("profile.reminders")
+                        Button { navigator.showsWeeklySummary = true } label: {
+                            row("Your week", symbol: "calendar", value: nil)
+                        }
                     }
 
                     Section("Profiles") {
@@ -48,9 +77,6 @@ struct ProfileView: View {
                         Picker(selection: $appearance) {
                             ForEach(AppAppearance.allCases) { Text($0.title).tag($0.rawValue) }
                         } label: { Label("Appearance", systemImage: "circle.lefthalf.filled") }
-                        NavigationLink { NotificationSettingsView(repository: repository) } label: {
-                            row("Reminders", symbol: "bell", value: repository.snapshot.notificationPreferences.anyEnabled ? "On" : "Off")
-                        }
                     }
                 }
 
@@ -63,16 +89,8 @@ struct ProfileView: View {
                         Button { prepareExport() } label: { Label("Export my data", systemImage: "square.and.arrow.up") }
                     }
                     Button(role: .destructive) { confirmsDeleteAll = true } label: { Label("Delete all data", systemImage: "trash") }
-                } header: { Text("Privacy") } footer: {
-                    Text("Export creates a readable JSON file of every profile and measurement. Nothing is uploaded.")
-                }
-
-                Section {
-                    plannedRow("Doctor-ready growth report", symbol: "doc.richtext")
-                    plannedRow("Advanced growth insights", symbol: "sparkles")
-                    plannedRow("Family plan", symbol: "person.3")
-                } header: { Text("Coming later") } footer: {
-                    Text("Your growth profile, chart, estimate and history stay free.")
+                } header: { Text("Privacy & data") } footer: {
+                    Text("Export creates a readable JSON file of every profile and measurement. Nothing is uploaded. Deleting data doesn't cancel a subscription; manage that in Apple's subscription settings.")
                 }
 
                 Section {
@@ -85,13 +103,23 @@ struct ProfileView: View {
             .scrollContentBackground(.hidden)
             .background(DS.Colors.background)
             .navigationTitle("Profile")
+            .navigationDestination(for: ProfileDestination.self) { destination in
+                switch destination {
+                case .report: ReportPreviewView(repository: repository)
+                case .reminders: NotificationSettingsView(repository: repository)
+                }
+            }
+            .manageSubscriptionsSheet(isPresented: $showsManageSubscriptions)
+            .onChange(of: showsManageSubscriptions) { _, showing in
+                if !showing { Task { await entitlements.refresh() } }
+            }
             .confirmationDialog("Delete all data?", isPresented: $confirmsDeleteAll, titleVisibility: .visible) {
                 Button("Delete everything", role: .destructive) {
                     do { try repository.deleteAllData() } catch { deleteFailed = true }
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This permanently removes every profile and measurement from this device. It can't be undone.")
+                Text("This permanently removes every profile and measurement from this device. It can't be undone. A Premium subscription isn't cancelled by deleting data.")
             }
             .alert("Couldn't delete data", isPresented: $deleteFailed) { Button("OK", role: .cancel) {} } message: { Text("Please try again.") }
             .alert("Couldn't export", isPresented: $exportFailed) { Button("OK", role: .cancel) {} } message: { Text("Please try again.") }
@@ -101,6 +129,54 @@ struct ProfileView: View {
             .sheet(isPresented: $showsSwitcher) {
                 ProfileSwitcherSheet(repository: repository).presentationDetents([.medium, .large])
             }
+            .onAppear {
+                #if DEBUG
+                if UserDefaults.standard.bool(forKey: "openReport"), path.isEmpty { path = [.report] }
+                if UserDefaults.standard.bool(forKey: "openNotificationSettings"), path.isEmpty { path = [.reminders] }
+                #endif
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var premiumSection: some View {
+        let state = entitlements.state
+        Section {
+            SubscriptionCard(title: BrandConfig.current.displayName + " Premium",
+                             detail: entitlements.statusDescription(),
+                             isPremium: entitlements.isPremium,
+                             actionTitle: entitlements.isPremium ? nil : "Explore Premium",
+                             action: entitlements.isPremium ? nil : { navigator.showPaywall(.general) })
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+                .animation(Motion.standard, value: entitlements.isPremium)
+        }
+        Section {
+            if state.status != .none {
+                ManageSubscriptionRow { showsManageSubscriptions = true }
+            }
+            Button {
+                restoring = true
+                Task {
+                    let outcome = await entitlements.restore()
+                    restoring = false
+                    switch outcome {
+                    case .restored: restoreMessage = "Premium restored."
+                    case .nothingToRestore: restoreMessage = "No previous purchase was found for this Apple Account."
+                    case .failed(let message): restoreMessage = message
+                    }
+                }
+            } label: {
+                HStack {
+                    Label("Restore purchases", systemImage: "arrow.clockwise").foregroundStyle(DS.Colors.textPrimary)
+                    Spacer()
+                    if restoring { ProgressView() }
+                }
+            }
+            .disabled(restoring)
+            .accessibilityIdentifier("profile.restore")
+        } footer: {
+            if let restoreMessage { Text(restoreMessage).accessibilityIdentifier("profile.restoreMessage") }
         }
     }
 
@@ -110,15 +186,6 @@ struct ProfileView: View {
             Spacer()
             if let value { Text(value).foregroundStyle(DS.Colors.textSecondary).hiddenAtAccessibilitySizes() }
         }
-    }
-
-    private func plannedRow(_ title: String, symbol: String) -> some View {
-        HStack {
-            Label(title, systemImage: symbol).foregroundStyle(DS.Colors.textSecondary)
-            Spacer()
-            Badge("Planned")
-        }
-        .accessibilityElement(children: .combine)
     }
 
     private func prepareExport() {
@@ -179,57 +246,4 @@ private struct ProfileHeaderCard: View {
     }
 }
 
-/// Reminder choices. Saved now; delivery starts once notifications are wired up (Phase 5).
-struct NotificationSettingsView: View {
-    let repository: AppRepository
-
-    var body: some View {
-        let prefs = repository.snapshot.notificationPreferences
-        Form {
-            Section {
-                Toggle(isOn: binding(\.measurementReminders, prefs)) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Measurement reminders")
-                        Text("When a new measurement is due, every few months.").font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
-                    }
-                }
-                Toggle(isOn: binding(\.dailyCheckIn, prefs)) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Daily check-in")
-                        Text("One gentle note a day for habits. Never about height.").font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
-                    }
-                }
-                if prefs.dailyCheckIn {
-                    DatePicker("Time", selection: Binding(
-                        get: { Calendar.current.date(bySettingHour: prefs.dailyCheckInTime.hour, minute: prefs.dailyCheckInTime.minute, second: 0, of: Date()) ?? Date() },
-                        set: { date in
-                            var p = repository.snapshot.notificationPreferences
-                            let c = Calendar.current.dateComponents([.hour, .minute], from: date)
-                            p.dailyCheckInTime = TimeOfDay(hour: c.hour ?? 19, minute: c.minute ?? 0)
-                            repository.setNotificationPreferences(p)
-                        }
-                    ), displayedComponents: .hourAndMinute)
-                }
-                Toggle(isOn: binding(\.weeklySummary, prefs)) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Weekly summary")
-                        Text("Sunday evening: the week's check-ins and what's next.").font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
-                    }
-                }
-            } footer: {
-                Text("Your choices are saved on this device. Reminders start in an upcoming update, and iOS will ask for permission first. We never send fear- or guilt-based messages.")
-            }
-        }
-        .navigationTitle("Reminders")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-
-    private func binding(_ keyPath: WritableKeyPath<NotificationPreferences, Bool>, _ prefs: NotificationPreferences) -> Binding<Bool> {
-        Binding(get: { prefs[keyPath: keyPath] }, set: { value in
-            var p = repository.snapshot.notificationPreferences
-            p[keyPath: keyPath] = value
-            repository.setNotificationPreferences(p)
-        })
-    }
-}
 #endif

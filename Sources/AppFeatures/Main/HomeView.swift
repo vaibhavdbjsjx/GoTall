@@ -26,7 +26,7 @@ struct HomeView: View {
 }
 
 enum HomeAction {
-    case measure, growth, habits, explanation, editFamily, switchProfile
+    case measure, growth, habits, explanation, editFamily, switchProfile, report
 }
 
 private struct HomeContent: View {
@@ -67,6 +67,8 @@ private struct HomeContent: View {
                     }
                 }
                 }
+                PremiumMomentCard(profile: profile, analysis: analysis, onOpen: { onAction(.report) })
+                    .id("premium")
                 if case .message(let title, let body) = state.estimate {
                     QuietNote(title: title, message: body, symbol: "scope")
                 }
@@ -79,7 +81,9 @@ private struct HomeContent: View {
         }
         .onAppear {
             #if DEBUG
-            if let target = UserDefaults.standard.string(forKey: "homeScrollTo") { proxy.scrollTo(target, anchor: .top) }
+            if let target = UserDefaults.standard.string(forKey: "homeScrollTo") {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { proxy.scrollTo(target, anchor: .top) }
+            }
             #endif
         }
         }
@@ -425,6 +429,64 @@ struct HabitBaselineSection: View {
                 }
             }
         }
+    }
+}
+
+/// The one place Home mentions Premium. Free: a dismissible suggestion, shown only once a growth trend exists
+/// (real value first) and snoozed for 60 days when dismissed. Premium: a shortcut to the report.
+private struct PremiumMomentCard: View {
+    let profile: GrowthProfile
+    let analysis: GrowthAnalysis
+    let onOpen: () -> Void
+    @Environment(EntitlementStore.self) private var entitlements
+    @AppStorage("premiumOfferDismissedAt") private var dismissedAt: Double = 0
+
+    var body: some View {
+        if entitlements.isPremium {
+            card(eyebrow: "Doctor-ready report",
+                 title: "Ready for the next check-up",
+                 detail: "\(profile.measurements.count) measurement\(profile.measurements.count == 1 ? "" : "s"), the growth chart, percentile history and methods, as a PDF made on this iPhone.",
+                 button: "Open report", showsDismiss: false)
+                .accessibilityIdentifier("home.report")
+        } else if PremiumOfferPolicy.shouldSuggest(analysis: analysis, isPremium: false,
+                                                   dismissedAt: dismissedAt > 0 ? Date(timeIntervalSince1970: dismissedAt) : nil,
+                                                   now: Date(), calendar: .current) {
+            card(eyebrow: "Premium",
+                 title: "A clear report for the doctor",
+                 detail: "\(profile.subject == .child ? (profile.nickname ?? "This") + "'s" : "Your") growth history can become a PDF with the chart, every measurement and the methods behind them.",
+                 button: "See what's included", showsDismiss: true)
+                .accessibilityIdentifier("home.premiumOffer")
+        }
+    }
+
+    private func card(eyebrow: String, title: String, detail: String, button: String, showsDismiss: Bool) -> some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.md) {
+            HStack(alignment: .top, spacing: DS.Spacing.md) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(eyebrow.uppercased()).font(DS.Typography.eyebrow).foregroundStyle(DS.Colors.accent)
+                    Text(title).font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
+                    Text(detail).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                ReportPreview(compact: true)
+                    .scaleEffect(0.8)
+                    .frame(width: 100, height: 110)
+                    .hiddenAtAccessibilitySizes()
+            }
+            AdaptiveStack(horizontalAlignment: .center, spacing: DS.Spacing.xs) {
+                AppButton(button, kind: .secondary, fullWidth: !showsDismiss, action: onOpen)
+                if showsDismiss {
+                    AppButton("Not now", kind: .tertiary, fullWidth: false) {
+                        withAnimation(Motion.standard) { dismissedAt = Date().timeIntervalSince1970 }
+                    }
+                    .accessibilityIdentifier("home.premiumOffer.dismiss")
+                }
+            }
+        }
+        .padding(DS.Spacing.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .dsSurface()
     }
 }
 #endif

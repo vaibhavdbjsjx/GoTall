@@ -6,13 +6,21 @@ import DesignSystem
 /// Entry point for the app UI. Decides between data recovery, onboarding and the main app.
 public struct AppRootView: View {
     @State private var repository: AppRepository
+    @State private var entitlements: EntitlementStore
+    @State private var notifications: NotificationCoordinator
+    @State private var navigator: AppNavigator
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
 
     private let initialTab: AppTab
 
-    public init(repository: AppRepository, initialTab: AppTab = .home) {
+    public init(repository: AppRepository, entitlements: EntitlementStore, notifications: NotificationCoordinator,
+                navigator: AppNavigator, initialTab: AppTab = .home) {
         _repository = State(initialValue: repository)
+        _entitlements = State(initialValue: entitlements)
+        _notifications = State(initialValue: notifications)
+        _navigator = State(initialValue: navigator)
         self.initialTab = initialTab
     }
 
@@ -32,6 +40,27 @@ public struct AppRootView: View {
             }
         }
         .animation(Motion.resolved(Motion.reveal, reduceMotion: reduceMotion), value: repository.profiles.isEmpty)
+        // The sheet is attached before the environment so its content receives the same services.
+        .paywallSheet(Bindable(navigator).paywall)
+        .environment(entitlements)
+        .environment(notifications)
+        .environment(navigator)
+        // Entitlements are recomputed from verified transactions at launch and whenever the app returns to the
+        // foreground (e.g. after changing the subscription in Settings). Reminders are re-planned from the data.
+        .task {
+            await entitlements.start()
+            await notifications.sync(repository.snapshot)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            guard phase == .active else { return }
+            Task {
+                await entitlements.refresh()
+                await notifications.sync(repository.snapshot)
+            }
+        }
+        .onChange(of: repository.snapshot) { _, snapshot in
+            Task { await notifications.sync(snapshot) }
+        }
         .tint(DS.Colors.accent)
         .preferredColorScheme(AppAppearance(rawValue: appearance)?.colorScheme)
     }

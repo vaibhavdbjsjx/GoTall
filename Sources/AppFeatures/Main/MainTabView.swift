@@ -11,7 +11,9 @@ public enum AppTab: String, Hashable {
 
 struct MainTabView: View {
     let repository: AppRepository
+    @Environment(AppNavigator.self) private var navigator
     @State private var selection: AppTab
+    @State private var showsReport = false
     @State private var showsAddMeasurement = false
     @State private var showsSwitcher = false
     @State private var editingFamily: GrowthProfile?
@@ -51,6 +53,29 @@ struct MainTabView: View {
         .sheet(item: $editingFamily) { profile in
             EditProfileView(repository: repository, profile: profile, focus: nil)
         }
+        .sheet(isPresented: $showsReport) {
+            NavigationStack {
+                ReportPreviewView(repository: repository)
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showsReport = false } } }
+            }
+        }
+        .sheet(isPresented: Bindable(navigator).showsWeeklySummary) {
+            WeeklySummaryView(repository: repository)
+        }
+        .onChange(of: navigator.route) { _, route in
+            guard let route else { return }
+            navigator.route = nil
+            switch route {
+            case .addMeasurement(let profileID):
+                repository.setActiveProfile(profileID)
+                selection = .home
+                showsAddMeasurement = true
+            case .habits:
+                selection = .habits
+            case .weeklySummary:
+                navigator.showsWeeklySummary = true
+            }
+        }
         .safeAreaInset(edge: .top, spacing: 0) {
             if repository.lastSaveError != nil {
                 InfoBanner("Changes couldn't be saved. They'll be retried automatically.", tone: .caution)
@@ -70,6 +95,7 @@ struct MainTabView: View {
             explanationRequest += 1
         case .editFamily: editingFamily = repository.activeProfile
         case .switchProfile: showsSwitcher = true
+        case .report: showsReport = true
         }
     }
 
@@ -78,6 +104,8 @@ struct MainTabView: View {
         // Screenshot harness only.
         if UserDefaults.standard.bool(forKey: "openAddMeasurement") { showsAddMeasurement = true }
         if UserDefaults.standard.bool(forKey: "openProfileSwitcher") { showsSwitcher = true }
+        if UserDefaults.standard.bool(forKey: "openWeeklySummary") { navigator.showsWeeklySummary = true }
+        if let context = UserDefaults.standard.string(forKey: "openPaywall").flatMap(PaywallContext.init(rawValue:)) { navigator.showPaywall(context) }
         #endif
     }
 }
@@ -126,7 +154,9 @@ struct ProfileSwitcher: View {
 struct ProfileSwitcherSheet: View {
     let repository: AppRepository
     @Environment(\.dismiss) private var dismiss
+    @Environment(EntitlementStore.self) private var entitlements
     @State private var showsAddProfile = false
+    @State private var paywall: PaywallContext?
 
     var body: some View {
         NavigationStack {
@@ -160,8 +190,24 @@ struct ProfileSwitcherSheet: View {
                         .buttonStyle(PressableStyle())
                         .accessibilityAddTraits(isActive ? [.isButton, .isSelected] : .isButton)
                     }
-                    AppButton("Add a child", systemImage: "plus", kind: .secondary) { showsAddProfile = true }
-                        .padding(.top, DS.Spacing.xs)
+                    let canAdd = entitlements.canAddProfile(existingCount: repository.profiles.count)
+                    AppButton("Add a child", systemImage: "plus", kind: .secondary) {
+                        if canAdd {
+                            showsAddProfile = true
+                        } else {
+                            paywall = .family
+                        }
+                    }
+                    .padding(.top, DS.Spacing.xs)
+                    .accessibilityIdentifier("switcher.addChild")
+                    if !canAdd {
+                        HStack(spacing: DS.Spacing.xs) {
+                            PremiumBadge()
+                            Text("Family profiles are part of Premium. Every profile here stays free to use.")
+                                .font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
                 }
                 .padding(DS.Spacing.page)
             }
@@ -169,6 +215,7 @@ struct ProfileSwitcherSheet: View {
             .navigationTitle("Profiles")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .paywallSheet($paywall)
             .fullScreenCover(isPresented: $showsAddProfile) {
                 OnboardingHost(repository: repository, mode: .additionalProfile,
                                onCancel: { showsAddProfile = false },

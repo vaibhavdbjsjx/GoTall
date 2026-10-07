@@ -18,6 +18,7 @@ struct GrowthView: View {
     @State private var showsExplanation = false
     @State private var showsGuide = false
     @State private var showsHistory = false
+    @State private var showsReport = false
 
     var body: some View {
         NavigationStack {
@@ -49,6 +50,9 @@ struct GrowthView: View {
             .onChange(of: explanationRequest) { _, _ in showsExplanation = true }
             .navigationDestination(isPresented: $showsHistory) {
                 MeasurementHistoryView(repository: repository)
+            }
+            .navigationDestination(isPresented: $showsReport) {
+                ReportPreviewView(repository: repository)
             }
             .onChange(of: repository.activeProfile?.id) { _, _ in selectedPoint = nil }
         }
@@ -92,6 +96,11 @@ struct GrowthView: View {
 
                 InsightsSection(insights: Array(analysis.insights.prefix(3)))
                     .id("insights")
+
+                AdvancedAnalysisSection(profile: profile)
+                    .id("advanced")
+
+                ReportLinkCard { showsReport = true }
 
                 historySection(profile: profile)
                     .id("history")
@@ -483,6 +492,42 @@ struct GuideLinkCard: View {
             .dsSurface()
         }
         .buttonStyle(PressableStyle())
+    }
+}
+
+/// Entry to the doctor-ready report from Growth. The preview is free to open.
+private struct ReportLinkCard: View {
+    let action: () -> Void
+    @Environment(EntitlementStore.self) private var entitlements
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: DS.Spacing.md) {
+                Image(systemName: "doc.richtext")
+                    .font(.title3)
+                    .foregroundStyle(DS.Colors.accent)
+                    .frame(width: 40, height: 40)
+                    .background(DS.Colors.accentSoft, in: RoundedRectangle(cornerRadius: DS.Radius.sm, style: .continuous))
+                    .accessibilityHidden(true)
+                    .hiddenAtAccessibilitySizes()
+                VStack(alignment: .leading, spacing: 2) {
+                    AdaptiveStack(horizontalAlignment: .firstTextBaseline, spacing: DS.Spacing.xs) {
+                        Text("Doctor-ready report").font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
+                        if !entitlements.isPremium { PremiumBadge() }
+                    }
+                    Text("A PDF of the chart, measurements and methods for a check-up. See what's included.")
+                        .font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
+                        .multilineTextAlignment(.leading)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(DS.Colors.textTertiary)
+            }
+            .padding(DS.Spacing.md)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .dsSurface()
+        }
+        .buttonStyle(PressableStyle())
+        .accessibilityIdentifier("growth.report")
     }
 }
 #endif

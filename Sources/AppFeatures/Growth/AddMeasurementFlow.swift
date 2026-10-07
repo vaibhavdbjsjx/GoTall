@@ -231,6 +231,10 @@ struct MeasurementSuccessView: View {
     let repository: AppRepository
     let profileID: UUID
     let onDone: () -> Void
+    @Environment(NotificationCoordinator.self) private var notifications
+    @State private var reminderState: ReminderState = .offer
+
+    enum ReminderState: Equatable { case offer, working, set(Date?), needsSettings }
 
     var body: some View {
         VStack(spacing: DS.Spacing.lg) {
@@ -256,10 +260,38 @@ struct MeasurementSuccessView: View {
             .padding(DS.Spacing.md)
             .background(DS.Colors.surface, in: RoundedRectangle(cornerRadius: DS.Radius.lg, style: .continuous))
             Spacer()
+            reminderOffer
             AppButton("Done", action: onDone)
         }
         .padding(DS.Spacing.page)
         .accessibilityElement(children: .contain)
+    }
+
+    /// Offered here because this is when a reminder is relevant: the next measurement is months away.
+    /// Permission is requested only if the person taps it.
+    @ViewBuilder
+    private var reminderOffer: some View {
+        if !repository.snapshot.notificationPreferences.measurementReminders || reminderState != .offer {
+            switch reminderState {
+            case .offer, .working:
+                AppButton("Remind me when it's time to measure again", systemImage: "bell", kind: .tertiary, isLoading: reminderState == .working) {
+                    reminderState = .working
+                    Task {
+                        let result = await notifications.setCategory(.measurementReminder, enabled: true, repository: repository)
+                        reminderState = result == .updated ? .set(notifications.nextMeasurementReminder(for: profileID)) : .needsSettings
+                    }
+                }
+                .accessibilityIdentifier("success.remind")
+            case .set(let date):
+                Label(date.map { "Reminder set for \(DisplayFormat.day($0, calendar: .current))" } ?? "Measurement reminders are on", systemImage: "bell.fill")
+                    .font(DS.Typography.subheadline.weight(.medium))
+                    .foregroundStyle(DS.Colors.accent)
+            case .needsSettings:
+                Text("Notifications are off for this app. You can turn them on in iOS Settings.")
+                    .font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
+                    .multilineTextAlignment(.center)
+            }
+        }
     }
 
     private func stat(value: String, label: String) -> some View {

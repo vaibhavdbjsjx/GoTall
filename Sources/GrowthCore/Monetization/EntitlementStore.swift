@@ -56,6 +56,36 @@ public final class EntitlementStore {
     }
 
     public func acknowledgeUnlock() { justUnlocked = false }
+
+    /// Restore from outside the paywall (Profile). Applies any verified entitlement found.
+    public func restore() async -> RestoreOutcome {
+        let outcome = await service.restore()
+        if case .restored(let restored) = outcome { apply(restored) }
+        return outcome
+    }
+
+    /// Words for the subscription card in Profile, derived from verified state only.
+    public func statusDescription(plans: [SubscriptionPlan] = [], calendar: Calendar = .current, locale: Locale = .current) -> String {
+        let planName = state.productID == SubscriptionProductID.monthly ? "Monthly plan" : (state.productID == SubscriptionProductID.yearly ? "Yearly plan" : "Premium")
+        let date = state.expirationDate.map { DisplayFormat.day($0, calendar: calendar, locale: locale) }
+        let shared = state.isFamilyShared ? " Shared with you through Family Sharing." : ""
+        switch state.status {
+        case .active:
+            return (date.map { "\(planName) · renews on \($0)." } ?? "\(planName) is active.") + shared
+        case .cancelled:
+            return (date.map { "\(planName) · ends on \($0). It won't renew." } ?? "\(planName) won't renew.") + shared
+        case .gracePeriod:
+            return "Apple couldn't take the latest payment. Premium stays on while Apple retries; you can update payment details in Settings."
+        case .billingRetry:
+            return "Premium is paused because Apple couldn't take the latest payment. Updating payment details in Settings restores it."
+        case .expired:
+            return "Your Premium subscription has ended. Your profiles, measurements and reports you saved are all still here."
+        case .revoked:
+            return "Premium access was removed (refund or Family Sharing change). All your data is still here."
+        case .none:
+            return "Doctor-ready reports, advanced growth analysis and family profiles. Your growth result, chart and history stay free."
+        }
+    }
 }
 
 /// Paywall state machine. Owns loading plans, purchasing and restoring, and reports each outcome in words
