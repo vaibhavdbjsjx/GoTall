@@ -3,10 +3,14 @@
 iOS-first app for honest height-growth tracking: real growth charts, transparent estimates (coming in Phase 5), healthy-habit baselines and privacy by design. The final name is not decided; see `docs/launch-strategy.md`.
 
 ## Status
-Phase 2 (product foundation): design system, adaptive onboarding, local persistence, dashboard shell, navigation. See `docs/phase-2-foundation.md`.
+Phase 3 (growth intelligence engine): CDC 2000 percentiles, growth chart, growth speed, family-height range,
+adult-height scenario with qualitative uncertainty, profile editing. See `docs/growth-engine.md`.
+Phase 2 foundation: `docs/phase-2-foundation.md`.
 
 ## Structure
+- `Sources/GrowthEngine`: growth science only (CDC reference, percentiles, velocity, scenario), unit-tested
 - `Sources/GrowthCore`: platform-independent logic and state (Swift 6, fully unit-tested)
+- `Reference/cdc2000`: CDC data file + provenance; `scripts/`: data generation/verification, screenshot capture
 - `Sources/DesignSystem`: SwiftUI tokens and components
 - `Sources/AppFeatures`: SwiftUI screens
 - `App/`: iOS app target (XcodeGen spec + entry point)
