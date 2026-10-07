@@ -109,8 +109,15 @@ final class StoreKitIntegrationTests: XCTestCase {
         session.askToBuyEnabled = true
         let service = StoreKitSubscriptionService()
         let unlocked = expectation(description: "premium after approval")
+        // Approval arrives through both Transaction.updates and subscription-status updates, so the handler
+        // can report Premium more than once; only the first report matters here.
+        unlocked.assertForOverFulfill = false
+        var reported = false
         service.startObservingUpdates { state in
-            if state.isPremium { unlocked.fulfill() }
+            if state.isPremium && !reported {
+                reported = true
+                unlocked.fulfill()
+            }
         }
         let outcome = await service.purchase(planID: SubscriptionProductID.yearly)
         XCTAssertEqual(outcome, .pending)
