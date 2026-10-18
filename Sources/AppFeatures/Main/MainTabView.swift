@@ -14,6 +14,7 @@ struct MainTabView: View {
     @Environment(AppNavigator.self) private var navigator
     @State private var selection: AppTab
     @State private var showsReport = false
+    @State private var assistantRequest: AssistantRequest?
     @State private var showsAddMeasurement = false
     @State private var showsSwitcher = false
     @State private var editingFamily: GrowthProfile?
@@ -59,6 +60,10 @@ struct MainTabView: View {
                     .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showsReport = false } } }
             }
         }
+        .sheet(item: $assistantRequest) { request in
+            AssistantView(repository: repository, initialQuestion: request.question)
+                .presentationDragIndicator(.visible)
+        }
         .sheet(isPresented: Bindable(navigator).showsWeeklySummary) {
             WeeklySummaryView(repository: repository)
         }
@@ -96,6 +101,7 @@ struct MainTabView: View {
         case .editFamily: editingFamily = repository.activeProfile
         case .switchProfile: showsSwitcher = true
         case .report: showsReport = true
+        case .ask(let question): assistantRequest = AssistantRequest(question: question)
         }
     }
 
@@ -105,9 +111,16 @@ struct MainTabView: View {
         if UserDefaults.standard.bool(forKey: "openAddMeasurement") { showsAddMeasurement = true }
         if UserDefaults.standard.bool(forKey: "openProfileSwitcher") { showsSwitcher = true }
         if UserDefaults.standard.bool(forKey: "openWeeklySummary") { navigator.showsWeeklySummary = true }
+        if UserDefaults.standard.bool(forKey: "openAssistant") { assistantRequest = AssistantRequest(question: nil) }
         if let context = UserDefaults.standard.string(forKey: "openPaywall").flatMap(PaywallContext.init(rawValue:)) { navigator.showPaywall(context) }
         #endif
     }
+}
+
+/// Opens Ask Linden, optionally with a question to send straight away.
+struct AssistantRequest: Identifiable {
+    let id = UUID()
+    let question: String?
 }
 
 /// Header button that opens the profile switcher. Hidden when there's only one profile.

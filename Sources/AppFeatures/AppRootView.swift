@@ -9,6 +9,7 @@ public struct AppRootView: View {
     @State private var entitlements: EntitlementStore
     @State private var notifications: NotificationCoordinator
     @State private var navigator: AppNavigator
+    @State private var assistant = AssistantSession(model: OnDeviceAssistantModel(), usage: DefaultsAssistantUsageStore())
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
@@ -45,6 +46,8 @@ public struct AppRootView: View {
         .environment(entitlements)
         .environment(notifications)
         .environment(navigator)
+        .environment(assistant)
+        .onChange(of: repository.activeProfile?.id) { _, _ in assistant.clear() }
         // Entitlements are recomputed from verified transactions at launch and whenever the app returns to the
         // foreground (e.g. after changing the subscription in Settings). Reminders are re-planned from the data.
         .task {

@@ -131,4 +131,28 @@ final class CommercialFlowsUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Growth chart"].waitForExistence(timeout: 5), "chart is free")
         XCTAssertTrue(element(app, "analysis.locked").waitForExistence(timeout: 5) || app.staticTexts["Advanced growth analysis"].exists)
     }
+
+    // Ask Linden: open from Home, use a suggestion, then type a question. On the CI simulator Apple Intelligence
+    // isn't available, so answers come from the built-in guide; the flow and UI are the same.
+    func testAskLindenAnswersQuestions() {
+        let app = launch(tab: "home")
+        let entry = app.buttons["home.ask"]
+        XCTAssertTrue(entry.waitForExistence(timeout: 10))
+        entry.tap()
+        XCTAssertTrue(element(app, "assistant.mode").waitForExistence(timeout: 5), "shows which engine answers")
+        let suggestion = app.buttons["assistant.suggestion.0"]
+        XCTAssertTrue(suggestion.waitForExistence(timeout: 5))
+        suggestion.tap()
+        let answers = app.descendants(matching: .any).matching(identifier: "assistant.answer")
+        XCTAssertTrue(answers.firstMatch.waitForExistence(timeout: 15), "an answer appears")
+        XCTAssertTrue(element(app, "assistant.remaining").label.contains("2 free questions"), "free allowance counts down")
+
+        let input = app.textFields["assistant.input"].exists ? app.textFields["assistant.input"] : app.textViews["assistant.input"]
+        input.tap()
+        input.typeText("When should we measure next?")
+        app.buttons["assistant.send"].tap()
+        let two = NSPredicate(format: "count >= 2")
+        expectation(for: two, evaluatedWith: answers)
+        waitForExpectations(timeout: 15)
+    }
 }

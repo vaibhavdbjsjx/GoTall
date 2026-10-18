@@ -21,6 +21,7 @@ struct ProfileView: View {
     @State private var restoring = false
     @State private var restoreMessage: String?
     @State private var path: [ProfileDestination] = []
+    @State private var showsAssistant = false
 
     enum ProfileDestination: Hashable { case report, reminders }
 
@@ -37,6 +38,10 @@ struct ProfileView: View {
                     premiumSection
 
                     Section("Tools") {
+                        Button { showsAssistant = true } label: {
+                            row(BrandConfig.current.assistantName, symbol: "sparkles", value: nil)
+                        }
+                        .accessibilityIdentifier("profile.ask")
                         NavigationLink(value: ProfileDestination.report) {
                             HStack {
                                 row("Doctor-ready report", symbol: "doc.richtext", value: nil)
@@ -126,6 +131,7 @@ struct ProfileView: View {
             .sheet(item: $editingProfile) { profile in
                 EditProfileView(repository: repository, profile: profile, focus: nil)
             }
+            .sheet(isPresented: $showsAssistant) { AssistantView(repository: repository).presentationDragIndicator(.visible) }
             .sheet(isPresented: $showsSwitcher) {
                 ProfileSwitcherSheet(repository: repository).presentationDetents([.medium, .large])
             }

@@ -112,7 +112,8 @@ struct PaywallView: View {
                         detail: "Percentile history over time, growth speed between measurements, and how the estimate has changed as you added data.")
             BenefitCard(symbol: "person.2", title: "Family profiles",
                         detail: "Follow more than one child in one place. Profiles you already have always stay yours to use.")
-            BenefitCard(symbol: "square.stack.3d.up", title: "Future Premium tools", detail: "Planned additions, such as more report options, come with Premium.", tag: "Planned")
+            BenefitCard(symbol: "sparkles", title: "Unlimited \(BrandConfig.current.assistantName)",
+                        detail: "Ask as many questions about growth as you like (3 a day are free). Answered privately on this iPhone: conversational on iPhones with Apple Intelligence, Linden's built-in guide on others.")
         }
     }
 
@@ -298,6 +299,7 @@ struct PremiumActiveView: View {
                 PremiumFeatureRow(symbol: "doc.richtext", title: "Doctor-ready report", detail: "Profile › Reports, or from Growth.")
                 PremiumFeatureRow(symbol: "chart.line.uptrend.xyaxis", title: "Advanced growth analysis", detail: "On the Growth tab.")
                 PremiumFeatureRow(symbol: "person.2", title: "Family profiles", detail: "Add a child from the profile switcher.")
+                PremiumFeatureRow(symbol: "sparkles", title: "Unlimited \(BrandConfig.current.assistantName)", detail: "From Home, Growth or Profile.")
             }
             .padding(DS.Spacing.md)
             .dsSurface()

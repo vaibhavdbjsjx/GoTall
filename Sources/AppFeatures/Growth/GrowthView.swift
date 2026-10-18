@@ -19,6 +19,7 @@ struct GrowthView: View {
     @State private var showsGuide = false
     @State private var showsHistory = false
     @State private var showsReport = false
+    @State private var showsAssistant = false
 
     var body: some View {
         NavigationStack {
@@ -37,6 +38,11 @@ struct GrowthView: View {
                     Button { showsAdd = true } label: { Image(systemName: "plus.circle.fill").font(.title3) }
                         .accessibilityLabel("Add measurement")
                 }
+                ToolbarItem(placement: .primaryAction) {
+                    Button { showsAssistant = true } label: { Image(systemName: "sparkles").font(.title3) }
+                        .accessibilityLabel(BrandConfig.current.assistantName)
+                        .accessibilityIdentifier("growth.ask")
+                }
             }
             .sheet(item: $editor) { route in
                 if let profile = repository.activeProfile {
@@ -44,6 +50,7 @@ struct GrowthView: View {
                 }
             }
             .sheet(isPresented: $showsGuide) { MeasurementGuideView() }
+            .sheet(isPresented: $showsAssistant) { AssistantView(repository: repository).presentationDragIndicator(.visible) }
             .sheet(isPresented: $showsAdd) {
                 if let profile = repository.activeProfile { AddMeasurementFlow(repository: repository, profile: profile) }
             }

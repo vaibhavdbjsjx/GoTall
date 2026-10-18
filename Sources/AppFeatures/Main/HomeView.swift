@@ -27,6 +27,7 @@ struct HomeView: View {
 
 enum HomeAction {
     case measure, growth, habits, explanation, editFamily, switchProfile, report
+    case ask(String?)
 }
 
 private struct HomeContent: View {
@@ -50,6 +51,8 @@ private struct HomeContent: View {
                     HomeEstimateCard(card: state.estimate, onTap: { onAction(.explanation) })
                         .appearEffect(delay: 0.04)
                 }
+                AskLindenCard(facts: AssistantFacts(profile: profile, now: now, calendar: .current), onAsk: { onAction(.ask($0)) })
+                    .appearEffect(delay: 0.05)
                 TrajectoryPreview(analysis: analysis, unit: profile.unitPreference, onTap: { onAction(.growth) })
                     .appearEffect(delay: 0.06)
                 TodayCard(repository: repository, profile: profile, analysis: analysis, onOpenHabits: { onAction(.habits) })
