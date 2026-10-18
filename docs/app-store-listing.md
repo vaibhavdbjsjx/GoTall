@@ -19,7 +19,7 @@ Ready-to-paste metadata for App Store Connect. The character limits are Apple's.
 ```
 height,percentile,growth chart,kids,child,teen,CDC,pediatric,tracker,measure,puberty,report,parents
 ```
-(98 characters.) Don't add competitor names.
+(99 characters.) Don't add competitor names.
 
 ## Promotional text (170, editable any time)
 
