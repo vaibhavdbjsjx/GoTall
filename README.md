@@ -1,4 +1,4 @@
-# Growth tracking app (working title: Arcwise)
+# Linden: growth & height tracker (iOS)
 
 iOS-first app for honest height-growth tracking: real growth charts, transparent estimates (coming in Phase 5), healthy-habit baselines and privacy by design. The final name is not decided; see `docs/launch-strategy.md`.
 

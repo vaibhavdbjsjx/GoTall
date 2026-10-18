@@ -88,7 +88,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "com.example.growthapp.premium.yearly",
+          "productID" : "app.linden.growth.premium.yearly",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Premium Yearly (test price)",
           "subscriptionGroupID" : "21500001",
@@ -113,7 +113,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "com.example.growthapp.premium.monthly",
+          "productID" : "app.linden.growth.premium.monthly",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Premium Monthly (test price)",
           "subscriptionGroupID" : "21500001",

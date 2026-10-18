@@ -8,6 +8,8 @@ public enum PremiumFeature: String, CaseIterable, Sendable {
     case multipleProfiles
     case doctorReport
     case advancedAnalytics
+    /// Ask Linden beyond the free daily questions.
+    case unlimitedAssistant
 }
 
 /// The single answer the UI asks for. Views never inspect subscription details directly.

@@ -6,7 +6,7 @@
 # Sources/GrowthCore/Brand/BrandConfig.swift. The final name is not decided (docs/launch-strategy.md §3).
 name: GrowthApp
 options:
-  bundleIdPrefix: com.example.growthapp
+  bundleIdPrefix: app.linden.growth
   deploymentTarget:
     iOS: "17.0"
   createIntermediateGroups: true
@@ -15,9 +15,9 @@ packages:
     path: ..
 settings:
   base:
-    MARKETING_VERSION: "0.2.0"
+    MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
-    APP_DISPLAY_NAME: "Arcwise"
+    APP_DISPLAY_NAME: "Linden"
 targets:
   GrowthApp:
     type: application
@@ -31,7 +31,7 @@ targets:
         product: AppFeatures
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.example.growthapp
+        PRODUCT_BUNDLE_IDENTIFIER: app.linden.growth
         TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: $(APP_DISPLAY_NAME)
@@ -59,7 +59,7 @@ targets:
       - sdk: StoreKitTest.framework
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.example.growthapp.tests
+        PRODUCT_BUNDLE_IDENTIFIER: app.linden.growth.tests
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: "5.0"
         CODE_SIGN_STYLE: Automatic
@@ -74,7 +74,7 @@ targets:
       - target: GrowthApp
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.example.growthapp.uitests
+        PRODUCT_BUNDLE_IDENTIFIER: app.linden.growth.uitests
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: "5.0"
         CODE_SIGN_STYLE: Automatic

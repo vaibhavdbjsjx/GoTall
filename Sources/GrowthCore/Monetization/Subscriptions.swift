@@ -5,8 +5,8 @@ import Foundation
 /// App Store product identifiers. Prices are never written in code: they come from the App Store
 /// (or the local StoreKit configuration file in development). See docs/phase-5-commercial.md §4.
 public enum SubscriptionProductID {
-    public static let monthly = "com.example.growthapp.premium.monthly"
-    public static let yearly = "com.example.growthapp.premium.yearly"
+    public static let monthly = "app.linden.growth.premium.monthly"
+    public static let yearly = "app.linden.growth.premium.yearly"
     public static let all: [String] = [yearly, monthly]
     public static let groupName = "Premium"
 }

@@ -4,7 +4,7 @@
 set -uo pipefail
 APP="$1"
 OUT="$2"
-BUNDLE="com.example.growthapp"
+BUNDLE="app.linden.growth"
 mkdir -p "$OUT"
 
 udid_for() { xcrun simctl list devices available | grep -E "$1" | head -1 | sed -E 's/.*\(([A-F0-9-]{36})\).*/\1/'; }
