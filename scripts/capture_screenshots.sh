@@ -76,6 +76,10 @@ shoot "$MAIN" light-37-growth-locked $PW free -initialTab growth -growthScrollTo
 shoot "$MAIN" light-38-growth-advanced $PW premium -initialTab growth -growthScrollTo advanced
 shoot "$MAIN" light-39-weekly-summary $PW free -openWeeklySummary YES
 shoot "$MAIN" light-40-switcher-gated -demoScenario parent -storeMode free -openProfileSwitcher YES
+# Release pass: Ask Linden (on CI simulators Apple Intelligence is unavailable, so the built-in guide answers)
+shoot "$MAIN" light-41-assistant-empty $PW free -openAssistant YES
+shoot "$MAIN" light-42-assistant-answer -demoScenario parent -storeMode free -openAssistant YES -assistantAsk "Is Ava's growth on track?"
+shoot "$MAIN" light-43-assistant-safety $PW free -openAssistant YES -assistantAsk "Where can I buy HGH?"
 
 # Dark
 xcrun simctl ui "$MAIN" appearance dark
@@ -93,6 +97,7 @@ shoot "$MAIN" dark-31-report-premium $PW premium -initialTab profile -openReport
 shoot "$MAIN" dark-33-notifications-on $PW free -initialTab profile -openNotificationSettings YES -notificationsMode preview -demoNotifications YES
 shoot "$MAIN" dark-37-growth-locked $PW free -initialTab growth -growthScrollTo advanced
 shoot "$MAIN" dark-36-home-premium $PW premium -homeScrollTo premium
+shoot "$MAIN" dark-42-assistant-answer -demoScenario parent -storeMode free -openAssistant YES -assistantAsk "Is Ava's growth on track?"
 xcrun simctl ui "$MAIN" appearance light
 
 # Accessibility text size
@@ -108,11 +113,18 @@ shoot "$MAIN" ax-20-paywall-plans $PW free -openPaywall general -paywallScrollTo
 shoot "$MAIN" ax-31-report-premium $PW premium -initialTab profile -openReport YES
 shoot "$MAIN" ax-33-notifications-on $PW free -initialTab profile -openNotificationSettings YES -notificationsMode preview -demoNotifications YES
 shoot "$MAIN" ax-37-growth-locked $PW free -initialTab growth -growthScrollTo advanced
+shoot "$MAIN" ax-42-assistant-answer -demoScenario parent -storeMode free -openAssistant YES -assistantAsk "Is Ava's growth on track?"
 xcrun simctl ui "$MAIN" content_size large
 xcrun simctl shutdown "$MAIN" 2>/dev/null || true
 
 # Small and large phones
 SMALL=$(udid_for "iPhone SE")
+if [ -z "$SMALL" ]; then
+  # Newer Xcode versions don't ship an SE simulator by default; create one (smallest supported screen).
+  RUNTIME=$(xcrun simctl list runtimes available | grep -E "^iOS" | tail -1 | sed -E 's/.* - (com\.apple\.CoreSimulator\.SimRuntime\.[^ ]+).*/\1/')
+  SMALL=$(xcrun simctl create "iPhone SE (3rd generation)" com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation "$RUNTIME" 2>/dev/null || true)
+  echo "Created SE simulator: $SMALL"
+fi
 if [ -n "$SMALL" ]; then
   prepare "$SMALL"
   shoot "$SMALL" se-01-home-teen -demoScenario teen
@@ -123,6 +135,7 @@ if [ -n "$SMALL" ]; then
   shoot "$SMALL" se-20-paywall-plans -demoScenario teen -storeMode free -openPaywall general -paywallScrollTo plans
   shoot "$SMALL" se-31-report-premium -demoScenario teen -storeMode premium -initialTab profile -openReport YES
   shoot "$SMALL" se-33-notifications-on -demoScenario teen -storeMode free -initialTab profile -openNotificationSettings YES -notificationsMode preview -demoNotifications YES
+  shoot "$SMALL" se-42-assistant-answer -demoScenario parent -storeMode free -openAssistant YES -assistantAsk "Is Ava's growth on track?"
   xcrun simctl shutdown "$SMALL" 2>/dev/null || true
 else
   echo "No iPhone SE simulator available"
@@ -134,6 +147,13 @@ if [ -n "$LARGE" ]; then
   shoot "$LARGE" max-04-growth-teen -demoScenario teen -initialTab growth
   shoot "$LARGE" max-19-paywall -demoScenario teen -storeMode free -openPaywall general
   shoot "$LARGE" max-31-report-premium -demoScenario teen -storeMode premium -initialTab profile -openReport YES
+  # Raw captures for the App Store screenshots (composed by scripts/make_store_screenshots.py)
+  shoot "$LARGE" store-raw-01 -demoScenario parent -storeMode premium
+  shoot "$LARGE" store-raw-02 -demoScenario parent -storeMode premium -initialTab growth
+  shoot "$LARGE" store-raw-03 -demoScenario parent -storeMode premium -openAssistant YES -assistantAsk "How tall might Ava be as an adult?"
+  shoot "$LARGE" store-raw-04 -demoScenario parent -storeMode premium -initialTab profile -openReport YES
+  shoot "$LARGE" store-raw-05 -demoScenario teen -storeMode premium -initialTab habits
+  shoot "$LARGE" store-raw-06 -demoScenario teen -storeMode premium -initialTab growth -growthScrollTo advanced
   xcrun simctl shutdown "$LARGE" 2>/dev/null || true
 fi
 ls "$OUT" | wc -l

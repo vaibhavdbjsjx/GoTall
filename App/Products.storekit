@@ -83,7 +83,7 @@
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Doctor-ready reports, advanced growth analysis and family profiles.",
+              "description" : "Doctor-ready reports, advanced analysis, family profiles and unlimited Ask Linden.",
               "displayName" : "Premium Yearly",
               "locale" : "en_US"
             }
@@ -108,7 +108,7 @@
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Doctor-ready reports, advanced growth analysis and family profiles.",
+              "description" : "Doctor-ready reports, advanced analysis, family profiles and unlimited Ask Linden.",
               "displayName" : "Premium Monthly",
               "locale" : "en_US"
             }

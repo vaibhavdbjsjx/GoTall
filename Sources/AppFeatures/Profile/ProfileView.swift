@@ -22,6 +22,8 @@ struct ProfileView: View {
     @State private var restoreMessage: String?
     @State private var path: [ProfileDestination] = []
     @State private var showsAssistant = false
+    @State private var legal: LegalDocument?
+    @Environment(\.openURL) private var openURL
 
     enum ProfileDestination: Hashable { case report, reminders }
 
@@ -98,9 +100,15 @@ struct ProfileView: View {
                     Text("Export creates a readable JSON file of every profile and measurement. Nothing is uploaded. Deleting data doesn't cancel a subscription; manage that in Apple's subscription settings.")
                 }
 
-                Section {
-                    LabeledContent("App", value: BrandConfig.current.displayName)
-                    Text("This app helps you track and understand growth. It doesn't diagnose. For health concerns, talk to a doctor.")
+                Section("About") {
+                    Button { legal = .privacy } label: { row("Privacy Policy", symbol: "hand.raised", value: nil) }
+                        .accessibilityIdentifier("profile.privacyPolicy")
+                    Button { legal = .terms } label: { row("Terms of Use", symbol: "doc.text", value: nil) }
+                    if let support = BrandConfig.current.supportURL {
+                        Button { openURL(support) } label: { row("Help & support", symbol: "questionmark.circle", value: nil) }
+                    }
+                    LabeledContent("Version", value: Self.versionText)
+                    Text("\(BrandConfig.current.displayName) helps you track and understand growth. It doesn't diagnose. For health concerns, talk to a doctor.")
                         .font(DS.Typography.footnote)
                         .foregroundStyle(DS.Colors.textSecondary)
                 }
@@ -131,6 +139,7 @@ struct ProfileView: View {
             .sheet(item: $editingProfile) { profile in
                 EditProfileView(repository: repository, profile: profile, focus: nil)
             }
+            .sheet(item: $legal) { LegalDocumentView(document: $0) }
             .sheet(isPresented: $showsAssistant) { AssistantView(repository: repository).presentationDragIndicator(.visible) }
             .sheet(isPresented: $showsSwitcher) {
                 ProfileSwitcherSheet(repository: repository).presentationDetents([.medium, .large])
@@ -185,6 +194,13 @@ struct ProfileView: View {
         } footer: {
             if let restoreMessage { Text(restoreMessage).accessibilityIdentifier("profile.restoreMessage") }
         }
+    }
+
+    static var versionText: String {
+        let info = Bundle.main.infoDictionary
+        let version = info?["CFBundleShortVersionString"] as? String ?? "1.0"
+        let build = info?["CFBundleVersion"] as? String ?? "1"
+        return "\(version) (\(build))"
     }
 
     private func badge(for status: EntitlementState.Status) -> String? {

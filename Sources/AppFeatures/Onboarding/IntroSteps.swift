@@ -52,6 +52,7 @@ struct WelcomeStepView: View {
 struct PrivacyStepView: View {
     @Bindable var controller: OnboardingController
     let onCancel: (() -> Void)?
+    @State private var showsPolicy = false
 
     var body: some View {
         let copy = controller.copy
@@ -68,14 +69,10 @@ struct PrivacyStepView: View {
         ) {
             PrivacyNotice(items: copy.privacyPoints.map { ($0.symbol, $0.title, $0.detail) })
             InfoBanner(copy.medicalNote, title: "Not medical advice")
-            if let url = BrandConfig.current.privacyPolicyURL {
-                Link("Read the full privacy policy", destination: url)
-                    .font(DS.Typography.subheadline.weight(.semibold))
-            } else {
-                Text("The full privacy policy will be linked here before release.")
-                    .font(DS.Typography.footnote)
-                    .foregroundStyle(DS.Colors.textTertiary)
-            }
+            Button("Read the full privacy policy") { showsPolicy = true }
+                .font(DS.Typography.subheadline.weight(.semibold))
+                .tint(DS.Colors.accent)
+                .sheet(isPresented: $showsPolicy) { LegalDocumentView(document: .privacy) }
         }
     }
 }

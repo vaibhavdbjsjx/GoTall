@@ -10,11 +10,8 @@ struct PaywallView: View {
     @Environment(EntitlementStore.self) private var entitlements
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @Environment(\.openURL) private var openURL
     @State private var model: PaywallModel?
-    @State private var showsPrivacy = false
-
-    static let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
+    @State private var legal: LegalDocument?
 
     var body: some View {
         NavigationStack {
@@ -46,7 +43,7 @@ struct PaywallView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .sheet(isPresented: $showsPrivacy) { PrivacySummaryView() }
+            .sheet(item: $legal) { LegalDocumentView(document: $0) }
         }
         .task {
             if model == nil {
@@ -197,10 +194,10 @@ struct PaywallView: View {
                 .font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             AdaptiveStack(horizontalAlignment: .center, spacing: DS.Spacing.md) {
-                Button("Terms of Use") { openURL(Self.termsURL) }
-                Button("Privacy") {
-                    if let url = BrandConfig.current.privacyPolicyURL { openURL(url) } else { showsPrivacy = true }
-                }
+                Button("Terms of Use") { legal = .terms }
+                    .accessibilityIdentifier("paywall.terms.link")
+                Button("Privacy Policy") { legal = .privacy }
+                    .accessibilityIdentifier("paywall.privacy.link")
                 Spacer(minLength: 0).hiddenAtAccessibilitySizes()
                 RestorePurchaseButton(isLoading: model.purchase == .restoring) { Task { await model.restore() } }
                     .disabled(model.isBusy)
@@ -311,30 +308,4 @@ struct PremiumActiveView: View {
     }
 }
 
-/// Plain-language privacy summary, shown until the hosted privacy policy exists (BrandConfig.privacyPolicyURL).
-struct PrivacySummaryView: View {
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: DS.Spacing.md) {
-                    PrivacyNotice(items: [
-                        ("iphone", "Stored on this device", "Profiles, measurements and habits are saved on this iPhone with file protection."),
-                        ("creditcard", "Payments through Apple", "Apple processes subscriptions. We don't receive your payment details or send growth data anywhere to check a subscription."),
-                        ("doc.richtext", "Reports made on the device", "PDF reports are created on this iPhone. You decide whether to share them."),
-                        ("bell", "Reminders are local", "Notifications are scheduled on this iPhone. Nothing is sent to a server."),
-                        ("hand.raised", "No ads, no tracking", "No advertising SDKs and no cross-app tracking."),
-                        ("trash", "Export or delete anytime", "Profile › Privacy & data.")
-                    ])
-                }
-                .padding(DS.Spacing.page)
-            }
-            .dsPageBackground()
-            .navigationTitle("Privacy")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
-        }
-    }
-}
 #endif

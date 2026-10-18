@@ -2,8 +2,8 @@
 #   brew install xcodegen   # developer tool only; not an app dependency
 #   cd App && xcodegen generate && open GrowthApp.xcodeproj
 #
-# Branding: change APP_DISPLAY_NAME and PRODUCT_BUNDLE_IDENTIFIER here, and BrandConfig in
-# Sources/GrowthCore/Brand/BrandConfig.swift. The final name is not decided (docs/launch-strategy.md §3).
+# Brand: Linden. APP_DISPLAY_NAME must match BrandConfig.displayName (Sources/GrowthCore/Brand/BrandConfig.swift).
+# The bundle ID and product IDs must match what you register in App Store Connect (docs/release-checklist.md).
 name: GrowthApp
 options:
   bundleIdPrefix: app.linden.growth
@@ -24,6 +24,7 @@ targets:
     platform: iOS
     sources:
       - Sources
+      - path: Resources
     dependencies:
       - package: GrowthPackage
         product: GrowthCore
@@ -39,6 +40,9 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.healthcare-fitness
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         SWIFT_VERSION: "5.0"
         CODE_SIGN_STYLE: Automatic
 

@@ -19,8 +19,12 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.4.app || sudo xcode-select -s /Applications/Xcode.app
+      - name: Select Xcode (newest Xcode 26 for the iOS 26 SDK and Apple's on-device model)
+        run: |
+          XC=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          [ -z "$XC" ] && XC=$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -1)
+          sudo xcode-select -s "${XC:-/Applications/Xcode.app}"
+          xcodebuild -version
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate project
@@ -33,20 +37,34 @@ jobs:
             -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO
+      - name: Release build for device (unsigned, as submitted)
+        run: |
+          xcodebuild build \
+            -project App/GrowthApp.xcodeproj \
+            -scheme GrowthApp \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build-release \
+            CODE_SIGNING_ALLOWED=NO | grep -E "error:|\*\* BUILD"
+          test "${PIPESTATUS[0]}" -eq 0
       - name: Core tests on macOS (also renders the PDF report pages)
         run: REPORT_PNG_DIR="$PWD/report-pages" swift test
       - name: Capture simulator screenshots
         run: |
           chmod +x scripts/capture_screenshots.sh
           scripts/capture_screenshots.sh build/Build/Products/Debug-iphonesimulator/GrowthApp.app screenshots
+      - name: Compose App Store screenshots
+        run: |
+          python3 -m venv .venv && .venv/bin/pip install --quiet pillow
+          .venv/bin/python scripts/make_store_screenshots.py screenshots store-screenshots
       - name: Print downscaled screenshots to the log
         # Lets reviewers without artifact-storage access inspect the screenshots (base64 JPEG, ~600 px).
         run: |
           mkdir -p small
-          for f in screenshots/*.png report-pages/*.png; do
+          for f in screenshots/*.png report-pages/*.png store-screenshots/*.png; do
             [ -f "$f" ] || continue
-            # Phase 1–4 screens were reviewed earlier; printing only new screens keeps the log under the size limit.
-            echo "$(basename "$f")" | grep -Eq '^(light-(0[0-9]|1[014-8])|se-(0|15)|max-0|dark-(0|1[0-5])|ax-(0|1[0-3]))' && continue
+            # Only screens changed in this pass are printed, which keeps the log under the size limit.
+            echo "$(basename "$f")" | grep -Eq '^(light-(01|04|13|19|20|4[0-9])|dark-(01|19|4[0-9])|ax-(19|4[0-9])|se-(01|4[0-9])|appstore-|report-metric-p1)' || continue
             n=$(basename "$f" .png)
             sips -Z 600 -s format jpeg -s formatOptions 50 "$f" --out "small/$n.jpg" >/dev/null
             echo "IMG:$n:$(base64 -i "small/$n.jpg" | tr -d '\n')"
@@ -61,4 +79,5 @@ jobs:
           path: |
             screenshots
             report-pages
+            store-screenshots
           retention-days: 14
