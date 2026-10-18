@@ -150,7 +150,7 @@ if [ -n "$LARGE" ]; then
   # Raw captures for the App Store screenshots (composed by scripts/make_store_screenshots.py)
   shoot "$LARGE" store-raw-01 -demoScenario parent -storeMode premium
   shoot "$LARGE" store-raw-02 -demoScenario parent -storeMode premium -initialTab growth
-  shoot "$LARGE" store-raw-03 -demoScenario parent -storeMode premium -openAssistant YES -assistantAsk "How tall might Ava be as an adult?"
+  shoot "$LARGE" store-raw-03 -demoScenario parent -storeMode premium -openAssistant YES -assistantAsk "How tall might Ava be as an adult?|How can I support Ava's growth?"
   shoot "$LARGE" store-raw-04 -demoScenario parent -storeMode premium -initialTab profile -openReport YES
   shoot "$LARGE" store-raw-05 -demoScenario teen -storeMode premium -initialTab habits
   shoot "$LARGE" store-raw-06 -demoScenario teen -storeMode premium -initialTab growth -growthScrollTo advanced

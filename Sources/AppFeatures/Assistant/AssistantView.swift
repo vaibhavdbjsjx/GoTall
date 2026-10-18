@@ -86,11 +86,14 @@ struct AssistantView: View {
             .task {
                 guard !askedInitial else { return }
                 askedInitial = true
-                var question = initialQuestion
+                var questions = initialQuestion.map { [$0] } ?? []
                 #if DEBUG
-                if question == nil { question = UserDefaults.standard.string(forKey: "assistantAsk") }
+                // Screenshot harness: `-assistantAsk "First question|Second question"`.
+                if questions.isEmpty, let scripted = UserDefaults.standard.string(forKey: "assistantAsk") {
+                    questions = scripted.components(separatedBy: "|")
+                }
                 #endif
-                if let question { await ask(question, facts: facts) }
+                for question in questions { await ask(question, facts: facts) }
             }
         }
     }
