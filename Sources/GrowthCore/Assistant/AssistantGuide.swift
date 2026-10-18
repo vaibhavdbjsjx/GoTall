@@ -4,13 +4,14 @@ import Foundation
 /// Apple Intelligence, when the model is unavailable, and whenever a model answer fails the output guard.
 public enum AssistantGuide {
     public enum Intent: String, CaseIterable, Sendable {
-        case estimate, percentile, speed, taller, sleep, nutrition, exercise, measuring, stopGrowing, doctor, report, summary
+        case estimate, percentile, speed, taller, support, sleep, nutrition, exercise, measuring, stopGrowing, doctor, report, summary
     }
 
     static let keywords: [(Intent, [String])] = [
         (.estimate, ["how tall will", "how tall might", "how tall would", "adult height", "final height", "predict", "end up", "grown-up height", "estimate"]),
         (.stopGrowing, ["stop growing", "growth plate", "done growing", "finish growing", "still grow", "when will i stop", "until what age"]),
         (.taller, ["grow taller", "get taller", "be taller", "increase height", "increase my height", "boost", "stretch", "hang", "taller faster"]),
+        (.support, ["support", "help her grow", "help him grow", "help them grow", "help my child", "healthy growth", "what can i do", "what can we do"]),
         (.percentile, ["percentile", "normal", "average", "short for", "tall for", "compared", "behind", "on track"]),
         (.speed, ["growth spurt", "spurt", "speed", "velocity", "how fast", "how much did", "how much have", "stopped growing", "slowed"]),
         (.sleep, ["sleep", "bedtime", "nap", "rest"]),
@@ -47,6 +48,11 @@ public enum AssistantGuide {
             return f.speedUnavailable ?? "Growth speed isn't available yet."
         case .taller:
             return "Honestly: no food, stretch, pill or exercise adds height beyond what genes allow, and anything promising that isn't telling the truth. What does help growth reach its natural potential is enough sleep, regular balanced meals and being active. " + (f.weekText.map { "This week: \($0)" } ?? "")
+        case .support:
+            var text = "The things that help growth reach its natural potential are simple: enough sleep on a steady schedule, regular balanced meals, and being active most days. Measuring every few months, the same way each time, keeps the picture clear."
+            if let week = f.weekText { text += " This week: \(week)" }
+            if let habit = f.mostConsistentHabit { text += " Most consistent so far: \(habit.lowercased())." }
+            return text
         case .sleep:
             return "Sleep supports healthy growth and how you feel day to day. Common guidance is about 9 to 12 hours a night for ages 6 to 12 and 8 to 10 hours for teenagers. A steady bedtime and wake time, even on weekends, usually helps more than one big change."
         case .nutrition:

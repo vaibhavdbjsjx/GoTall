@@ -61,6 +61,11 @@ final class AssistantFactsAndGuideTests: XCTestCase {
         XCTAssertEqual(AssistantGuide.intent(for: "how often should we measure"), .measuring)
         XCTAssertEqual(AssistantGuide.intent(for: "should I see a doctor"), .doctor)
         XCTAssertEqual(AssistantGuide.intent(for: "hello"), .summary)
+        XCTAssertEqual(AssistantGuide.intent(for: "How can I support Maya's growth?"), .support)
+        // Every suggested question must have a specific answer, never the generic summary.
+        for suggestion in AssistantGuide.suggestions(for: AssistantFixtures.facts) {
+            XCTAssertNotEqual(AssistantGuide.intent(for: suggestion), .summary, suggestion)
+        }
     }
 
     func testGuideAnswersUseRealNumbersAndPassTheGuard() {
