@@ -26,6 +26,7 @@ public struct AssistantFacts: Sendable, Equatable {
     public var familyText: String?
     public var nextMeasurementText: String?
     public var weekText: String?
+    public var checkInDaysThisWeek: Int
     public var mostConsistentHabit: String?
     public var concernSignposts: [String]
     public var unit: HeightUnit
@@ -77,6 +78,7 @@ public struct AssistantFacts: Sendable, Equatable {
         }
         let engine = HabitEngine(today: now, calendar: calendar)
         let days = engine.checkInDaysThisWeek(in: profile)
+        checkInDaysThisWeek = days
         weekText = "\(days) of 7 days with a habit check-in this week."
         mostConsistentHabit = engine.mostConsistent(in: profile)?.kind.title
         concernSignposts = analysis.signposts.map(GrowthCopy.signpostText)

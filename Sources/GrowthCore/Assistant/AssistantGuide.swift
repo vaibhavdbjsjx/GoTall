@@ -47,10 +47,10 @@ public enum AssistantGuide {
             }
             return f.speedUnavailable ?? "Growth speed isn't available yet."
         case .taller:
-            return "Honestly: no food, stretch, pill or exercise adds height beyond what genes allow, and anything promising that isn't telling the truth. What does help growth reach its natural potential is enough sleep, regular balanced meals and being active. " + (f.weekText.map { "This week: \($0)" } ?? "")
+            return "Honestly: no food, stretch, pill or exercise adds height beyond what genes allow, and anything promising that isn't telling the truth. What does help growth reach its natural potential is enough sleep, regular balanced meals and being active. " + (f.checkInDaysThisWeek > 0 ? (f.weekText ?? "") : "")
         case .support:
             var text = "The things that help growth reach its natural potential are simple: enough sleep on a steady schedule, regular balanced meals, and being active most days. Measuring every few months, the same way each time, keeps the picture clear."
-            if let week = f.weekText { text += " This week: \(week)" }
+            if f.checkInDaysThisWeek > 0, let week = f.weekText { text += " \(week)" }
             if let habit = f.mostConsistentHabit { text += " Most consistent so far: \(habit.lowercased())." }
             return text
         case .sleep:
