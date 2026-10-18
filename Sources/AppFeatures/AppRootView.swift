@@ -9,7 +9,7 @@ public struct AppRootView: View {
     @State private var entitlements: EntitlementStore
     @State private var notifications: NotificationCoordinator
     @State private var navigator: AppNavigator
-    @State private var assistant = AssistantSession(model: OnDeviceAssistantModel(), usage: DefaultsAssistantUsageStore())
+    @State private var assistant = AssistantSession(model: OnDeviceAssistantModel(), usage: AppRootView.makeUsageStore())
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
@@ -23,6 +23,14 @@ public struct AppRootView: View {
         _notifications = State(initialValue: notifications)
         _navigator = State(initialValue: navigator)
         self.initialTab = initialTab
+    }
+
+    /// Free-question counts persist on the device; demo launches (screenshots, UI tests) count in memory only.
+    static func makeUsageStore() -> AssistantUsageStore {
+        #if DEBUG
+        if UserDefaults.standard.string(forKey: "demoScenario") != nil { return InMemoryAssistantUsageStore() }
+        #endif
+        return DefaultsAssistantUsageStore()
     }
 
     public var body: some View {
