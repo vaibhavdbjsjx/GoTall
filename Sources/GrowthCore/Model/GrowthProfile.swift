@@ -29,6 +29,8 @@ public struct GrowthProfile: Codable, Identifiable, Hashable, Sendable {
     public var habitLog: [HabitDay]
     /// Habits the person chose to track. `nil` = defaults chosen from goals.
     public var activeHabits: [HabitKind]?
+    /// Routines, posture checks, bedtime, meals and the puberty check. Never an input to growth numbers.
+    public var wellness: WellnessData
     public var createdAt: Date
     public var updatedAt: Date
 
@@ -49,6 +51,7 @@ public struct GrowthProfile: Codable, Identifiable, Hashable, Sendable {
         intent: UserIntent? = nil,
         habitLog: [HabitDay] = [],
         activeHabits: [HabitKind]? = nil,
+        wellness: WellnessData = .empty,
         createdAt: Date,
         updatedAt: Date
     ) {
@@ -69,6 +72,7 @@ public struct GrowthProfile: Codable, Identifiable, Hashable, Sendable {
         self.intent = intent
         self.habitLog = habitLog
         self.activeHabits = activeHabits
+        self.wellness = wellness
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -83,7 +87,7 @@ public struct GrowthProfile: Codable, Identifiable, Hashable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case schemaVersion, id, subject, nickname, birthDate, chartSex, unitPreference, measurements,
-             parentHeights, recentGrowthChange, sleep, activity, nutrition, goals, intent, habitLog, activeHabits, createdAt, updatedAt
+             parentHeights, recentGrowthChange, sleep, activity, nutrition, goals, intent, habitLog, activeHabits, wellness, createdAt, updatedAt
     }
 
     public init(from decoder: Decoder) throws {
@@ -105,6 +109,7 @@ public struct GrowthProfile: Codable, Identifiable, Hashable, Sendable {
         intent = try c.decodeIfPresent(UserIntent.self, forKey: .intent)
         habitLog = try c.decodeIfPresent([HabitDay].self, forKey: .habitLog) ?? []
         activeHabits = try c.decodeIfPresent([HabitKind].self, forKey: .activeHabits)
+        wellness = try c.decodeIfPresent(WellnessData.self, forKey: .wellness) ?? .empty
         createdAt = try c.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date(timeIntervalSince1970: 0)
         updatedAt = try c.decodeIfPresent(Date.self, forKey: .updatedAt) ?? createdAt
     }

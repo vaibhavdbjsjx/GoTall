@@ -142,6 +142,36 @@ public final class AppRepository {
         }
     }
 
+    // MARK: Wellness
+
+    /// Applies a change to one profile's wellness data (routines, posture, bedtime, meals, puberty, relatives).
+    public func updateWellness(for profileID: UUID, at date: Date, _ mutate: (inout WellnessData) -> Void) {
+        update { snapshot in
+            guard let index = snapshot.profiles.firstIndex(where: { $0.id == profileID }) else { return }
+            mutate(&snapshot.profiles[index].wellness)
+            snapshot.profiles[index].updatedAt = date
+        }
+    }
+
+    public func logRoutine(_ session: RoutineSession, for profileID: UUID) {
+        updateWellness(for: profileID, at: session.date) { wellness in
+            wellness.routineSessions.append(session)
+            // Bounded history: two years of sessions is plenty for progress views.
+            if wellness.routineSessions.count > 1500 { wellness.routineSessions.removeFirst(wellness.routineSessions.count - 1500) }
+        }
+    }
+
+    public func savePostureCheck(_ record: PostureCheckRecord, for profileID: UUID) {
+        updateWellness(for: profileID, at: record.date) { $0.postureChecks.append(record) }
+    }
+
+    public func toggleFoodGroup(_ group: FoodGroup, on date: Date, for profileID: UUID, calendar: Calendar) {
+        update { snapshot in
+            guard let index = snapshot.profiles.firstIndex(where: { $0.id == profileID }) else { return }
+            snapshot.profiles[index] = MealLog.toggling(group, on: date, in: snapshot.profiles[index], calendar: calendar)
+        }
+    }
+
     public func setNotificationPreferences(_ preferences: NotificationPreferences) {
         update { $0.notificationPreferences = preferences }
     }

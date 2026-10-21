@@ -10,6 +10,14 @@ public enum PremiumFeature: String, CaseIterable, Sendable {
     case advancedAnalytics
     /// Stature Coach beyond the free daily questions.
     case unlimitedAssistant
+    /// The full routine library and the personal daily plan (free users get the free routines).
+    case routines
+    /// Posture checks after the first one.
+    case postureCheck
+    /// Clothing and shoe planning from the growth curve.
+    case outgrowForecast
+    /// The full Learn library (a few articles are free).
+    case learnLibrary
 }
 
 /// The single answer the UI asks for. Views never inspect subscription details directly.
