@@ -37,6 +37,7 @@ shoot "$MAIN" light-00-welcome
 shoot "$MAIN" light-01-home-teen -demoScenario teen
 shoot "$MAIN" light-02-home-teen-today -demoScenario teen -homeScrollTo today
 shoot "$MAIN" light-03-habits-teen -demoScenario teen -initialTab habits
+shoot "$MAIN" light-03b-learn -demoScenario teen -initialTab learn
 shoot "$MAIN" light-04-growth-teen -demoScenario teen -initialTab growth
 shoot "$MAIN" light-05-growth-teen-numbers -demoScenario teen -initialTab growth -growthScrollTo velocity
 shoot "$MAIN" light-06-explanation -demoScenario teen -initialTab growth -openExplanation YES

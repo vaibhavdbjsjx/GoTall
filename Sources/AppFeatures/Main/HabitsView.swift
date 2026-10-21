@@ -3,7 +3,8 @@ import SwiftUI
 import GrowthCore
 import DesignSystem
 
-/// Calm daily check-ins for healthy development. Weekly consistency, forgiving rhythm, no failure states.
+/// The Plan tab: level, today's routine, tools and routines (`PlanHubSections`), then calm daily habit check-ins.
+/// Weekly consistency, forgiving rhythm, no failure states.
 struct HabitsView: View {
     let repository: AppRepository
     @State private var choosingHabits = false
@@ -19,7 +20,7 @@ struct HabitsView: View {
                 }
             }
             .dsPageBackground()
-            .navigationTitle("Habits")
+            .navigationTitle("Plan")
             .toolbar { ToolbarItem(placement: .topBarTrailing) { ProfileSwitcher(repository: repository) } }
             .sheet(isPresented: $choosingHabits) {
                 if let profile = repository.activeProfile {
@@ -42,11 +43,12 @@ struct HabitsView: View {
         let rhythm = engine.rhythm(in: profile)
         return ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.xl) {
+                PlanHubSections(repository: repository, profile: profile)
                 // TODAY
                 VStack(alignment: .leading, spacing: DS.Spacing.md) {
                     HStack(alignment: .firstTextBaseline) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Today").font(DS.Typography.title).foregroundStyle(DS.Colors.textPrimary).accessibilityAddTraits(.isHeader)
+                            Text("Daily habits").font(DS.Typography.title).foregroundStyle(DS.Colors.textPrimary).accessibilityAddTraits(.isHeader)
                             Text(engine.encouragement(in: profile)).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
                                 .contentTransition(.opacity)
                         }

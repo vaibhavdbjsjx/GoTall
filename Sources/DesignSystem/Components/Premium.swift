@@ -217,7 +217,7 @@ public struct PriceOption: View {
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 3) {
                     AdaptiveStack(horizontalAlignment: .firstTextBaseline, spacing: DS.Spacing.xs) {
-                        Text(plan.period == .year ? "Yearly" : "Monthly")
+                        Text(plan.planTitle)
                             .font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
                         if let tag { Badge(tag, tone: .accent) }
                     }

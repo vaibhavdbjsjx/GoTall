@@ -157,10 +157,12 @@ struct SurfaceElevation: ViewModifier {
 }
 
 /// The page backdrop: midnight with a faint champagne glow at the top in dark mode, plain ivory in light mode.
-struct PageBackdrop: View {
+public struct PageBackdrop: View {
     @Environment(\.colorScheme) private var colorScheme
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         ZStack(alignment: .top) {
             DS.Colors.background
             if colorScheme == .dark {

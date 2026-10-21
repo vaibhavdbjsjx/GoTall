@@ -5,7 +5,7 @@ import GrowthCore
 
 /// Why the paywall was opened. Changes only the first line, so the person knows what they tapped.
 public enum PaywallContext: String, Identifiable, Sendable {
-    case general, report, analysis, family
+    case general, report, analysis, family, onboarding, routines, posture, outgrow, learn
     public var id: String { rawValue }
 
     var intro: String? {
@@ -14,6 +14,11 @@ public enum PaywallContext: String, Identifiable, Sendable {
         case .report: return "The doctor-ready report is part of Stature Pro."
         case .analysis: return "Advanced growth analysis is part of Stature Pro."
         case .family: return "Adding another profile is part of Stature Pro. Profiles you already have always stay free to use."
+        case .onboarding: return nil
+        case .routines: return "The full routine library and your personal daily plan are part of Stature Pro."
+        case .posture: return "Your first posture check is free. Weekly checks and progress tracking are part of Stature Pro."
+        case .outgrow: return "The Outgrow Forecast is part of Stature Pro."
+        case .learn: return "The full Learn library is part of Stature Pro."
         }
     }
 }

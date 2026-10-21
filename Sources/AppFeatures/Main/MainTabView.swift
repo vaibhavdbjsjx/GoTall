@@ -6,7 +6,7 @@ import DesignSystem
 /// Four destinations. Future features slot in without new tabs:
 /// coach → a Home entry + sheet; reports → Growth; nutrition/exercise → Habits; subscription & widgets → Profile.
 public enum AppTab: String, Hashable {
-    case home, growth, habits, profile
+    case home, growth, habits, learn, profile
 }
 
 struct MainTabView: View {
@@ -34,8 +34,11 @@ struct MainTabView: View {
                 .tabItem { Label("Growth", systemImage: "chart.xyaxis.line") }
                 .tag(AppTab.growth)
             HabitsView(repository: repository)
-                .tabItem { Label("Habits", systemImage: "checklist") }
+                .tabItem { Label("Plan", systemImage: "figure.mind.and.body") }
                 .tag(AppTab.habits)
+            LearnView()
+                .tabItem { Label("Learn", systemImage: "book") }
+                .tag(AppTab.learn)
             ProfileView(repository: repository)
                 .tabItem { Label("Profile", systemImage: "person.crop.circle") }
                 .tag(AppTab.profile)

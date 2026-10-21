@@ -25,6 +25,14 @@ public struct AppRootView: View {
         self.initialTab = initialTab
     }
 
+    static var isDemoLaunch: Bool {
+        #if DEBUG
+        return UserDefaults.standard.string(forKey: "demoScenario") != nil
+        #else
+        return false
+        #endif
+    }
+
     /// Free-question counts persist on the device; demo launches (screenshots, UI tests) count in memory only.
     static func makeUsageStore() -> AssistantUsageStore {
         #if DEBUG
@@ -56,6 +64,12 @@ public struct AppRootView: View {
         .environment(navigator)
         .environment(assistant)
         .onChange(of: repository.activeProfile?.id) { _, _ in assistant.clear() }
+        // After first-run setup, offer Stature Pro once, after the summary has had a moment. Closing it is one tap
+        // and everything set up so far stays free.
+        .onChange(of: repository.profiles.isEmpty) { wasEmpty, isEmpty in
+            guard wasEmpty, !isEmpty, !entitlements.isPremium, !AppRootView.isDemoLaunch else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { navigator.showPaywall(.onboarding) }
+        }
         // Entitlements are recomputed from verified transactions at launch and whenever the app returns to the
         // foreground (e.g. after changing the subscription in Settings). Reminders are re-planned from the data.
         .task {

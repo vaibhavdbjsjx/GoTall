@@ -55,6 +55,9 @@ private struct HomeContent: View {
                     .appearEffect(delay: 0.05)
                 TrajectoryPreview(analysis: analysis, unit: profile.unitPreference, onTap: { onAction(.growth) })
                     .appearEffect(delay: 0.06)
+                TodayPlanCard(repository: repository, profile: profile, analysis: analysis, onOpenPlan: { onAction(.habits) })
+                    .id("plan")
+                    .appearEffect(delay: 0.07)
                 TodayCard(repository: repository, profile: profile, analysis: analysis, onOpenHabits: { onAction(.habits) })
                     .id("today")
                 InsightCardView(insight: state.insight)
@@ -288,7 +291,7 @@ private struct TodayCard: View {
         let engine = HabitEngine(today: Date(), calendar: .current)
         let habits = HabitEngine.activeHabits(for: profile)
         VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-            SectionHeader("Today", actionTitle: "Habits", action: onOpenHabits)
+            SectionHeader("Today", actionTitle: "Plan", action: onOpenHabits)
             AppCard(padding: 0) {
                 VStack(spacing: 0) {
                     VStack(alignment: .leading, spacing: DS.Spacing.sm) {

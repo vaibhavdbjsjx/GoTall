@@ -3,7 +3,7 @@ import SwiftUI
 import GrowthCore
 import DesignSystem
 
-/// The Premium page. Answers "why pay?" before "how much?", shows every price and billing term in full,
+/// The Stature Pro page. Answers "why pay?" before "how much?", shows every price and billing term in full,
 /// keeps the close button visible at all times, and never uses urgency, timers or pre-selected trials.
 struct PaywallView: View {
     let context: PaywallContext
@@ -63,8 +63,8 @@ struct PaywallView: View {
         ScrollViewReader { proxy in
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.xl) {
-                PaywallHero(title: "Go deeper with your growth profile.",
-                            subtitle: "Your growth result, chart, estimate and history stay free. Stature Pro adds tools for following growth over the years and sharing it with a doctor.")
+                PaywallHero(title: context == .onboarding ? "Your profile is ready. Want the full plan?" : "Stand taller, sleep better, track growth properly.",
+                            subtitle: "Your growth result, chart, estimate and history stay free. Stature Pro adds the full routine library, weekly posture checks, the Outgrow Forecast and tools for sharing growth with a doctor.")
                     .padding(.top, DS.Spacing.xs)
                 if let intro = context.intro {
                     InfoBanner(intro, tone: .info)
@@ -103,12 +103,20 @@ struct PaywallView: View {
         VStack(alignment: .leading, spacing: DS.Spacing.sm) {
             Text("What Stature Pro adds").font(DS.Typography.title).foregroundStyle(DS.Colors.textPrimary)
                 .accessibilityAddTraits(.isHeader)
+            BenefitCard(symbol: "figure.mind.and.body", title: "Every guided routine",
+                        detail: "\(RoutineLibrary.all.count) routines and \(RoutineLibrary.moveCount) moves for posture, mobility and core, with a daily plan that adapts to your posture checks.")
+            BenefitCard(symbol: "figure.stand", title: "Weekly posture checks",
+                        detail: "A 30-second camera check of head, shoulder and hip alignment, with your score tracked week to week. Analysed on this iPhone; no image is kept.")
+            BenefitCard(symbol: "tshirt", title: "Outgrow Forecast",
+                        detail: "For children: expected height and clothing size over the next 3, 6 and 12 months, from their own growth curve.")
             BenefitCard(symbol: "doc.richtext", title: "Doctor-ready growth report",
                         detail: "A clear PDF with the growth chart, every measurement, percentile history, methods and limitations. Made on your phone, ready for a check-up.")
             BenefitCard(symbol: "chart.line.uptrend.xyaxis", title: "Advanced growth analysis",
                         detail: "Percentile history over time, growth speed between measurements, and how the estimate has changed as you added data.")
             BenefitCard(symbol: "person.2", title: "Family profiles",
                         detail: "Follow more than one child in one place. Profiles you already have always stay yours to use.")
+            BenefitCard(symbol: "book", title: "The full Learn library",
+                        detail: "Every article on growth, sleep, food and posture, each linked to its public-health source.")
             BenefitCard(symbol: "sparkles", title: "Unlimited \(BrandConfig.current.assistantName)",
                         detail: "Ask as many questions about growth as you like (3 a day are free). Answered privately on this iPhone: conversational on iPhones with Apple Intelligence, Stature's built-in guide on others.")
         }
@@ -119,7 +127,7 @@ struct PaywallView: View {
             Text("Always free").font(DS.Typography.headline).foregroundStyle(DS.Colors.textPrimary)
                 .accessibilityAddTraits(.isHeader)
             ForEach(["Height, percentile and growth chart", "Adult-height estimate and its explanation", "Unlimited measurement history",
-                     "Habits, reminders, export and delete"], id: \.self) { item in
+                     "Daily habits, bedtime planner and food variety", "Starter routines and your first posture check", "Reminders, export and delete"], id: \.self) { item in
                 Label {
                     Text(item).font(DS.Typography.subheadline).foregroundStyle(DS.Colors.textSecondary)
                 } icon: {
@@ -153,7 +161,7 @@ struct PaywallView: View {
             case .loaded(let plans):
                 ForEach(plans) { plan in
                     PriceOption(plan: plan, detail: detail(for: plan, monthly: model.monthlyPlan),
-                                tag: plan.savingPercent(comparedTo: model.monthlyPlan).map { "Save \($0)%" },
+                                tag: plan.savingPercent(comparedTo: model.monthlyPlan).map { "Save \($0)%" } ?? (plan.isLifetime ? "Best value" : nil),
                                 isSelected: plan.id == model.selectedPlan?.id) {
                         withAnimation(Motion.quick) { model.selectedPlanID = plan.id }
                         model.clearMessage()
@@ -167,10 +175,15 @@ struct PaywallView: View {
     private func detail(for plan: SubscriptionPlan, monthly: SubscriptionPlan?) -> String {
         var parts: [String] = []
         if let intro = plan.introductoryOffer { parts.append(intro) }
-        if let equivalent = plan.monthlyEquivalent() {
-            parts.append("Works out at \(equivalent) a month, billed once a year.")
-        } else {
+        switch plan.period {
+        case .year:
+            if let equivalent = plan.monthlyEquivalent() { parts.append("Works out at \(equivalent) a month, billed once a year.") }
+        case .month:
             parts.append("Billed every month. Cancel anytime.")
+        case .week:
+            if let year = plan.yearlyCost() { parts.append("Billed every week (\(year) over a year). Cancel anytime.") }
+        case .lifetime:
+            parts.append("Pay once, keep Stature Pro for good. Nothing renews.")
         }
         return parts.joined(separator: " ")
     }
@@ -251,9 +264,18 @@ struct PaywallView: View {
 
     private func purchaseTitle(_ model: PaywallModel) -> String {
         if case .purchasing = model.purchase { return "Confirming with the App Store" }
-        guard let plan = model.selectedPlan else { return model.plans == .loading ? "Loading prices" : "Subscribe" }
-        if case .failed = model.purchase { return "Try again · \(plan.displayPrice)/\(plan.periodNoun)" }
-        return "Subscribe · \(plan.displayPrice)/\(plan.periodNoun)"
+        guard let plan = model.selectedPlan else { return model.plans == .loading ? "Loading prices" : "Continue" }
+        let action: String
+        if case .failed = model.purchase {
+            action = "Try again"
+        } else if plan.isLifetime {
+            action = "Buy once"
+        } else if plan.introductoryOffer != nil {
+            action = "Start free trial"
+        } else {
+            action = "Subscribe"
+        }
+        return "\(action) · \(plan.shortPrice)"
     }
 
     private func statusColor(_ state: PaywallModel.PurchaseState) -> Color {
@@ -293,6 +315,7 @@ struct PremiumActiveView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             VStack(alignment: .leading, spacing: DS.Spacing.sm) {
+                PremiumFeatureRow(symbol: "figure.mind.and.body", title: "Every routine and the posture check", detail: "On the Plan tab.")
                 PremiumFeatureRow(symbol: "doc.richtext", title: "Doctor-ready report", detail: "Profile › Reports, or from Growth.")
                 PremiumFeatureRow(symbol: "chart.line.uptrend.xyaxis", title: "Advanced growth analysis", detail: "On the Growth tab.")
                 PremiumFeatureRow(symbol: "person.2", title: "Family profiles", detail: "Add a child from the profile switcher.")

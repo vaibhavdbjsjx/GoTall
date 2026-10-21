@@ -55,7 +55,7 @@ public struct DashboardState: Equatable, Sendable {
             switch self {
             case .measure: return "Add measurement"
             case .viewGrowth: return "View growth"
-            case .habits: return "Habits"
+            case .habits: return "Your plan"
             }
         }
         public var symbol: String {
