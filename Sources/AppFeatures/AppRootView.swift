@@ -9,6 +9,7 @@ public struct AppRootView: View {
     @State private var entitlements: EntitlementStore
     @State private var notifications: NotificationCoordinator
     @State private var navigator: AppNavigator
+    @State private var account: AccountStore
     @State private var assistant = AssistantSession(model: OnDeviceAssistantModel(), usage: AppRootView.makeUsageStore())
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
@@ -17,11 +18,12 @@ public struct AppRootView: View {
     private let initialTab: AppTab
 
     public init(repository: AppRepository, entitlements: EntitlementStore, notifications: NotificationCoordinator,
-                navigator: AppNavigator, initialTab: AppTab = .home) {
+                navigator: AppNavigator, account: AccountStore? = nil, initialTab: AppTab = .home) {
         _repository = State(initialValue: repository)
         _entitlements = State(initialValue: entitlements)
         _notifications = State(initialValue: notifications)
         _navigator = State(initialValue: navigator)
+        _account = State(initialValue: account ?? AccountStore(backend: nil, storage: InMemorySessionStorage(), defaults: nil))
         self.initialTab = initialTab
     }
 
@@ -62,6 +64,7 @@ public struct AppRootView: View {
         .environment(entitlements)
         .environment(notifications)
         .environment(navigator)
+        .environment(account)
         .environment(assistant)
         .onChange(of: repository.activeProfile?.id) { _, _ in assistant.clear() }
         // After first-run setup, offer Stature Pro once, after the summary has had a moment. Closing it is one tap
@@ -85,6 +88,7 @@ public struct AppRootView: View {
         }
         .onChange(of: repository.snapshot) { _, snapshot in
             Task { await notifications.sync(snapshot) }
+            account.snapshotDidChange(snapshot)
         }
         .tint(DS.Colors.accent)
         .preferredColorScheme(AppAppearance(rawValue: appearance)?.colorScheme)

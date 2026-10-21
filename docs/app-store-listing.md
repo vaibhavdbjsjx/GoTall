@@ -1,128 +1,135 @@
-# App Store listing: Linden (v1.0.0)
+# App Store listing: Stature (v1.0.0)
 
-Ready-to-paste metadata for App Store Connect. The character limits are Apple's. Name availability and trademark clearance haven't been checked yet (see `release-checklist.md`).
+Ready-to-paste metadata for App Store Connect. The character limits are Apple's. Check the name in App Store Connect before you rely on it (see `release-checklist.md`).
 
 ## Identity
 
 | Field | Value | Notes |
 |---|---|---|
-| App name (30) | **Linden: Growth & Height Chart** | 29 characters |
-| Subtitle (30) | **Kids growth tracker & report** | 28 characters |
-| Bundle ID | `app.linden.growth` | Must match App Store Connect |
-| SKU | `linden-ios-001` | Any unique string |
+| App name (30) | **Stature: Height & Posture** | 25 characters |
+| Subtitle (30) | **Growth chart, routines, kids** | 29 characters |
+| Bundle ID | `app.stature.height` | Must match App Store Connect |
+| SKU | `stature-ios-001` | Any unique string |
 | Primary category | Health & Fitness | |
-| Secondary category | Medical | Optional. Expect closer review of health claims; the app makes none. |
-| Price | Free with in-app subscriptions | |
+| Secondary category | Lifestyle | Avoid Medical: it brings closer review and the app makes no medical claims. |
+| Price | Free with in-app purchases | |
 
-## Keywords (100, comma-separated, no spaces)
+## Keywords (100, comma-separated, no spaces after commas)
 
 ```
-height,percentile,growth chart,kids,child,teen,CDC,pediatric,tracker,measure,puberty,report,parents
+height,predictor,growth chart,percentile,posture,stretch,kids,teen,tracker,puberty,sleep,CDC,taller
 ```
-(99 characters.) Don't add competitor names.
+(99 characters.) Don't add competitor names. "taller" is a search term people use; the app's copy never promises height gain.
 
 ## Promotional text (170, editable any time)
 
-> Track height on real CDC growth charts, see an honest adult-height estimate with its reasoning, and ask Linden questions answered privately on your iPhone.
+> Real CDC growth charts, an honest adult-height estimate, guided posture routines and a 30-second camera posture check. Private on your iPhone.
 
 ## Description (4000)
 
-> Linden helps parents, teens and adults understand growth: honestly, beautifully and privately.
+> Stature helps teens, parents and adults understand growth honestly and build the habits that help you stand tall.
 >
 > REAL GROWTH CHARTS
-> • Height percentiles from the CDC 2000 growth charts, explained in plain words ("of 100 people the same age and sex, about 42 are shorter")
+> • Height percentiles from the CDC 2000 growth charts, explained in plain words
 > • A clear chart with your measurements over the percentile curves
-> • Growth speed from measurements at least 6 months apart, the way clinicians read it
+> • Growth speed from measurements months apart, the way clinicians read it
 >
 > AN HONEST ADULT-HEIGHT ESTIMATE
 > • See where height would land if growth stays in its current percentile channel, with the reasoning behind it
-> • A range that's never presented as a guarantee, with puberty and measuring differences explained
-> • Family-height context from both parents' heights, shown alongside the estimate and never mixed into it
+> • A range, never a guarantee, with puberty timing and measuring differences explained
+> • Family-height context from both parents' heights
 >
-> ASK LINDEN
-> • Ask questions about your growth: the estimate, percentiles, growth speed, sleep, food, activity or measuring
-> • Answers use your saved measurements and are made on your iPhone. Nothing is sent anywhere.
-> • Conversational answers on iPhones with Apple Intelligence; Linden's built-in guide on other iPhones
+> YOUR DAILY PLAN
+> • A short plan every day: one routine, your habits, food variety and bedtime
+> • Levels, points and a forgiving streak that never shames a missed day
+>
+> GUIDED ROUTINES
+> • Posture, mobility, core, morning, evening and desk-break routines with a timer, cues and haptics
+> • Built to help you stand at your full height and feel good. No exercise changes bone length, and Stature never pretends it does.
+>
+> 30-SECOND POSTURE CHECK
+> • Stand in front of your iPhone and get a score for head, shoulder and hip alignment, front or side
+> • Analysed on your iPhone. No photo or video is saved or sent.
+> • Routines picked for what the check found
+>
+> SLEEP, FOOD AND PUBERTY
+> • Bedtime planner that works back from wake-up time, with the sleep range for your age and a wind-down reminder
+> • Food-variety check-ins across six food groups
+> • A private puberty-stage check that explains what it means for growth
+>
+> FOR PARENTS
+> • Track several children in one place
+> • Outgrow Forecast: expected height and clothing size over the next 3, 6 and 12 months
+> • Doctor visit kit: questions to ask and a doctor-ready PDF report
+>
+> STATURE COACH
+> • Ask questions about growth, sleep, food, posture or measuring; answered on your iPhone using your own data
 > • Careful by design: no invented numbers, no medical claims, no "grow taller" tricks
 >
-> CALM DAILY HABITS
-> • Gentle check-ins for sleep, activity, meals and water
-> • A forgiving rhythm that never shames a missed day
-> • Habits support healthy growth; they never change any height number
+> PRIVATE BY DESIGN
+> • No ads, no tracking. Your data stays on your iPhone.
+> • Optional account (Sign in with Apple or email) to back up and restore on a new iPhone. Delete it any time.
 >
-> DOCTOR-READY REPORT (PREMIUM)
-> • A clean PDF with the growth chart, every measurement, percentile history, growth speed, methods and limitations
-> • Made on your iPhone, ready to share or print at the next check-up
+> STATURE PRO
+> All routines, weekly posture checks, the Outgrow Forecast, doctor-ready reports, advanced growth analysis, family profiles, the full Learn library and unlimited Stature Coach. Your growth result, chart, estimate, history, habits and starter routines are always free.
+> Choose weekly, monthly or yearly (with a 3-day free trial), or a one-time lifetime purchase. Payment is charged to your Apple Account. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple Account › Subscriptions.
 >
-> FAMILY & PRIVACY
-> • Track several children in one place (Premium adds profiles; the profiles you already have are always yours)
-> • No accounts, no ads, no tracking. Your data stays on your device.
-> • Export or delete everything at any time
+> Stature provides information, not medical advice, and does not diagnose any condition. Talk to a doctor about any health concern.
 >
-> LINDEN PREMIUM
-> Doctor-ready reports, advanced growth analysis, family profiles and unlimited Ask Linden. Your growth result, chart, estimate and history are always free.
-> Payment is charged to your Apple Account. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple Account › Subscriptions.
->
-> Linden provides information, not medical advice, and does not diagnose any condition. Talk to a doctor about any health concern.
->
-> Privacy Policy: https://vaibhavdbjsjx.github.io/linden/privacy.html
-> Terms of Use: https://vaibhavdbjsjx.github.io/linden/terms.html
+> Privacy Policy: https://stature.netlify.app/privacy
+> Terms of Use: https://stature.netlify.app/terms
 
 ## What's New (v1.0.0)
 
-> Welcome to Linden. Real growth charts, an honest estimate, Ask Linden and a doctor-ready report, all private on your iPhone.
+> Welcome to Stature. Real growth charts, an honest estimate, a daily plan, guided routines and a private posture check.
 
 ## URLs
 
 | Field | URL |
 |---|---|
-| Privacy Policy URL | https://vaibhavdbjsjx.github.io/linden/privacy.html |
-| Support URL | https://vaibhavdbjsjx.github.io/linden/support.html |
-| Marketing URL (optional) | https://vaibhavdbjsjx.github.io/linden/ |
+| Privacy Policy URL | https://stature.netlify.app/privacy |
+| Support URL | https://stature.netlify.app/support |
+| Marketing URL | https://stature.netlify.app/ |
 
-These work once `site/` is published (see `release-checklist.md` step 3). If you host elsewhere, update `BrandConfig` and this table.
+The marketing site lives in the project's `website/stature-site` folder and deploys to Netlify. `site/` in this repo holds the same legal text generated from the app (`scripts/build_site.py`); copy `site/privacy.html` and `site/terms.html` into the Netlify site whenever the policy changes, or the in-app and web text will differ.
 
 ## App Privacy ("nutrition label")
 
-- **Data collection:** select "No, we do not collect data from this app". It's true: there's no server, analytics or third-party SDK, and StoreKit purchases are processed by Apple.
-- **Tracking:** No.
-- The privacy manifest (`App/Resources/PrivacyInfo.xcprivacy`) declares no tracking and no collected data, plus UserDefaults use with reason CA92.1.
+If you ship with accounts turned on (`STATURE_BACKEND_URL` set):
+- **Data collected:** Contact Info › Email Address; Health & Fitness › Health (height measurements in the backup).
+- For both: **Linked to the user: Yes. Used for tracking: No. Purpose: App Functionality** only.
+- **Camera:** not collected (frames are processed on device and discarded).
+If you ship without accounts, select "Data Not Collected" and remove the two entries from `App/Resources/PrivacyInfo.xcprivacy`.
 
 ## Age rating questionnaire (guidance)
 
-Answer honestly in App Store Connect:
 - No violence, mature themes, gambling, user-generated content, web browsing or messaging.
-- "Medical or treatment information": the app shows growth-chart information and general wellness guidance, with no treatment advice. Most developers answer "Infrequent/Mild"; Apple then assigns the rating.
-- Not in the Kids category. The Kids category requires parental gates on purchases and links, and the app is for parents and teens.
+- "Medical or treatment information": general growth-chart and wellness information, no treatment advice. Answer "Infrequent/Mild".
+- Not in the Kids category (it requires parental gates; the app is for parents, teens and adults).
 
-## Subscriptions (App Store Connect › Subscriptions)
+## In-app purchases (App Store Connect)
 
-| Reference name | Product ID | Duration | Family Sharing | Price |
-|---|---|---|---|---|
-| Premium Yearly | `app.linden.growth.premium.yearly` | 1 year | On | Your decision. $39.99 is a test value only. |
-| Premium Monthly | `app.linden.growth.premium.monthly` | 1 month | On | Your decision. $5.99 is a test value only. |
+Prices are set a little under the original GoTall's. The app always shows the live App Store price.
 
-- **Group:** "Linden Premium". Both plans are at the same level.
-- **Display name / description for each:** "Linden Premium". "Doctor-ready reports, advanced analysis, family profiles and unlimited Ask Linden."
-- **Review screenshot:** use `appstore-06.png` or a paywall capture.
+| Reference name | Product ID | Type | Duration | Price (USD) | Notes |
+|---|---|---|---|---|---|
+| Stature Pro Yearly | `app.stature.height.pro.yearly` | Auto-renewable | 1 year | $34.99 | Introductory offer: 3-day free trial |
+| Stature Pro Monthly | `app.stature.height.pro.monthly` | Auto-renewable | 1 month | $9.99 | |
+| Stature Pro Weekly | `app.stature.height.pro.weekly` | Auto-renewable | 1 week | $4.99 | |
+| Stature Pro Lifetime | `app.stature.height.pro.lifetime` | Non-consumable | — | $49.99 | Family Sharing on |
+
+- **Subscription group:** "Stature Pro". All three plans at the same level. Family Sharing on.
+- **Display name:** "Stature Pro". **Description:** "All routines, posture checks, forecasts and reports."
+- **Review screenshot:** a capture of the paywall (CI screenshot `light-26-paywall` or similar).
 
 ## App Review notes (paste into "Notes")
 
-> Linden needs no account or login. All data is stored on the device.
-> To see Premium: open the Profile tab › Explore Premium, or tap "Generate report" in Profile › Doctor-ready report. Restore purchases is on the paywall and in Profile.
-> Ask Linden (Home › Ask Linden) uses Apple's on-device Foundation Models framework on devices with Apple Intelligence. On other devices it answers with a built-in, deterministic guide. No data leaves the device. Questions about self-harm, eating disorders, emergencies or growth hormone/steroids/surgery get fixed safety answers (988, 911, see a pediatrician).
-> The app gives growth-chart information (CDC 2000 references) and says it is not medical advice. The adult-height estimate is labelled as an estimate, never a guarantee.
-> Reminders are local notifications, requested only when the user turns one on.
+> No login is needed. Accounts are optional and only used to back up data (Profile › Account). Sign in with Apple and email/password are offered; account deletion is in Profile › Account › Delete account and also revokes the Sign in with Apple token.
+> To see Stature Pro: Profile › Explore Stature Pro, or tap a locked routine on the Plan tab. Restore purchases is on the paywall and in Profile.
+> The posture check (Plan › Posture check) uses the front camera with Apple's Vision framework on device. Nothing is recorded or uploaded.
+> Stature Coach uses Apple's on-device Foundation Models framework where available and a built-in deterministic guide elsewhere. No data leaves the device. Safety topics get fixed answers.
+> Routines are posture and mobility exercises. The app states clearly that they don't change bone length. The adult-height estimate is labelled as an estimate, never a guarantee.
 
 ## Screenshots
 
-CI composes six 1320 × 2868 screenshots (6.9-inch display) into the `store-screenshots` folder of the CI artifact. Upload them in order:
-
-1. Growth, beautifully understood (Home)
-2. See the whole growth story (Growth chart)
-3. Ask Linden anything (assistant)
-4. A doctor-ready report (report preview)
-5. Small habits. No guilt. (Habits)
-6. Go deeper with Premium (advanced analysis)
-
-App Store Connect scales the 6.9-inch set for smaller iPhones.
+CI composes 1320 × 2868 screenshots (6.9-inch) into `store-screenshots` in the CI artifact. Suggested order: Home with today's plan, growth chart, Plan tab with routines, posture check result, Outgrow Forecast, paywall.

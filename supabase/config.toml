@@ -1,0 +1,5 @@
+# Minimal Supabase CLI config for Stature's optional accounts. See docs/backend-setup.md.
+project_id = "stature"
+
+[functions.delete-account]
+verify_jwt = true

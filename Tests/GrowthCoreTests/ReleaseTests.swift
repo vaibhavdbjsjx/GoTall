@@ -18,11 +18,13 @@ final class ReleaseTests: XCTestCase {
 
     func testLegalTextIsHonestAndComplete() {
         let privacy = LegalDocument.privacy.plainText
-        for required in ["don't collect", "no ads", "Apple", "Delete all data", "under 13", "on your device"] {
+        for required in ["don't collect", "no ads", "Apple", "Delete all data", "under 13", "on your device", "optional",
+                         "Delete account", "Supabase", "No photo or video is saved", "never sell"] {
             XCTAssertTrue(privacy.contains(required), required)
         }
         let terms = LegalDocument.terms.plainText
-        for required in ["not medical advice", "24 hours", "cancel", "stdeula", "not guarantees"] {
+        for required in ["not medical advice", "24 hours", "cancel", "stdeula", "not guarantees", "lifetime", "free trial",
+                         "don't change bone length"] {
             XCTAssertTrue(terms.lowercased().contains(required.lowercased()), required)
         }
         XCTAssertEqual(CopyGuard.violations(in: privacy + terms), [])
@@ -47,5 +49,9 @@ final class ReleaseTests: XCTestCase {
         XCTAssertTrue(manifest.contains("<key>NSPrivacyTracking</key>\n\t<false/>"))
         XCTAssertTrue(manifest.contains("NSPrivacyAccessedAPICategoryUserDefaults"))
         XCTAssertTrue(manifest.contains("CA92.1"))
+        // Optional accounts: email and the growth backup are declared, linked to the person, for app functionality only.
+        XCTAssertTrue(manifest.contains("NSPrivacyCollectedDataTypeEmailAddress"))
+        XCTAssertTrue(manifest.contains("NSPrivacyCollectedDataTypeHealth"))
+        XCTAssertFalse(manifest.contains("NSPrivacyCollectedDataTypePurposeThirdPartyAdvertising"))
     }
 }

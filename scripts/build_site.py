@@ -8,7 +8,7 @@ import html, pathlib, re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SWIFT = (ROOT / "Sources/GrowthCore/Brand/LegalDocuments.swift").read_text()
-NAME, ASSISTANT = "Linden", "Ask Linden"
+NAME, ASSISTANT = "Stature", "Stature Coach"
 
 def subst(text):
     text = text.replace("\\(name)", NAME).replace("\\(BrandConfig.current.assistantName)", ASSISTANT)
@@ -25,10 +25,10 @@ def document(var):
     return title, date, sections
 
 STYLE = """
-:root{--bg:#F6F5F1;--surface:#fff;--text:#15191B;--muted:#565F63;--accent:#09705F;--soft:#DCEFEA;--line:#E2DFD8}
-@media (prefers-color-scheme: dark){:root{--bg:#0D1012;--surface:#161A1D;--text:#F1F3F2;--muted:#A7B0B4;--accent:#45C7AC;--soft:#12332D;--line:#2A3034}}
+:root{--bg:#F7F4EE;--surface:#fff;--text:#14161C;--muted:#5A5F6B;--accent:#8A6418;--soft:#F3E8CF;--line:#E4DDCF}
+@media (prefers-color-scheme: dark){:root{--bg:#0B0F1A;--surface:#151B2A;--text:#F4F1EA;--muted:#A3ABBD;--accent:#E8C77A;--soft:#2A2618;--line:#283045}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:17px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif}
-main{max-width:720px;margin:0 auto;padding:40px 20px 64px}a{color:var(--accent)}
+main{max-width:720px;margin:0 auto;padding:40px 16px 64px}a{color:var(--accent)}h1,h2{font-family:"New York",ui-serif,Georgia,serif}
 .brand{display:flex;align-items:center;gap:12px;font-weight:700;color:var(--accent);letter-spacing:.08em;text-transform:uppercase;font-size:13px}
 .brand img{width:36px;height:36px;border-radius:9px}h1{font-size:34px;line-height:1.15;margin:18px 0 6px}
 .date{color:var(--muted);margin:0 0 28px}h2{font-size:19px;margin:28px 0 6px}p{color:var(--muted);margin:0 0 12px}
@@ -57,21 +57,23 @@ def legal(var, filename):
 legal("privacy", "privacy.html")
 legal("terms", "terms.html")
 (ROOT / "site/support.html").write_text(page("Support", """
-<h1>Help &amp; support</h1><p class="date">We usually reply within a few days.</p>
-<div class="card"><h2>Contact</h2><p>Email: <strong>SUPPORT_EMAIL</strong> <!-- replace before submission --></p></div>
+<h1>Help &amp; support</h1><p class="date">We usually reply within two working days.</p>
+<div class="card"><h2>Contact</h2><p>Email: <a href="mailto:support@stature.app"><strong>support@stature.app</strong></a></p></div>
 <div class="card"><h2>Common questions</h2>
-<p><strong>Where is my data?</strong> Only on your iPhone. Linden has no accounts and no server.</p>
-<p><strong>How do I restore Premium?</strong> Profile › Restore purchases, signed in with the Apple Account that bought it.</p>
-<p><strong>How do I cancel?</strong> Settings › Apple Account › Subscriptions on your iPhone, or Profile › Manage subscription in the app.</p>
-<p><strong>Why are Ask Linden answers short or from the guide?</strong> Conversational answers need iOS 26 with Apple Intelligence turned on. Other iPhones get answers from Linden's built-in guide.</p>
-<p><strong>Is the adult-height estimate a prediction?</strong> No. It shows where height would land if growth stays in its current percentile channel on the CDC chart. It's not a guarantee.</p>
-<p><strong>How do I delete everything?</strong> Profile › Privacy &amp; data › Delete all data.</p></div>
+<p><strong>Where is my data?</strong> On your iPhone. If you sign in (optional), a backup is kept with your account so you can restore it on a new iPhone.</p>
+<p><strong>How do I restore Stature Pro?</strong> Profile › Restore purchases, signed in with the Apple Account that bought it.</p>
+<p><strong>How do I cancel?</strong> Settings › Apple Account › Subscriptions on your iPhone, or Profile › Manage subscription in the app. The lifetime purchase never renews.</p>
+<p><strong>Can routines make me taller?</strong> No exercise changes bone length. Routines help posture, mobility and core strength, which can help you stand at your full height.</p>
+<p><strong>Is the posture check recorded?</strong> No. The camera image is analysed on your iPhone and discarded; only the score is kept.</p>
+<p><strong>Why are Stature Coach answers short or from the guide?</strong> Conversational answers need Apple Intelligence on a supported iPhone. Other iPhones get answers from Stature's built-in guide.</p>
+<p><strong>Is the adult-height estimate a prediction?</strong> It shows where height would land if growth stays in its current percentile channel on the CDC chart. It's not a guarantee.</p>
+<p><strong>How do I delete everything?</strong> Profile › Privacy &amp; data › Delete all data. To delete your account and backup: Profile › Account › Delete account.</p></div>
 """))
-(ROOT / "site/index.html").write_text(page("Growth, beautifully understood", """
-<h1>Growth, beautifully understood.</h1>
-<p class="date">Linden tracks height with real CDC growth charts, explains it honestly, and keeps everything on your iPhone.</p>
+(ROOT / "site/index.html").write_text(page("Growth, measured honestly", """
+<h1>Growth, measured honestly.</h1>
+<p class="date">Stature tracks height with real CDC growth charts, explains it honestly, and gives you a daily plan for posture, sleep and food.</p>
 <div class="card"><h2>What's inside</h2>
-<p>Percentiles and a clear growth chart · an honest adult-height estimate with its reasoning · growth speed · family-height context · calm daily habits · a doctor-ready PDF report · Ask Linden, answered on your iPhone.</p></div>
-<div class="card"><h2>Private by design</h2><p>No accounts, no ads, no tracking. Your data never leaves your device.</p></div>
+<p>Percentiles and a clear growth chart · an honest adult-height estimate with its reasoning · guided posture and mobility routines · a 30-second camera posture check · bedtime planner · Outgrow Forecast for kids · a doctor-ready PDF report · Stature Coach, answered on your iPhone.</p></div>
+<div class="card"><h2>Private by design</h2><p>No ads, no tracking. Your data stays on your iPhone unless you choose to back it up.</p></div>
 """))
 print("site/ built")

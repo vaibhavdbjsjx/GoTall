@@ -10,6 +10,7 @@ struct ProfileView: View {
     let repository: AppRepository
     @Environment(EntitlementStore.self) private var entitlements
     @Environment(AppNavigator.self) private var navigator
+    @Environment(AccountStore.self) private var account
     @AppStorage("appearance") private var appearance = AppAppearance.dark.rawValue
     @State private var editingProfile: GrowthProfile?
     @State private var showsSwitcher = false
@@ -25,7 +26,7 @@ struct ProfileView: View {
     @State private var legal: LegalDocument?
     @Environment(\.openURL) private var openURL
 
-    enum ProfileDestination: Hashable { case report, reminders }
+    enum ProfileDestination: Hashable { case report, reminders, account }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -38,6 +39,17 @@ struct ProfileView: View {
                     }
 
                     premiumSection
+
+                    if account.isAvailable {
+                        Section("Account") {
+                            NavigationLink(value: ProfileDestination.account) {
+                                row(account.isSignedIn ? (account.session?.email ?? "Signed in") : "Sign in to back up",
+                                    symbol: account.isSignedIn ? "person.crop.circle.badge.checkmark" : "person.crop.circle",
+                                    value: account.isSignedIn ? (account.lastBackup == nil ? "Not backed up" : "Backed up") : "Optional")
+                            }
+                            .accessibilityIdentifier("profile.account")
+                        }
+                    }
 
                     Section("Tools") {
                         Button { showsAssistant = true } label: {
@@ -88,7 +100,11 @@ struct ProfileView: View {
                 }
 
                 Section {
-                    Label("Stored only on this device", systemImage: "iphone")
+                    if account.isSignedIn {
+                        Label("On this device, backed up to your account", systemImage: "icloud")
+                    } else {
+                        Label("Stored only on this device", systemImage: "iphone")
+                    }
                     Label("No ads and no cross-app tracking", systemImage: "hand.raised")
                     if let exportURL {
                         ShareLink(item: exportURL) { Label("Share exported file", systemImage: "square.and.arrow.up") }
@@ -97,7 +113,7 @@ struct ProfileView: View {
                     }
                     Button(role: .destructive) { confirmsDeleteAll = true } label: { Label("Delete all data", systemImage: "trash") }
                 } header: { Text("Privacy & data") } footer: {
-                    Text("Export creates a readable JSON file of every profile and measurement. Nothing is uploaded. Deleting data doesn't cancel a subscription; manage that in Apple's subscription settings.")
+                    Text("Export creates a readable JSON file of every profile and measurement. Nothing is uploaded unless you sign in to back up. Deleting data doesn't cancel a subscription; manage that in Apple's subscription settings.")
                 }
 
                 Section("About") {
@@ -120,6 +136,7 @@ struct ProfileView: View {
                 switch destination {
                 case .report: ReportPreviewView(repository: repository)
                 case .reminders: NotificationSettingsView(repository: repository)
+                case .account: AccountView(repository: repository)
                 }
             }
             .manageSubscriptionsSheet(isPresented: $showsManageSubscriptions)

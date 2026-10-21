@@ -9,6 +9,7 @@ struct GrowthApp: App {
     @State private var navigator: AppNavigator
     @State private var entitlements: EntitlementStore
     @State private var notifications: NotificationCoordinator
+    @State private var account: AccountStore
     private let tapRouter: NotificationTapRouter
 
     init() {
@@ -21,12 +22,13 @@ struct GrowthApp: App {
         _repository = State(initialValue: Self.makeRepository())
         _entitlements = State(initialValue: Self.makeEntitlements())
         _notifications = State(initialValue: Self.makeNotifications())
+        _account = State(initialValue: Self.makeAccount())
     }
 
     var body: some Scene {
         WindowGroup {
             AppRootView(repository: repository, entitlements: entitlements, notifications: notifications,
-                        navigator: navigator, initialTab: Self.initialTab)
+                        navigator: navigator, account: account, initialTab: Self.initialTab)
         }
     }
 
@@ -69,6 +71,18 @@ struct GrowthApp: App {
         }
         #endif
         return NotificationCoordinator(scheduler: UserNotificationScheduler())
+    }
+
+    /// Optional accounts and backup. Hidden until StatureBackendURL and StatureBackendAnonKey are set (docs/backend-setup.md).
+    @MainActor
+    private static func makeAccount() -> AccountStore {
+        #if DEBUG
+        if UserDefaults.standard.string(forKey: "demoScenario") != nil {
+            return AccountStore(backend: nil, storage: InMemorySessionStorage(), defaults: nil)
+        }
+        #endif
+        let backend = BackendConfig.from(infoDictionary: Bundle.main.infoDictionary).map { AccountBackend(config: $0) }
+        return AccountStore(backend: backend, storage: KeychainSessionStorage())
     }
 
     private static var initialTab: AppTab {

@@ -191,6 +191,18 @@ public final class AppRepository {
         state = .ready
     }
 
+    /// Replaces everything on this device with a restored backup. The caller confirms with the person first.
+    public func replaceAll(with restored: AppSnapshot) {
+        var copy = restored
+        copy.onboardingDraft = nil
+        if copy.activeProfileID == nil || !copy.profiles.contains(where: { $0.id == copy.activeProfileID }) {
+            copy.activeProfileID = copy.profiles.first?.id
+        }
+        snapshot = copy
+        state = .ready
+        persist()
+    }
+
     public func deleteAllData() throws {
         try store.deleteAll()
         snapshot = .empty

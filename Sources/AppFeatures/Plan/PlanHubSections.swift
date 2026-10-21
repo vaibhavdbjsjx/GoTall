@@ -39,7 +39,7 @@ struct PlanHubSections: View {
                 VStack(alignment: .trailing, spacing: 0) {
                     Text("\(progression.activeStreak)").font(DS.Typography.metricSmall).foregroundStyle(DS.Colors.textPrimary)
                         .contentTransition(.numericText())
-                    Text(progression.activeStreak == 1 ? "day streak" : "day streak").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
+                    Text("day streak").font(DS.Typography.caption).foregroundStyle(DS.Colors.textSecondary)
                 }
                 .accessibilityElement(children: .combine)
                 VStack(alignment: .trailing, spacing: 0) {
