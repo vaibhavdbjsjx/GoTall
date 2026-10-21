@@ -40,8 +40,19 @@ public final class StoreKitSubscriptionService: SubscriptionService {
     }
 
     static func plan(from product: Product) -> SubscriptionPlan? {
+        if product.type == .nonConsumable {
+            return SubscriptionPlan(id: product.id, displayName: product.displayName, displayPrice: product.displayPrice, price: product.price,
+                                    currencyCode: product.priceFormatStyle.currencyCode, period: .lifetime,
+                                    isFamilyShareable: product.isFamilyShareable)
+        }
         guard let subscription = product.subscription else { return nil }
-        let unit: SubscriptionPeriodUnit = subscription.subscriptionPeriod.unit == .year ? .year : .month
+        let unit: SubscriptionPeriodUnit
+        switch subscription.subscriptionPeriod.unit {
+        case .year: unit = .year
+        case .week: unit = .week
+        case .day: unit = subscription.subscriptionPeriod.value >= 7 ? .week : .month
+        default: unit = .month
+        }
         return SubscriptionPlan(id: product.id, displayName: product.displayName, displayPrice: product.displayPrice, price: product.price,
                                 currencyCode: product.priceFormatStyle.currencyCode, period: unit, isFamilyShareable: product.isFamilyShareable,
                                 introductoryOffer: subscription.introductoryOffer.map(describe))
@@ -58,7 +69,7 @@ public final class StoreKitSubscriptionService: SubscriptionService {
         @unknown default: unit = "periods"
         }
         switch offer.paymentMode {
-        case .freeTrial: return "\(period.value)-\(unit) free trial"
+        case .freeTrial: return "\(period.value)-\(period.value == 1 ? unit : String(unit.dropLast())) free trial"
         default: return "Introductory price \(offer.displayPrice) for \(period.value) \(unit)"
         }
     }
@@ -109,7 +120,7 @@ public final class StoreKitSubscriptionService: SubscriptionService {
         switch error {
         case .userCancelled: return .cancelled
         case .networkError: return .failed("The App Store couldn't be reached. Check your connection and try again.")
-        case .notAvailableInStorefront: return .failed("Premium isn't available in your App Store country yet.")
+        case .notAvailableInStorefront: return .failed("Stature Pro isn't available in your App Store country yet.")
         default: return .failed("The purchase didn't complete. You haven't been charged. Please try again.")
         }
     }

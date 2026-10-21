@@ -8,7 +8,7 @@ public enum PremiumFeature: String, CaseIterable, Sendable {
     case multipleProfiles
     case doctorReport
     case advancedAnalytics
-    /// Ask Linden beyond the free daily questions.
+    /// Stature Coach beyond the free daily questions.
     case unlimitedAssistant
 }
 

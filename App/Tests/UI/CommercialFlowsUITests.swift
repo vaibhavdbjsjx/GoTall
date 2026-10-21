@@ -132,9 +132,9 @@ final class CommercialFlowsUITests: XCTestCase {
         XCTAssertTrue(element(app, "analysis.locked").waitForExistence(timeout: 5) || app.staticTexts["Advanced growth analysis"].exists)
     }
 
-    // Ask Linden: open from Home, use a suggestion, then type a question. On the CI simulator Apple Intelligence
+    // Stature Coach: open from Home, use a suggestion, then type a question. On the CI simulator Apple Intelligence
     // isn't available, so answers come from the built-in guide; the flow and UI are the same.
-    func testAskLindenAnswersQuestions() {
+    func testCoachAnswersQuestions() {
         let app = launch(tab: "home")
         let entry = app.buttons["home.ask"]
         XCTAssertTrue(entry.waitForExistence(timeout: 10))

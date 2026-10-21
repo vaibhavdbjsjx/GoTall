@@ -14,10 +14,10 @@ public enum AssistantAvailability: Sendable, Equatable {
     public var explanation: String? {
         switch self {
         case .available: return nil
-        case .deviceNotEligible: return "This iPhone doesn't support Apple Intelligence, so answers come from Linden's built-in guide."
-        case .appleIntelligenceOff: return "Turn on Apple Intelligence in Settings for conversational answers. Until then, answers come from Linden's built-in guide."
-        case .modelNotReady: return "Apple Intelligence is still getting ready on this iPhone. Answers come from Linden's built-in guide for now."
-        case .unsupportedOS: return "Conversational answers need iOS 26 with Apple Intelligence. Answers come from Linden's built-in guide."
+        case .deviceNotEligible: return "This iPhone doesn't support Apple Intelligence, so answers come from Stature's built-in guide."
+        case .appleIntelligenceOff: return "Turn on Apple Intelligence in Settings for conversational answers. Until then, answers come from Stature's built-in guide."
+        case .modelNotReady: return "Apple Intelligence is still getting ready on this iPhone. Answers come from Stature's built-in guide for now."
+        case .unsupportedOS: return "Conversational answers need iOS 26 with Apple Intelligence. Answers come from Stature's built-in guide."
         }
     }
 }
@@ -52,7 +52,7 @@ public final class DefaultsAssistantUsageStore: AssistantUsageStore {
     public func increment(on day: String) { defaults.set(count(on: day) + 1, forKey: "assistant.count.\(day)") }
 }
 
-/// A conversation with Ask Linden. Every question goes through: safety check → free-question allowance →
+/// A conversation with Stature Coach. Every question goes through: safety check → free-question allowance →
 /// on-device model (if available) → output guard → built-in guide as the fallback. Nothing leaves the device.
 @MainActor
 @Observable
@@ -120,7 +120,7 @@ public final class AssistantSession {
 
         if !isPremium && usage.count(on: dayKey) >= Self.freeDailyQuestions {
             messages.append(Message(role: .assistant,
-                                    text: "That's today's \(Self.freeDailyQuestions) free questions. They reset tomorrow, or Premium gives unlimited questions. Everything else in the app stays free.",
+                                    text: "That's today's \(Self.freeDailyQuestions) free questions. They reset tomorrow, or Stature Pro gives unlimited questions. Everything else in the app stays free.",
                                     source: .system, isLimitNotice: true))
             return
         }

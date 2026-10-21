@@ -172,7 +172,33 @@ final class EntitlementResolverTests: XCTestCase {
         XCTAssertTrue(yearly.billingTerms.lowercased().contains("cancel"))
         XCTAssertTrue(yearly.billingTerms.contains("24 hours"))
         XCTAssertEqual(yearly.priceLine, "$39.99 per year")
-        XCTAssertNil(yearly.introductoryOffer, "launch plan has no trial")
+        XCTAssertNil(yearly.introductoryOffer)
+    }
+
+    func testTrialWeeklyAndLifetimeTermsAreStatedInFull() {
+        var trial = FakePlans.yearly
+        trial.introductoryOffer = "3-day free trial"
+        XCTAssertTrue(trial.billingTerms.hasPrefix("3-day free trial, then billed $39.99 every year"))
+        let weekly = SubscriptionPlan(id: SubscriptionProductID.weekly, displayName: "Pro Weekly", displayPrice: "$4.99",
+                                      price: Decimal(string: "4.99")!, currencyCode: "USD", period: .week, isFamilyShareable: true)
+        XCTAssertEqual(weekly.priceLine, "$4.99 per week")
+        XCTAssertEqual(weekly.yearlyCost(locale: Locale(identifier: "en_US")), "$259.48")
+        let lifetime = SubscriptionPlan(id: SubscriptionProductID.lifetime, displayName: "Pro Lifetime", displayPrice: "$49.99",
+                                        price: Decimal(string: "49.99")!, currencyCode: "USD", period: .lifetime, isFamilyShareable: true)
+        XCTAssertEqual(lifetime.priceLine, "$49.99 once")
+        XCTAssertTrue(lifetime.billingTerms.contains("nothing renews"))
+        XCTAssertFalse(lifetime.billingTerms.contains("24 hours"))
+        XCTAssertEqual([SubscriptionPeriodUnit.lifetime, .week, .year, .month].sorted { $0.sortOrder < $1.sortOrder }, [.year, .month, .week, .lifetime])
+    }
+
+    func testLifetimePurchaseNeverExpires() {
+        let lifetime = TransactionSnapshot(productID: SubscriptionProductID.lifetime, originalID: "L1", purchaseDate: now.addingTimeInterval(-86_400 * 400),
+                                           expirationDate: nil)
+        let state = EntitlementResolver.resolve(transactions: [.verified(lifetime)], renewals: [], now: now)
+        XCTAssertTrue(state.isPremium)
+        XCTAssertEqual(state.productID, SubscriptionProductID.lifetime)
+        let refunded = TransactionSnapshot(productID: SubscriptionProductID.lifetime, originalID: "L1", purchaseDate: now, expirationDate: nil, revocationDate: now)
+        XCTAssertFalse(EntitlementResolver.resolve(transactions: [.verified(refunded)], renewals: [], now: now).isPremium)
     }
 }
 
@@ -230,7 +256,7 @@ final class PaywallModelTests: XCTestCase {
         XCTAssertTrue(store.isPremium)
         XCTAssertTrue(store.justUnlocked)
         XCTAssertEqual(store.access(.doctorReport), .available)
-        XCTAssertEqual(model.statusMessage, "Premium is active.")
+        XCTAssertEqual(model.statusMessage, "Stature Pro is active.")
     }
 
     @MainActor

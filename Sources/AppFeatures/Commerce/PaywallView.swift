@@ -64,7 +64,7 @@ struct PaywallView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.xl) {
                 PaywallHero(title: "Go deeper with your growth profile.",
-                            subtitle: "Your growth result, chart, estimate and history stay free. Premium adds tools for following growth over the years and sharing it with a doctor.")
+                            subtitle: "Your growth result, chart, estimate and history stay free. Stature Pro adds tools for following growth over the years and sharing it with a doctor.")
                     .padding(.top, DS.Spacing.xs)
                 if let intro = context.intro {
                     InfoBanner(intro, tone: .info)
@@ -101,7 +101,7 @@ struct PaywallView: View {
 
     private var benefits: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-            Text("What Premium adds").font(DS.Typography.title).foregroundStyle(DS.Colors.textPrimary)
+            Text("What Stature Pro adds").font(DS.Typography.title).foregroundStyle(DS.Colors.textPrimary)
                 .accessibilityAddTraits(.isHeader)
             BenefitCard(symbol: "doc.richtext", title: "Doctor-ready growth report",
                         detail: "A clear PDF with the growth chart, every measurement, percentile history, methods and limitations. Made on your phone, ready for a check-up.")
@@ -110,7 +110,7 @@ struct PaywallView: View {
             BenefitCard(symbol: "person.2", title: "Family profiles",
                         detail: "Follow more than one child in one place. Profiles you already have always stay yours to use.")
             BenefitCard(symbol: "sparkles", title: "Unlimited \(BrandConfig.current.assistantName)",
-                        detail: "Ask as many questions about growth as you like (3 a day are free). Answered privately on this iPhone: conversational on iPhones with Apple Intelligence, Linden's built-in guide on others.")
+                        detail: "Ask as many questions about growth as you like (3 a day are free). Answered privately on this iPhone: conversational on iPhones with Apple Intelligence, Stature's built-in guide on others.")
         }
     }
 
@@ -185,7 +185,7 @@ struct PaywallView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("paywall.terms")
                 if plan.isFamilyShareable {
-                    Text("Family Sharing is on: up to five family members can use Premium at no extra cost.")
+                    Text("Family Sharing is on: up to five family members can use Stature Pro at no extra cost.")
                         .font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -283,7 +283,7 @@ struct PremiumActiveView: View {
             Spacer()
             SuccessSeal()
             VStack(spacing: DS.Spacing.xs) {
-                Text(justPurchased ? "Premium is active" : "You have Premium")
+                Text(justPurchased ? "Stature Pro is active" : "You have Stature Pro")
                     .font(DS.Typography.title)
                     .foregroundStyle(DS.Colors.textPrimary)
                     .accessibilityIdentifier("paywall.active")

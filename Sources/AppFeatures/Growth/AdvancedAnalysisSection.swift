@@ -21,7 +21,7 @@ struct AdvancedAnalysisSection: View {
             } else {
                 LockedFeaturePreview(
                     title: "Advanced growth analysis",
-                    message: "Premium shows the full percentile history, growth speed between every pair of measurements, and how the estimate has changed as measurements were added.",
+                    message: "Stature Pro shows the full percentile history, growth speed between every pair of measurements, and how the estimate has changed as measurements were added.",
                     action: { paywall = .analysis }
                 ) {
                     Text(advanced.summary)

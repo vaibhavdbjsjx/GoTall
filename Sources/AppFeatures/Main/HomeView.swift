@@ -51,7 +51,7 @@ private struct HomeContent: View {
                     HomeEstimateCard(card: state.estimate, onTap: { onAction(.explanation) })
                         .appearEffect(delay: 0.04)
                 }
-                AskLindenCard(facts: AssistantFacts(profile: profile, now: now, calendar: .current), onAsk: { onAction(.ask($0)) })
+                CoachCard(facts: AssistantFacts(profile: profile, now: now, calendar: .current), onAsk: { onAction(.ask($0)) })
                     .appearEffect(delay: 0.05)
                 TrajectoryPreview(analysis: analysis, unit: profile.unitPreference, onTap: { onAction(.growth) })
                     .appearEffect(delay: 0.06)
@@ -454,7 +454,7 @@ private struct PremiumMomentCard: View {
         } else if PremiumOfferPolicy.shouldSuggest(analysis: analysis, isPremium: false,
                                                    dismissedAt: dismissedAt > 0 ? Date(timeIntervalSince1970: dismissedAt) : nil,
                                                    now: Date(), calendar: .current) {
-            card(eyebrow: "Premium",
+            card(eyebrow: "Pro",
                  title: "A clear report for the doctor",
                  detail: "\(profile.subject == .child ? (profile.nickname ?? "This") + "'s" : "Your") growth history can become a PDF with the chart, every measurement and the methods behind them.",
                  button: "See what's included", showsDismiss: true)

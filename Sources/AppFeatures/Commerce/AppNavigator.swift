@@ -11,9 +11,9 @@ public enum PaywallContext: String, Identifiable, Sendable {
     var intro: String? {
         switch self {
         case .general: return nil
-        case .report: return "The doctor-ready report is part of Premium."
-        case .analysis: return "Advanced growth analysis is part of Premium."
-        case .family: return "Adding another profile is part of Premium. Profiles you already have always stay free to use."
+        case .report: return "The doctor-ready report is part of Stature Pro."
+        case .analysis: return "Advanced growth analysis is part of Stature Pro."
+        case .family: return "Adding another profile is part of Stature Pro. Profiles you already have always stay free to use."
         }
     }
 }

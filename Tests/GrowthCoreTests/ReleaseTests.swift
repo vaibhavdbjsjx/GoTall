@@ -6,14 +6,14 @@ final class ReleaseTests: XCTestCase {
     static let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
 
     func testBrandIsConsistent() throws {
-        XCTAssertEqual(BrandConfig.current.displayName, "Linden")
+        XCTAssertEqual(BrandConfig.current.displayName, "Stature")
         XCTAssertEqual(CopyGuard.violations(in: BrandConfig.current.tagline), [])
         let project = try String(contentsOf: Self.root.appendingPathComponent("App/project.yml"), encoding: .utf8)
         XCTAssertTrue(project.contains("APP_DISPLAY_NAME: \"\(BrandConfig.current.displayName)\""), "project display name matches BrandConfig")
         XCTAssertTrue(project.contains("MARKETING_VERSION: \"1.0.0\""))
         let storekit = try String(contentsOf: Self.root.appendingPathComponent("App/Products.storekit"), encoding: .utf8)
         for id in SubscriptionProductID.all { XCTAssertTrue(storekit.contains("\"\(id)\""), id) }
-        XCTAssertTrue(SubscriptionProductID.all.allSatisfy { $0.hasPrefix("app.linden.growth.") })
+        XCTAssertTrue(SubscriptionProductID.all.allSatisfy { $0.hasPrefix("app.stature.height.") })
     }
 
     func testLegalTextIsHonestAndComplete() {

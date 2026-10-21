@@ -12,7 +12,7 @@ public struct AppRootView: View {
     @State private var assistant = AssistantSession(model: OnDeviceAssistantModel(), usage: AppRootView.makeUsageStore())
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
-    @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
+    @AppStorage("appearance") private var appearance = AppAppearance.dark.rawValue
 
     private let initialTab: AppTab
 

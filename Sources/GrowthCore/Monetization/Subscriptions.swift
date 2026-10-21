@@ -5,14 +5,29 @@ import Foundation
 /// App Store product identifiers. Prices are never written in code: they come from the App Store
 /// (or the local StoreKit configuration file in development). See docs/phase-5-commercial.md §4.
 public enum SubscriptionProductID {
-    public static let monthly = "app.linden.growth.premium.monthly"
-    public static let yearly = "app.linden.growth.premium.yearly"
-    public static let all: [String] = [yearly, monthly]
-    public static let groupName = "Premium"
+    public static let weekly = "app.stature.height.pro.weekly"
+    public static let monthly = "app.stature.height.pro.monthly"
+    public static let yearly = "app.stature.height.pro.yearly"
+    /// One-time, non-consumable purchase. Not part of the subscription group.
+    public static let lifetime = "app.stature.height.pro.lifetime"
+    public static let subscriptions: [String] = [yearly, monthly, weekly]
+    public static let all: [String] = [yearly, monthly, weekly, lifetime]
+    public static let groupName = "Stature Pro"
 }
 
+/// How a plan is billed. `lifetime` is a single payment with no renewal.
 public enum SubscriptionPeriodUnit: String, Sendable, Equatable {
-    case month, year
+    case week, month, year, lifetime
+
+    /// Paywall order: the plan most people keep first, the one-time option last.
+    public var sortOrder: Int {
+        switch self {
+        case .year: return 0
+        case .month: return 1
+        case .week: return 2
+        case .lifetime: return 3
+        }
+    }
 }
 
 /// A purchasable plan as shown on the paywall. Built from a StoreKit `Product`.
@@ -40,15 +55,60 @@ public struct SubscriptionPlan: Sendable, Equatable, Identifiable {
         self.introductoryOffer = introductoryOffer
     }
 
-    public var periodNoun: String { period == .year ? "year" : "month" }
-    public var periodAdverb: String { period == .year ? "yearly" : "monthly" }
+    public var isLifetime: Bool { period == .lifetime }
 
-    /// "$39.99 per year".
-    public var priceLine: String { "\(displayPrice) per \(periodNoun)" }
+    public var periodNoun: String {
+        switch period {
+        case .week: return "week"
+        case .month: return "month"
+        case .year: return "year"
+        case .lifetime: return "lifetime"
+        }
+    }
+
+    public var periodAdverb: String {
+        switch period {
+        case .week: return "weekly"
+        case .month: return "monthly"
+        case .year: return "yearly"
+        case .lifetime: return "once"
+        }
+    }
+
+    /// Short plan name for the paywall ("Yearly", "Lifetime").
+    public var planTitle: String {
+        switch period {
+        case .week: return "Weekly"
+        case .month: return "Monthly"
+        case .year: return "Yearly"
+        case .lifetime: return "Lifetime"
+        }
+    }
+
+    /// "$34.99 per year", or "$49.99 once" for lifetime.
+    public var priceLine: String { isLifetime ? "\(displayPrice) once" : "\(displayPrice) per \(periodNoun)" }
+
+    /// "$34.99/year" or "$49.99 one time", for buttons.
+    public var shortPrice: String { isLifetime ? "\(displayPrice) one time" : "\(displayPrice)/\(periodNoun)" }
 
     /// Plain-language billing terms shown next to the purchase button (App Store Guideline 3.1.2).
     public var billingTerms: String {
-        "Billed \(displayPrice) every \(periodNoun) until you cancel. Renews automatically unless cancelled at least 24 hours before the end of the current period. Cancel anytime in Settings › Apple Account › Subscriptions."
+        if isLifetime {
+            return "One payment of \(displayPrice). No subscription and nothing renews. Restore it on any device signed in to the same Apple Account."
+        }
+        let start = introductoryOffer.map { "\($0), then billed" } ?? "Billed"
+        return "\(start) \(displayPrice) every \(periodNoun) until you cancel. Renews automatically unless cancelled at least 24 hours before the end of the current period. Cancel anytime in Settings › Apple Account › Subscriptions."
+    }
+
+    /// For a weekly plan, what a year costs at that rate, so weekly pricing is never shown without its total.
+    public func yearlyCost(locale: Locale = .current) -> String? {
+        guard period == .week else { return nil }
+        let year = NSDecimalNumber(decimal: price).multiplying(by: 52)
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.currencyCode = currencyCode
+        formatter.locale = locale
+        return formatter.string(from: year)
     }
 
     /// For a yearly plan, the monthly equivalent ("$3.33 a month"), formatted in the plan's currency.

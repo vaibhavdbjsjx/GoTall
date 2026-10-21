@@ -5,7 +5,7 @@ import GrowthCore
 import FoundationModels
 #endif
 
-/// Ask Linden's language model: Apple's on-device foundation model (iOS 26+, Apple Intelligence).
+/// Stature Coach's language model: Apple's on-device foundation model (iOS 26+, Apple Intelligence).
 /// Runs entirely on the iPhone: no API key, no server, no data leaves the device.
 /// On older iOS versions or ineligible devices `availability` says why, and the built-in guide answers instead.
 @MainActor

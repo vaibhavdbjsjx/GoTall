@@ -2,13 +2,13 @@
 import SwiftUI
 import GrowthCore
 
-// Premium components. Same Spruce surfaces, type and motion as the rest of the app: Premium reads as a
-// deeper layer of the product, not a different one. No gold, no gradients that shout, no countdowns.
+// Premium components. Same midnight surfaces, type and motion as the rest of the app: Pro reads as a
+// deeper layer of the product, not a different one. Champagne used sparingly, no gradients that shout, no countdowns.
 
 /// Quiet outline label marking a Premium feature.
 public struct PremiumBadge: View {
     let text: String
-    public init(_ text: String = "Premium") { self.text = text }
+    public init(_ text: String = "Pro") { self.text = text }
 
     public var body: some View {
         Text(text)
@@ -137,7 +137,7 @@ public struct ReportPreview: View {
                     line.addLine(to: CGPoint(x: size.width * 0.38, y: size.height * 0.6))
                     line.addLine(to: CGPoint(x: size.width * 0.62, y: size.height * 0.5))
                     line.addLine(to: CGPoint(x: size.width * 0.8, y: size.height * 0.44))
-                    context.stroke(line, with: .color(Color(red: 0.035, green: 0.44, blue: 0.37)), lineWidth: 1.6)
+                    context.stroke(line, with: .color(Color(red: 0.54, green: 0.39, blue: 0.09)), lineWidth: 1.6)
                 }
                 .padding(3)
             }
@@ -366,7 +366,7 @@ public struct LockedFeaturePreview<Preview: View>: View {
     let action: () -> Void
     let preview: Preview
 
-    public init(title: String, message: String, buttonTitle: String = "Explore Premium", action: @escaping () -> Void, @ViewBuilder preview: () -> Preview) {
+    public init(title: String, message: String, buttonTitle: String = "Explore Stature Pro", action: @escaping () -> Void, @ViewBuilder preview: () -> Preview) {
         self.title = title
         self.message = message
         self.buttonTitle = buttonTitle

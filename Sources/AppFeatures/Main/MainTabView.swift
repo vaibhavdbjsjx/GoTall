@@ -117,7 +117,7 @@ struct MainTabView: View {
     }
 }
 
-/// Opens Ask Linden, optionally with a question to send straight away.
+/// Opens Stature Coach, optionally with a question to send straight away.
 struct AssistantRequest: Identifiable {
     let id = UUID()
     let question: String?
@@ -216,7 +216,7 @@ struct ProfileSwitcherSheet: View {
                     if !canAdd {
                         HStack(spacing: DS.Spacing.xs) {
                             PremiumBadge()
-                            Text("Family profiles are part of Premium. Every profile here stays free to use.")
+                            Text("Family profiles are part of Stature Pro. Every profile here stays free to use.")
                                 .font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
@@ -254,7 +254,7 @@ struct ProfileAvatar: View {
     }
 
     private var color: Color {
-        let palette: [Color] = [Color(red: 0.04, green: 0.44, blue: 0.37), Color(red: 0.66, green: 0.31, blue: 0.15),
+        let palette: [Color] = [Color(red: 0.54, green: 0.39, blue: 0.09), Color(red: 0.06, green: 0.42, blue: 0.36),
                                 Color(red: 0.30, green: 0.36, blue: 0.70), Color(red: 0.50, green: 0.33, blue: 0.58)]
         // Stable across launches (hashValue is randomised per process).
         let index = profile.id.uuidString.unicodeScalars.reduce(0) { $0 + Int($1.value) } % palette.count

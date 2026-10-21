@@ -45,10 +45,14 @@ public final class PreviewSubscriptionService: SubscriptionService {
     }
 
     public static var plans: [SubscriptionPlan] {
-        [SubscriptionPlan(id: SubscriptionProductID.yearly, displayName: "Premium Yearly", displayPrice: "$39.99", price: Decimal(string: "39.99")!,
-                          currencyCode: "USD", period: .year, isFamilyShareable: true),
-         SubscriptionPlan(id: SubscriptionProductID.monthly, displayName: "Premium Monthly", displayPrice: "$5.99", price: Decimal(string: "5.99")!,
-                          currencyCode: "USD", period: .month, isFamilyShareable: true)]
+        [SubscriptionPlan(id: SubscriptionProductID.yearly, displayName: "Stature Pro Yearly", displayPrice: "$34.99", price: Decimal(string: "34.99")!,
+                          currencyCode: "USD", period: .year, isFamilyShareable: true, introductoryOffer: "3-day free trial"),
+         SubscriptionPlan(id: SubscriptionProductID.monthly, displayName: "Stature Pro Monthly", displayPrice: "$9.99", price: Decimal(string: "9.99")!,
+                          currencyCode: "USD", period: .month, isFamilyShareable: true),
+         SubscriptionPlan(id: SubscriptionProductID.weekly, displayName: "Stature Pro Weekly", displayPrice: "$4.99", price: Decimal(string: "4.99")!,
+                          currencyCode: "USD", period: .week, isFamilyShareable: true),
+         SubscriptionPlan(id: SubscriptionProductID.lifetime, displayName: "Stature Pro Lifetime", displayPrice: "$49.99", price: Decimal(string: "49.99")!,
+                          currencyCode: "USD", period: .lifetime, isFamilyShareable: true)]
     }
 
     public func loadPlans() async throws -> [SubscriptionPlan] {
@@ -67,8 +71,9 @@ public final class PreviewSubscriptionService: SubscriptionService {
             try? await Task.sleep(nanoseconds: 3_600_000_000_000)
             return .cancelled
         default:
-            state = EntitlementState(status: .active, productID: planID,
-                                     expirationDate: Calendar.current.date(byAdding: planID == SubscriptionProductID.yearly ? .year : .month, value: 1, to: Date()))
+            let component: Calendar.Component = planID == SubscriptionProductID.yearly ? .year : (planID == SubscriptionProductID.weekly ? .weekOfYear : .month)
+            let expiration = planID == SubscriptionProductID.lifetime ? nil : Calendar.current.date(byAdding: component, value: 1, to: Date())
+            state = EntitlementState(status: .active, productID: planID, expirationDate: expiration)
             return .purchased(state)
         }
     }

@@ -55,7 +55,7 @@ public struct LegalDocument: Sendable, Equatable, Identifiable {
                 "\(name) shows measurements and growth-chart context for information. It does not diagnose, treat or prevent any condition. Estimates are not guarantees. Talk to a doctor or other qualified health professional about any health concern."
             ]),
             Section(title: "Subscriptions", paragraphs: [
-                "Premium is an auto-renewable subscription sold by Apple. The price and billing period are shown before you buy. Payment is charged to your Apple Account. It renews automatically unless cancelled at least 24 hours before the end of the current period. You can manage or cancel it in Settings › Apple Account › Subscriptions. Deleting the app or its data does not cancel a subscription.",
+                "Stature Pro is an auto-renewable subscription sold by Apple. The price and billing period are shown before you buy. Payment is charged to your Apple Account. It renews automatically unless cancelled at least 24 hours before the end of the current period. You can manage or cancel it in Settings › Apple Account › Subscriptions. Deleting the app or its data does not cancel a subscription.",
                 "Apple's Standard Licensed Application End User License Agreement applies: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
             ]),
             Section(title: "Using the app", paragraphs: [

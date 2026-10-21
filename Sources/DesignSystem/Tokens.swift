@@ -11,20 +11,21 @@ public struct BrandPalette: Sendable {
         public init(_ light: UInt32, _ dark: UInt32) { self.light = light; self.dark = dark }
     }
 
-    public var background = Pair(0xF6F5F1, 0x0D1012)
-    public var surface = Pair(0xFFFFFF, 0x161A1D)
-    public var surfaceSecondary = Pair(0xEEECE6, 0x1F2427)
-    public var separator = Pair(0xE2DFD8, 0x2A3034)
-    public var textPrimary = Pair(0x15191B, 0xF1F3F2)
-    public var textSecondary = Pair(0x565F63, 0xA7B0B4)
-    public var textTertiary = Pair(0x5F686C, 0x8E979B)
-    /// "Spruce": calm, confident green-teal. Distinct from medical blue and fitness neon.
-    public var accent = Pair(0x09705F, 0x45C7AC)
-    public var onAccent = Pair(0xFFFFFF, 0x06201B)
-    public var accentSoft = Pair(0xDCEFEA, 0x12332D)
-    /// Warm secondary accent, used sparingly for highlights (never for warnings).
-    public var warm = Pair(0xA84F25, 0xF0A46E)
-    public var warmSoft = Pair(0xF8E9DF, 0x33231A)
+    /// "Midnight": deep ink, never pure black.
+    public var background = Pair(0xF7F4EE, 0x0B0F1A)
+    public var surface = Pair(0xFFFFFF, 0x151B2A)
+    public var surfaceSecondary = Pair(0xEFEADF, 0x1C2334)
+    public var separator = Pair(0xE4DDCF, 0x283045)
+    public var textPrimary = Pair(0x14161C, 0xF4F1EA)
+    public var textSecondary = Pair(0x5A5F6B, 0xA3ABBD)
+    public var textTertiary = Pair(0x60656F, 0x8A93A6)
+    /// "Champagne": the one accent. Soft gold on midnight, deep antique gold on ivory (both ≥ 4.5:1).
+    public var accent = Pair(0x8A6418, 0xE8C77A)
+    public var onAccent = Pair(0xFFFFFF, 0x1A1406)
+    public var accentSoft = Pair(0xF3E8CF, 0x2A2618)
+    /// Calm teal for progress and "on track" moments, used sparingly next to the gold.
+    public var warm = Pair(0x0F6B5C, 0x7FD1C0)
+    public var warmSoft = Pair(0xDDEFEA, 0x13302C)
     /// Caution is amber, never red: growth data is never framed as alarming.
     public var caution = Pair(0x8F5B00, 0xE9B04F)
     public var cautionSoft = Pair(0xFBF0DC, 0x2E2414)
@@ -93,10 +94,13 @@ public enum DS {
     // Built on Dynamic Type text styles so every size scales with the user's setting.
 
     public enum Typography {
-        public static let display = Font.system(.largeTitle, design: .default).weight(.bold)
+        /// Hero titles use the serif design for an editorial, premium feel (matches the website's Instrument Serif).
+        public static let display = Font.system(.largeTitle, design: .serif).weight(.regular)
+        /// Big serif numbers for hero moments (the height reveal, the posture score).
+        public static let heroNumber = Font.system(size: 64, weight: .regular, design: .serif).monospacedDigit()
         /// Onboarding questions: big enough to lead, smaller than `display` so long questions stay readable.
-        public static let question = Font.system(.title, design: .default).weight(.bold)
-        public static let title = Font.system(.title2, design: .default).weight(.semibold)
+        public static let question = Font.system(.title, design: .serif).weight(.regular)
+        public static let title = Font.system(.title2, design: .serif).weight(.regular)
         public static let headline = Font.system(.headline, design: .default)
         public static let body = Font.system(.body)
         public static let callout = Font.system(.callout)
@@ -125,19 +129,47 @@ extension UIColor {
 
 // MARK: Elevation
 
-/// Light mode: soft shadow + hairline. Dark mode: no shadow (it reads as mud); a lighter surface and hairline instead.
+/// Light mode: soft shadow + hairline. Dark mode: no shadow (it reads as mud); a lighter surface, a faint top-lit
+/// sheen and a hairline instead, so cards read as glass on midnight.
 struct SurfaceElevation: ViewModifier {
     @Environment(\.colorScheme) private var colorScheme
     var radius: CGFloat
 
     func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
         content
-            .background(DS.Colors.surface, in: RoundedRectangle(cornerRadius: radius, style: .continuous))
+            .background(DS.Colors.surface, in: shape)
+            .overlay {
+                if colorScheme == .dark {
+                    shape.fill(LinearGradient(colors: [.white.opacity(0.045), .clear], startPoint: .top, endPoint: .center))
+                        .allowsHitTesting(false)
+                }
+            }
             .overlay(
-                RoundedRectangle(cornerRadius: radius, style: .continuous)
-                    .strokeBorder(DS.Colors.separator.opacity(colorScheme == .dark ? 1 : 0.7), lineWidth: 0.5)
+                shape.strokeBorder(
+                    colorScheme == .dark
+                        ? AnyShapeStyle(LinearGradient(colors: [.white.opacity(0.12), .white.opacity(0.03)], startPoint: .top, endPoint: .bottom))
+                        : AnyShapeStyle(DS.Colors.separator.opacity(0.7)),
+                    lineWidth: 0.6)
             )
             .shadow(color: .black.opacity(colorScheme == .dark ? 0 : 0.05), radius: 10, x: 0, y: 3)
+    }
+}
+
+/// The page backdrop: midnight with a faint champagne glow at the top in dark mode, plain ivory in light mode.
+struct PageBackdrop: View {
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            DS.Colors.background
+            if colorScheme == .dark {
+                RadialGradient(colors: [DS.Colors.accent.opacity(0.10), .clear], center: .top, startRadius: 0, endRadius: 420)
+                    .frame(height: 520)
+                    .allowsHitTesting(false)
+            }
+        }
+        .ignoresSafeArea()
     }
 }
 
@@ -147,7 +179,7 @@ public extension View {
     }
 
     func dsPageBackground() -> some View {
-        background(DS.Colors.background.ignoresSafeArea())
+        background(PageBackdrop())
     }
 }
 #endif

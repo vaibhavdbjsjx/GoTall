@@ -66,7 +66,18 @@ public final class EntitlementStore {
 
     /// Words for the subscription card in Profile, derived from verified state only.
     public func statusDescription(plans: [SubscriptionPlan] = [], calendar: Calendar = .current, locale: Locale = .current) -> String {
-        let planName = state.productID == SubscriptionProductID.monthly ? "Monthly plan" : (state.productID == SubscriptionProductID.yearly ? "Yearly plan" : "Premium")
+        let pro = BrandConfig.premiumName
+        let planName: String
+        switch state.productID {
+        case SubscriptionProductID.weekly: planName = "\(pro) Weekly"
+        case SubscriptionProductID.monthly: planName = "\(pro) Monthly"
+        case SubscriptionProductID.yearly: planName = "\(pro) Yearly"
+        case SubscriptionProductID.lifetime: planName = "\(pro) Lifetime"
+        default: planName = pro
+        }
+        if state.productID == SubscriptionProductID.lifetime, state.isPremium {
+            return "\(planName) · yours for good, nothing renews." + (state.isFamilyShared ? " Shared with you through Family Sharing." : "")
+        }
         let date = state.expirationDate.map { DisplayFormat.day($0, calendar: calendar, locale: locale) }
         let shared = state.isFamilyShared ? " Shared with you through Family Sharing." : ""
         switch state.status {
@@ -75,15 +86,15 @@ public final class EntitlementStore {
         case .cancelled:
             return (date.map { "\(planName) · ends on \($0). It won't renew." } ?? "\(planName) won't renew.") + shared
         case .gracePeriod:
-            return "Apple couldn't take the latest payment. Premium stays on while Apple retries; you can update payment details in Settings."
+            return "Apple couldn't take the latest payment. \(pro) stays on while Apple retries; you can update payment details in Settings."
         case .billingRetry:
-            return "Premium is paused because Apple couldn't take the latest payment. Updating payment details in Settings restores it."
+            return "\(pro) is paused because Apple couldn't take the latest payment. Updating payment details in Settings restores it."
         case .expired:
-            return "Your Premium subscription has ended. Your profiles, measurements and reports you saved are all still here."
+            return "Your \(pro) subscription has ended. Your profiles, measurements and reports you saved are all still here."
         case .revoked:
-            return "Premium access was removed (refund or Family Sharing change). All your data is still here."
+            return "\(pro) access was removed (refund or Family Sharing change). All your data is still here."
         case .none:
-            return "Doctor-ready reports, advanced growth analysis and family profiles. Your growth result, chart and history stay free."
+            return "Your personal plan, guided routines, Posture Check, Outgrow Forecast, doctor-ready reports and family profiles. Your height range, chart and history stay free."
         }
     }
 }
@@ -141,12 +152,12 @@ public final class PaywallModel {
     public func loadPlans() async {
         plans = .loading
         do {
-            let loaded = try await store.service.loadPlans().sorted { ($0.period == .year ? 0 : 1) < ($1.period == .year ? 0 : 1) }
+            let loaded = try await store.service.loadPlans().sorted { $0.period.sortOrder < $1.period.sortOrder }
             guard !loaded.isEmpty else { throw SubscriptionError.productsUnavailable }
             plans = .loaded(loaded)
             if selectedPlanID == nil || !loaded.contains(where: { $0.id == selectedPlanID }) {
-                // Yearly is pre-selected because it's the plan most families keep for a growth year. Both prices
-                // are shown in full, and there is no trial to be pre-selected into.
+                // Yearly is pre-selected because it's the plan most families keep for a growth year. Every price is
+                // shown in full, and the trial's renewal date and price are stated next to the button.
                 selectedPlanID = loaded.first { $0.period == .year }?.id ?? loaded.first?.id
             }
         } catch let error as SubscriptionError {
@@ -194,8 +205,8 @@ public final class PaywallModel {
     public var statusMessage: String? {
         switch purchase {
         case .idle, .purchasing, .restoring: return nil
-        case .succeeded: return "Premium is active."
-        case .pending: return "Waiting for approval. Premium unlocks as soon as the purchase is approved."
+        case .succeeded: return "\(BrandConfig.premiumName) is active."
+        case .pending: return "Waiting for approval. \(BrandConfig.premiumName) unlocks as soon as the purchase is approved."
         case .cancelled: return "Purchase cancelled."
         case .failed(let message): return message
         case .nothingToRestore: return "No previous purchase was found for this Apple Account."

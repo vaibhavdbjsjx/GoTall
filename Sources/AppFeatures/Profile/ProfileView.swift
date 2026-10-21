@@ -10,7 +10,7 @@ struct ProfileView: View {
     let repository: AppRepository
     @Environment(EntitlementStore.self) private var entitlements
     @Environment(AppNavigator.self) private var navigator
-    @AppStorage("appearance") private var appearance = AppAppearance.system.rawValue
+    @AppStorage("appearance") private var appearance = AppAppearance.dark.rawValue
     @State private var editingProfile: GrowthProfile?
     @State private var showsSwitcher = false
     @State private var confirmsDeleteAll = false
@@ -132,7 +132,7 @@ struct ProfileView: View {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("This permanently removes every profile and measurement from this device. It can't be undone. A Premium subscription isn't cancelled by deleting data.")
+                Text("This permanently removes every profile and measurement from this device. It can't be undone. A Stature Pro subscription isn't cancelled by deleting data.")
             }
             .alert("Couldn't delete data", isPresented: $deleteFailed) { Button("OK", role: .cancel) {} } message: { Text("Please try again.") }
             .alert("Couldn't export", isPresented: $exportFailed) { Button("OK", role: .cancel) {} } message: { Text("Please try again.") }
@@ -157,11 +157,11 @@ struct ProfileView: View {
     private var premiumSection: some View {
         let state = entitlements.state
         Section {
-            SubscriptionCard(title: BrandConfig.current.displayName + " Premium",
+            SubscriptionCard(title: BrandConfig.current.displayName + " Pro",
                              detail: entitlements.statusDescription(),
                              isPremium: entitlements.isPremium,
                              badge: badge(for: state.status),
-                             actionTitle: entitlements.isPremium ? nil : "Explore Premium",
+                             actionTitle: entitlements.isPremium ? nil : "Explore Stature Pro",
                              action: entitlements.isPremium ? nil : { navigator.showPaywall(.general) })
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
@@ -177,7 +177,7 @@ struct ProfileView: View {
                     let outcome = await entitlements.restore()
                     restoring = false
                     switch outcome {
-                    case .restored: restoreMessage = "Premium restored."
+                    case .restored: restoreMessage = "Stature Pro restored."
                     case .nothingToRestore: restoreMessage = "No previous purchase was found for this Apple Account."
                     case .failed(let message): restoreMessage = message
                     }
