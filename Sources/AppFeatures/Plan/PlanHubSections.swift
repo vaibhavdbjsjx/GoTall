@@ -133,6 +133,11 @@ struct PlanHubSections: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+        .onAppear {
+            #if DEBUG
+            if UserDefaults.standard.bool(forKey: "openPostureDemo") { showsPosture = true }
+            #endif
+        }
         .fullScreenCover(item: $playing) { routine in
             RoutinePlayerView(routine: routine, repository: repository, profileID: profile.id)
         }

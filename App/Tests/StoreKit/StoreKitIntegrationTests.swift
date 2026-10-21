@@ -36,15 +36,21 @@ final class StoreKitIntegrationTests: XCTestCase {
         return state
     }
 
-    func testLoadsBothPlansFromConfiguration() async throws {
+    func testLoadsAllPlansFromConfiguration() async throws {
         let plans = try await StoreKitSubscriptionService().loadPlans()
         XCTAssertEqual(Set(plans.map(\.id)), Set(SubscriptionProductID.all))
         let yearly = try XCTUnwrap(plans.first { $0.id == SubscriptionProductID.yearly })
         XCTAssertEqual(yearly.period, .year)
         XCTAssertTrue(yearly.isFamilyShareable)
-        XCTAssertNil(yearly.introductoryOffer, "no trial at launch")
+        XCTAssertEqual(yearly.introductoryOffer, "3-day free trial", "the yearly plan starts with a short free trial")
         XCTAssertFalse(yearly.displayPrice.isEmpty)
         XCTAssertNotNil(yearly.monthlyEquivalent())
+        let weekly = try XCTUnwrap(plans.first { $0.id == SubscriptionProductID.weekly })
+        XCTAssertEqual(weekly.period, .week)
+        XCTAssertNotNil(weekly.yearlyCost(), "weekly pricing is shown with its yearly total")
+        let lifetime = try XCTUnwrap(plans.first { $0.id == SubscriptionProductID.lifetime })
+        XCTAssertEqual(lifetime.period, .lifetime)
+        XCTAssertTrue(lifetime.billingTerms.contains("nothing renews"), lifetime.billingTerms)
     }
 
     func testFreeBeforePurchase() async {

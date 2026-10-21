@@ -46,6 +46,18 @@ struct PostureCheckView: View {
             .sensoryFeedback(.impact(weight: .light), trigger: tick)
             .onChange(of: camera.landmarks) { _, landmarks in handle(landmarks) }
             .onDisappear { camera.stop() }
+            .onAppear {
+                #if DEBUG
+                // Screenshot harness: `-openPostureDemo YES` shows a result from fixed landmarks (simulators have no camera).
+                if UserDefaults.standard.bool(forKey: "openPostureDemo"), result == nil {
+                    let demo = BodyLandmarks(nose: BodyPoint(x: 0.5, y: 0.82), leftEar: BodyPoint(x: 0.56, y: 0.83), rightEar: BodyPoint(x: 0.44, y: 0.825),
+                                             leftShoulder: BodyPoint(x: 0.66, y: 0.70), rightShoulder: BodyPoint(x: 0.34, y: 0.685),
+                                             leftHip: BodyPoint(x: 0.6, y: 0.42), rightHip: BodyPoint(x: 0.4, y: 0.415))
+                    result = PostureScoring.front(demo)
+                    stage = .result
+                }
+                #endif
+            }
             .fullScreenCover(item: $playingRoutine) { routine in
                 RoutinePlayerView(routine: routine, repository: repository, profileID: profile.id)
             }

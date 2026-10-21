@@ -77,7 +77,7 @@ shoot "$MAIN" light-37-growth-locked $PW free -initialTab growth -growthScrollTo
 shoot "$MAIN" light-38-growth-advanced $PW premium -initialTab growth -growthScrollTo advanced
 shoot "$MAIN" light-39-weekly-summary $PW free -openWeeklySummary YES
 shoot "$MAIN" light-40-switcher-gated -demoScenario parent -storeMode free -openProfileSwitcher YES
-# Release pass: Ask Linden (on CI simulators Apple Intelligence is unavailable, so the built-in guide answers)
+# Release pass: Stature Coach (on CI simulators Apple Intelligence is unavailable, so the built-in guide answers)
 shoot "$MAIN" light-41-assistant-empty $PW free -openAssistant YES
 shoot "$MAIN" light-42-assistant-answer -demoScenario parent -storeMode free -openAssistant YES -assistantAsk "Is Ava's growth on track?"
 shoot "$MAIN" light-43-assistant-safety $PW free -openAssistant YES -assistantAsk "Where can I buy HGH?"
@@ -151,10 +151,10 @@ if [ -n "$LARGE" ]; then
   # Raw captures for the App Store screenshots (composed by scripts/make_store_screenshots.py)
   shoot "$LARGE" store-raw-01 -demoScenario parent -storeMode premium
   shoot "$LARGE" store-raw-02 -demoScenario parent -storeMode premium -initialTab growth
-  shoot "$LARGE" store-raw-03 -demoScenario parent -storeMode premium -openAssistant YES -assistantAsk "How tall might Ava be as an adult?|How can I support Ava's growth?"
-  shoot "$LARGE" store-raw-04 -demoScenario parent -storeMode premium -initialTab profile -openReport YES
-  shoot "$LARGE" store-raw-05 -demoScenario teen -storeMode premium -initialTab habits
-  shoot "$LARGE" store-raw-06 -demoScenario teen -storeMode premium -initialTab growth -growthScrollTo advanced
+  shoot "$LARGE" store-raw-03 -demoScenario teen -storeMode premium -initialTab habits
+  shoot "$LARGE" store-raw-04 -demoScenario teen -storeMode premium -initialTab habits -openPostureDemo YES
+  shoot "$LARGE" store-raw-05 -demoScenario parent -storeMode premium -openAssistant YES -assistantAsk "How tall might Ava be as an adult?|How can I support Ava's growth?"
+  shoot "$LARGE" store-raw-06 -demoScenario parent -storeMode premium -initialTab profile -openReport YES
   xcrun simctl shutdown "$LARGE" 2>/dev/null || true
 fi
 ls "$OUT" | wc -l

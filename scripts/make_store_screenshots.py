@@ -9,12 +9,12 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 W, H = 1320, 2868
 SLIDES = [
-    ("Growth, beautifully\nunderstood.", "Real CDC percentiles, explained in plain words."),
+    ("Growth,\nmeasured honestly.", "Real CDC percentiles, explained in plain words."),
     ("See the whole\ngrowth story", "Every measurement on the CDC growth chart."),
-    ("Ask Linden\nanything", "Private answers, made on your iPhone."),
+    ("A plan for\nstanding tall", "Guided posture routines, a little every day."),
+    ("A 30-second\nposture check", "Analysed on your iPhone. Nothing recorded."),
+    ("Ask Stature\nCoach anything", "Private answers, made on your iPhone."),
     ("A doctor-ready\nreport", "Chart, history and methods in one clear PDF."),
-    ("Small habits.\nNo guilt.", "Gentle check-ins that forgive a missed day."),
-    ("Go deeper\nwith Premium", "Percentile history, growth speed, estimate trends."),
 ]
 
 def font(size, bold):
@@ -36,7 +36,7 @@ def font(size, bold):
 def background():
     img = Image.new("RGB", (W, H))
     px = img.load()
-    top, bottom = (8, 80, 68), (20, 128, 106)
+    top, bottom = (11, 15, 26), (21, 27, 42)
     for y in range(H):
         t = y / H
         c = tuple(int(top[i] + (bottom[i] - top[i]) * t) for i in range(3))
@@ -45,12 +45,12 @@ def background():
     glow = Image.new("L", (W, H), 0)
     ImageDraw.Draw(glow).ellipse((-W * 0.3, -H * 0.15, W * 1.0, H * 0.35), fill=70)
     glow = glow.filter(ImageFilter.GaussianBlur(160))
-    return Image.composite(Image.new("RGB", (W, H), (150, 222, 196)), img, glow)
+    return Image.composite(Image.new("RGB", (W, H), (120, 98, 52)), img, glow)
 
 def compose(raw_path, headline, sub, out_path):
     canvas = background()
     d = ImageDraw.Draw(canvas)
-    cream = (248, 246, 240)
+    cream = (244, 241, 234)
     y = 150
     for line in headline.split("\n"):
         f = font(108, True)
@@ -59,7 +59,7 @@ def compose(raw_path, headline, sub, out_path):
         y += 124
     f2 = font(48, False)
     w = d.textlength(sub, font=f2)
-    d.text(((W - w) / 2, y + 26), sub, font=f2, fill=(205, 236, 224))
+    d.text(((W - w) / 2, y + 26), sub, font=f2, fill=(232, 199, 122))
 
     shot = Image.open(raw_path).convert("RGB")
     scale = 1030 / shot.width
@@ -70,7 +70,7 @@ def compose(raw_path, headline, sub, out_path):
     shadow = Image.new("L", (W, H), 0)
     ImageDraw.Draw(shadow).rounded_rectangle(((W - shot.width) / 2, top + 30, (W + shot.width) / 2, H + 200), radius=92, fill=150)
     shadow = shadow.filter(ImageFilter.GaussianBlur(50))
-    canvas = Image.composite(Image.new("RGB", (W, H), (2, 30, 25)), canvas, shadow)
+    canvas = Image.composite(Image.new("RGB", (W, H), (2, 4, 10)), canvas, shadow)
     frame = Image.new("RGB", (shot.width + 28, shot.height + 228), (20, 22, 24))
     fmask = Image.new("L", frame.size, 0)
     ImageDraw.Draw(fmask).rounded_rectangle((0, 0, frame.width, frame.height), radius=106, fill=255)
