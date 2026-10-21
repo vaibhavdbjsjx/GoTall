@@ -14,9 +14,10 @@ final class StubTransport: HTTPTransport, @unchecked Sendable {
     init(_ replies: [Reply]) { self.replies = replies }
 
     func send(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
-        lock.lock(); defer { lock.unlock() }
-        requests.append(request)
-        let reply = replies.isEmpty ? Reply(status: 500, body: "{}") : replies.removeFirst()
+        let reply: Reply = lock.withLock {
+            requests.append(request)
+            return replies.isEmpty ? Reply(status: 500, body: "{}") : replies.removeFirst()
+        }
         let response = HTTPURLResponse(url: request.url!, statusCode: reply.status, httpVersion: nil, headerFields: nil)!
         return (Data(reply.body.utf8), response)
     }
