@@ -121,7 +121,7 @@ public enum RoutineLibrary {
         cue: "Keep the opposite shoulder relaxed and low.", seconds: 40, perSide: true, symbol: "person.crop.circle")
     static let seatedTwist = RoutineMove(id: "seated-twist", name: "Seated twist",
         instruction: "Sit tall, feet flat. Turn your chest to one side, holding the back of the chair, then switch.",
-        cue: "Grow taller as you breathe in, turn a little further as you breathe out.", seconds: 40, perSide: true, symbol: "chair")
+        cue: "Lift through the crown of your head as you breathe in, turn a little further as you breathe out.", seconds: 40, perSide: true, symbol: "chair")
     static let standUpReach = RoutineMove(id: "overhead-reach", name: "Overhead reach",
         instruction: "Stand, interlace your fingers and reach up high, then lean gently to each side.",
         cue: "Long through both sides of the waist.", seconds: 30, symbol: "figure.stand")
