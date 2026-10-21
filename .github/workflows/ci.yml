@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build and test
-        run: swift test
+        run: bash scripts/swift_test_annotated.sh
 
   ios-build:
     name: iOS build, tests and simulator screenshots
@@ -48,7 +48,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO | grep -E "error:|\*\* BUILD"
           test "${PIPESTATUS[0]}" -eq 0
       - name: Core tests on macOS (also renders the PDF report pages)
-        run: REPORT_PNG_DIR="$PWD/report-pages" swift test
+        run: REPORT_PNG_DIR="$PWD/report-pages" bash scripts/swift_test_annotated.sh
       - name: Capture simulator screenshots
         run: |
           chmod +x scripts/capture_screenshots.sh
