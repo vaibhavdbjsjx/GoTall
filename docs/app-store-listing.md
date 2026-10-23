@@ -17,9 +17,9 @@ Ready-to-paste metadata for App Store Connect. The character limits are Apple's.
 ## Keywords (100, comma-separated, no spaces after commas)
 
 ```
-height,predictor,growth chart,percentile,posture,stretch,kids,teen,tracker,puberty,sleep,CDC,taller
+height,predictor,growth chart,percentile,posture,stretch,kids,teen,tracker,puberty,sleep,child,parent
 ```
-(99 characters.) Don't add competitor names. "taller" is a search term people use; the app's copy never promises height gain.
+Don't add competitor names, agency names (CDC) or "taller": they invite 1.4.1 / 5.2 questions.
 
 ## Promotional text (170, editable any time)
 
@@ -67,12 +67,11 @@ height,predictor,growth chart,percentile,posture,stretch,kids,teen,tracker,puber
 > • Careful by design: no invented numbers, no medical claims, no "grow taller" tricks
 >
 > PRIVATE BY DESIGN
-> • No ads, no tracking. Your data stays on your iPhone.
-> • Optional account (Sign in with Apple or email) to back up and restore on a new iPhone. Delete it any time.
+> • No ads, no tracking, no account needed. Your data stays on your iPhone.
 >
 > GROMAX PRO
 > All routines, weekly posture checks, the Outgrow Forecast, doctor-ready reports, advanced growth analysis, family profiles, the full Learn library and unlimited Gromax Coach. Your growth result, chart, estimate, history, habits and starter routines are always free.
-> Choose weekly, monthly or yearly (with a 3-day free trial), or a one-time lifetime purchase. Payment is charged to your Apple Account. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple Account › Subscriptions.
+> Choose monthly, or yearly with a 3-day free trial. Payment is charged to your Apple Account. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple Account › Subscriptions.
 >
 > Gromax provides information, not medical advice, and does not diagnose any condition. Talk to a doctor about any health concern.
 >
@@ -115,8 +114,8 @@ Prices are set a little under the original GoTall's. The app always shows the li
 |---|---|---|---|---|---|
 | Gromax Pro Yearly | `com.vaibhavsg.gromax.pro.yearly` | Auto-renewable | 1 year | $34.99 | Introductory offer: 3-day free trial |
 | Gromax Pro Monthly | `com.vaibhavsg.gromax.pro.monthly` | Auto-renewable | 1 month | $9.99 | |
-| Gromax Pro Weekly | `com.vaibhavsg.gromax.pro.weekly` | Auto-renewable | 1 week | $4.99 | |
-| Gromax Pro Lifetime | `com.vaibhavsg.gromax.pro.lifetime` | Non-consumable | — | $49.99 | Family Sharing on |
+| Gromax Pro Weekly | `com.vaibhavsg.gromax.pro.weekly` | Auto-renewable | 1 week | $4.99 | Not offered at launch (the app hides plans App Store Connect doesn't return) |
+| Gromax Pro Lifetime | `com.vaibhavsg.gromax.pro.lifetime` | Non-consumable | — | $49.99 | Not offered at launch |
 
 - **Subscription group:** "Gromax Pro". All three plans at the same level. Family Sharing on.
 - **Display name:** "Gromax Pro". **Description:** "All routines, posture checks, forecasts and reports."
