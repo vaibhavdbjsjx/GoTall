@@ -110,6 +110,7 @@ def compose(w, h, raw, icon, out, title_lines, sub):
 def main():
     raw, icon, out = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), pathlib.Path(sys.argv[3])
     out.mkdir(parents=True, exist_ok=True)
+    compose(3840, 1646, raw, icon, out / "appstore-header-21x9.png", ["Growth,", "measured honestly."], "Charts, routines and a posture check. Private on your iPhone.")
     compose(5244, 2950, raw, icon, out / "appstore-header.png", ["Growth,", "measured honestly."], "Charts, routines and a posture check. Private on your iPhone.")
     compose(3840, 2560, raw, icon, out / "appstore-search.png", ["Growth,", "measured honestly."], "Growth charts, routines, posture check.")
     print(f"composed header and search art in {out}")
