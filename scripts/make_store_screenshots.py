@@ -11,7 +11,7 @@ W, H = 1320, 2868
 SLIDES = [
     ("Growth,\nmeasured honestly.", "Real CDC percentiles, explained in plain words."),
     ("See the whole\ngrowth story", "Every measurement on the CDC growth chart."),
-    ("A plan for\nstanding tall", "Guided posture routines, a little every day."),
+    ("A daily\nposture plan", "Guided posture routines, a little every day."),
     ("A 30-second\nposture check", "Analysed on your iPhone. Nothing recorded."),
     ("Ask Gromax\nCoach anything", "Private answers, made on your iPhone."),
     ("A doctor-ready\nreport", "Chart, history and methods in one clear PDF."),
