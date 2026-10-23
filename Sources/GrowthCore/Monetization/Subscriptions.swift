@@ -12,7 +12,7 @@ public enum SubscriptionProductID {
     public static let lifetime = "app.stature.height.pro.lifetime"
     public static let subscriptions: [String] = [yearly, monthly, weekly]
     public static let all: [String] = [yearly, monthly, weekly, lifetime]
-    public static let groupName = "Stature Pro"
+    public static let groupName = "Gromax Pro"
 }
 
 /// How a plan is billed. `lifetime` is a single payment with no renewal.

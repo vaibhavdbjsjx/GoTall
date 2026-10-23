@@ -8,7 +8,7 @@ public enum PremiumFeature: String, CaseIterable, Sendable {
     case multipleProfiles
     case doctorReport
     case advancedAnalytics
-    /// Stature Coach beyond the free daily questions.
+    /// Gromax Coach beyond the free daily questions.
     case unlimitedAssistant
     /// The full routine library and the personal daily plan (free users get the free routines).
     case routines

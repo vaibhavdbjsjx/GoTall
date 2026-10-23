@@ -11,14 +11,14 @@ public enum PaywallContext: String, Identifiable, Sendable {
     var intro: String? {
         switch self {
         case .general: return nil
-        case .report: return "The doctor-ready report is part of Stature Pro."
-        case .analysis: return "Advanced growth analysis is part of Stature Pro."
-        case .family: return "Adding another profile is part of Stature Pro. Profiles you already have always stay free to use."
+        case .report: return "The doctor-ready report is part of Gromax Pro."
+        case .analysis: return "Advanced growth analysis is part of Gromax Pro."
+        case .family: return "Adding another profile is part of Gromax Pro. Profiles you already have always stay free to use."
         case .onboarding: return nil
-        case .routines: return "The full routine library and your personal daily plan are part of Stature Pro."
-        case .posture: return "Your first posture check is free. Weekly checks and progress tracking are part of Stature Pro."
-        case .outgrow: return "The Outgrow Forecast is part of Stature Pro."
-        case .learn: return "The full Learn library is part of Stature Pro."
+        case .routines: return "The full routine library and your personal daily plan are part of Gromax Pro."
+        case .posture: return "Your first posture check is free. Weekly checks and progress tracking are part of Gromax Pro."
+        case .outgrow: return "The Outgrow Forecast is part of Gromax Pro."
+        case .learn: return "The full Learn library is part of Gromax Pro."
         }
     }
 }

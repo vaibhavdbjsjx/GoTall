@@ -67,7 +67,7 @@ public struct AppRootView: View {
         .environment(account)
         .environment(assistant)
         .onChange(of: repository.activeProfile?.id) { _, _ in assistant.clear() }
-        // After first-run setup, offer Stature Pro once, after the summary has had a moment. Closing it is one tap
+        // After first-run setup, offer Gromax Pro once, after the summary has had a moment. Closing it is one tap
         // and everything set up so far stays free.
         .onChange(of: repository.profiles.isEmpty) { wasEmpty, isEmpty in
             guard wasEmpty, !isEmpty, !entitlements.isPremium, !AppRootView.isDemoLaunch else { return }

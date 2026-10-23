@@ -366,7 +366,7 @@ public struct LockedFeaturePreview<Preview: View>: View {
     let action: () -> Void
     let preview: Preview
 
-    public init(title: String, message: String, buttonTitle: String = "Explore Stature Pro", action: @escaping () -> Void, @ViewBuilder preview: () -> Preview) {
+    public init(title: String, message: String, buttonTitle: String = "Explore Gromax Pro", action: @escaping () -> Void, @ViewBuilder preview: () -> Preview) {
         self.title = title
         self.message = message
         self.buttonTitle = buttonTitle

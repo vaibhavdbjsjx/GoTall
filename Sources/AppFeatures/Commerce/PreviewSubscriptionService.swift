@@ -45,13 +45,13 @@ public final class PreviewSubscriptionService: SubscriptionService {
     }
 
     public static var plans: [SubscriptionPlan] {
-        [SubscriptionPlan(id: SubscriptionProductID.yearly, displayName: "Stature Pro Yearly", displayPrice: "$34.99", price: Decimal(string: "34.99")!,
+        [SubscriptionPlan(id: SubscriptionProductID.yearly, displayName: "Gromax Pro Yearly", displayPrice: "$34.99", price: Decimal(string: "34.99")!,
                           currencyCode: "USD", period: .year, isFamilyShareable: true, introductoryOffer: "3-day free trial"),
-         SubscriptionPlan(id: SubscriptionProductID.monthly, displayName: "Stature Pro Monthly", displayPrice: "$9.99", price: Decimal(string: "9.99")!,
+         SubscriptionPlan(id: SubscriptionProductID.monthly, displayName: "Gromax Pro Monthly", displayPrice: "$9.99", price: Decimal(string: "9.99")!,
                           currencyCode: "USD", period: .month, isFamilyShareable: true),
-         SubscriptionPlan(id: SubscriptionProductID.weekly, displayName: "Stature Pro Weekly", displayPrice: "$4.99", price: Decimal(string: "4.99")!,
+         SubscriptionPlan(id: SubscriptionProductID.weekly, displayName: "Gromax Pro Weekly", displayPrice: "$4.99", price: Decimal(string: "4.99")!,
                           currencyCode: "USD", period: .week, isFamilyShareable: true),
-         SubscriptionPlan(id: SubscriptionProductID.lifetime, displayName: "Stature Pro Lifetime", displayPrice: "$49.99", price: Decimal(string: "49.99")!,
+         SubscriptionPlan(id: SubscriptionProductID.lifetime, displayName: "Gromax Pro Lifetime", displayPrice: "$49.99", price: Decimal(string: "49.99")!,
                           currencyCode: "USD", period: .lifetime, isFamilyShareable: true)]
     }
 

@@ -3,7 +3,7 @@ import Foundation
 /// Single source of truth for product identity. Every user-facing reference to the product name reads from
 /// `BrandConfig.current`; the build setting `APP_DISPLAY_NAME` in App/project.yml must match `displayName`.
 ///
-/// Name: **Stature** ("Stature: Height & Growth" on the App Store). Trademark and App Store name availability
+/// Name: **Gromax** ("Gromax: Height & Growth" on the App Store). Trademark and App Store name availability
 /// still have to be checked before submission (docs/release-checklist.md).
 public struct BrandConfig: Sendable, Equatable {
     /// Name shown in UI copy ("Welcome to …").
@@ -34,17 +34,17 @@ public struct BrandConfig: Sendable, Equatable {
     /// Release brand. The URLs point at the marketing site (`/mnt/project-files/website/stature-site`, hosted on
     /// Netlify). Update them here and in docs/app-store-listing.md if the site moves to a custom domain.
     public static let stature = BrandConfig(
-        displayName: "Stature",
+        displayName: "Gromax",
         tagline: "Growth, measured honestly. Habits that help you stand tall.",
-        assistantName: "Stature Coach",
-        privacyPolicyURL: URL(string: "https://stature.netlify.app/privacy"),
-        termsURL: URL(string: "https://stature.netlify.app/terms"),
-        supportURL: URL(string: "https://stature.netlify.app/support"),
-        supportEmail: "support@stature.app"
+        assistantName: "Gromax Coach",
+        privacyPolicyURL: URL(string: "https://gromax.netlify.app/privacy"),
+        termsURL: URL(string: "https://gromax.netlify.app/terms"),
+        supportURL: URL(string: "https://gromax.netlify.app/support"),
+        supportEmail: "gromax.support@gmail.com"
     )
 
-    /// Name of the subscription as people see it ("Stature Pro"). Matches the website and App Store Connect.
-    public static let premiumName = "Stature Pro"
+    /// Name of the subscription as people see it ("Gromax Pro"). Matches the website and App Store Connect.
+    public static let premiumName = "Gromax Pro"
 
     public static let current: BrandConfig = .stature
 }

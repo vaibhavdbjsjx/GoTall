@@ -2,7 +2,7 @@
 #   brew install xcodegen   # developer tool only; not an app dependency
 #   cd App && xcodegen generate && open GrowthApp.xcodeproj
 #
-# Brand: Stature. APP_DISPLAY_NAME must match BrandConfig.displayName (Sources/GrowthCore/Brand/BrandConfig.swift).
+# Brand: Gromax. APP_DISPLAY_NAME must match BrandConfig.displayName (Sources/GrowthCore/Brand/BrandConfig.swift).
 # The bundle ID and product IDs must match what you register in App Store Connect (docs/release-checklist.md).
 name: GrowthApp
 options:
@@ -17,7 +17,7 @@ settings:
   base:
     MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
-    APP_DISPLAY_NAME: "Stature"
+    APP_DISPLAY_NAME: "Gromax"
     # Optional accounts and backup (Supabase). Leave empty to ship without accounts; the Account row then hides.
     # The anon key is public by design: row-level security keeps each account's backup private. docs/backend-setup.md
     STATURE_BACKEND_URL: ""

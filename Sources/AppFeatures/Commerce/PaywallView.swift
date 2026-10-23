@@ -3,7 +3,7 @@ import SwiftUI
 import GrowthCore
 import DesignSystem
 
-/// The Stature Pro page. Answers "why pay?" before "how much?", shows every price and billing term in full,
+/// The Gromax Pro page. Answers "why pay?" before "how much?", shows every price and billing term in full,
 /// keeps the close button visible at all times, and never uses urgency, timers or pre-selected trials.
 struct PaywallView: View {
     let context: PaywallContext
@@ -64,7 +64,7 @@ struct PaywallView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.xl) {
                 PaywallHero(title: context == .onboarding ? "Your profile is ready. Want the full plan?" : "Stand taller, sleep better, track growth properly.",
-                            subtitle: "Your growth result, chart, estimate and history stay free. Stature Pro adds the full routine library, weekly posture checks, the Outgrow Forecast and tools for sharing growth with a doctor.")
+                            subtitle: "Your growth result, chart, estimate and history stay free. Gromax Pro adds the full routine library, weekly posture checks, the Outgrow Forecast and tools for sharing growth with a doctor.")
                     .padding(.top, DS.Spacing.xs)
                 if let intro = context.intro {
                     InfoBanner(intro, tone: .info)
@@ -101,7 +101,7 @@ struct PaywallView: View {
 
     private var benefits: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-            Text("What Stature Pro adds").font(DS.Typography.title).foregroundStyle(DS.Colors.textPrimary)
+            Text("What Gromax Pro adds").font(DS.Typography.title).foregroundStyle(DS.Colors.textPrimary)
                 .accessibilityAddTraits(.isHeader)
             BenefitCard(symbol: "figure.mind.and.body", title: "Every guided routine",
                         detail: "\(RoutineLibrary.all.count) routines and \(RoutineLibrary.moveCount) moves for posture, mobility and core, with a daily plan that adapts to your posture checks.")
@@ -118,7 +118,7 @@ struct PaywallView: View {
             BenefitCard(symbol: "book", title: "The full Learn library",
                         detail: "Every article on growth, sleep, food and posture, each linked to its public-health source.")
             BenefitCard(symbol: "sparkles", title: "Unlimited \(BrandConfig.current.assistantName)",
-                        detail: "Ask as many questions about growth as you like (3 a day are free). Answered privately on this iPhone: conversational on iPhones with Apple Intelligence, Stature's built-in guide on others.")
+                        detail: "Ask as many questions about growth as you like (3 a day are free). Answered privately on this iPhone: conversational on iPhones with Apple Intelligence, Gromax's built-in guide on others.")
         }
     }
 
@@ -183,7 +183,7 @@ struct PaywallView: View {
         case .week:
             if let year = plan.yearlyCost() { parts.append("Billed every week (\(year) over a year). Cancel anytime.") }
         case .lifetime:
-            parts.append("Pay once, keep Stature Pro for good. Nothing renews.")
+            parts.append("Pay once, keep Gromax Pro for good. Nothing renews.")
         }
         return parts.joined(separator: " ")
     }
@@ -198,7 +198,7 @@ struct PaywallView: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("paywall.terms")
                 if plan.isFamilyShareable {
-                    Text("Family Sharing is on: up to five family members can use Stature Pro at no extra cost.")
+                    Text("Family Sharing is on: up to five family members can use Gromax Pro at no extra cost.")
                         .font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -305,7 +305,7 @@ struct PremiumActiveView: View {
             Spacer()
             SuccessSeal()
             VStack(spacing: DS.Spacing.xs) {
-                Text(justPurchased ? "Stature Pro is active" : "You have Stature Pro")
+                Text(justPurchased ? "Gromax Pro is active" : "You have Gromax Pro")
                     .font(DS.Typography.title)
                     .foregroundStyle(DS.Colors.textPrimary)
                     .accessibilityIdentifier("paywall.active")

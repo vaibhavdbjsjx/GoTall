@@ -13,7 +13,7 @@ SLIDES = [
     ("See the whole\ngrowth story", "Every measurement on the CDC growth chart."),
     ("A plan for\nstanding tall", "Guided posture routines, a little every day."),
     ("A 30-second\nposture check", "Analysed on your iPhone. Nothing recorded."),
-    ("Ask Stature\nCoach anything", "Private answers, made on your iPhone."),
+    ("Ask Gromax\nCoach anything", "Private answers, made on your iPhone."),
     ("A doctor-ready\nreport", "Chart, history and methods in one clear PDF."),
 ]
 

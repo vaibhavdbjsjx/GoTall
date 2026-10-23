@@ -1,10 +1,10 @@
-# Release checklist: Stature 1.0.0
+# Release checklist: Gromax 1.0.0
 
 What's done in the code, and what only you can do (accounts, money, legal, a real iPhone). Work top to bottom.
 
 ## Done in the repo
 
-- [x] Brand: Stature, gold-on-midnight icon, accent colour, display name, version 1.0.0 (build 1)
+- [x] Brand: Gromax, gold-on-midnight icon, accent colour, display name, version 1.0.0 (build 1)
 - [x] Bundle ID `app.stature.height`; product IDs `app.stature.height.pro.weekly / .monthly / .yearly / .lifetime`
 - [x] Prices in `App/Products.storekit` a little under the original GoTall: $4.99 a week, $9.99 a month, $34.99 a year (3-day free trial), $49.99 lifetime
 - [x] Privacy manifest declares no tracking; email and health data only for optional accounts (app functionality)
@@ -12,20 +12,20 @@ What's done in the code, and what only you can do (accounts, money, legal, a rea
 - [x] Privacy policy and terms in the app, generated into `site/`. A test fails if they drift apart.
 - [x] StoreKit 2 subscriptions and lifetime purchase with verification, restore, manage, Family Sharing
 - [x] Optional accounts with in-app deletion and Sign in with Apple token revocation (`supabase/`)
-- [x] Stature Coach on-device assistant with safety answers and an output guard
+- [x] Gromax Coach on-device assistant with safety answers and an output guard
 - [x] Unit tests (Linux and macOS), StoreKit and UI tests, release build and screenshots in CI
 - [x] Listing text: `docs/app-store-listing.md`
 
 ## You need to do (in order)
 
-1. **Check the name.** In App Store Connect, try to create the app as "Stature: Height & Posture". If the name is taken, change `BrandConfig.displayName`, `APP_DISPLAY_NAME` in `App/project.yml` and the listing.
+1. **Check the name.** In App Store Connect, try to create the app as "Gromax: Height & Posture". If the name is taken, change `BrandConfig.displayName`, `APP_DISPLAY_NAME` in `App/project.yml` and the listing.
 2. **Apple Developer Program.** Sign the Paid Apps agreement and add bank and tax details (App Store Connect › Business). Apply for the Small Business Program (15% commission).
-3. **Website.** Deploy the Netlify site (project folder `website/stature-site`) so `https://stature.netlify.app/privacy`, `/terms` and `/support` work. Set up the support@ and privacy@ mailboxes.
+3. **Website.** Deploy the Netlify site (project folder `website/stature-site`) so `https://gromax.netlify.app/privacy`, `/terms` and `/support` work. Set up the support@ and privacy@ mailboxes.
 4. **Accounts (optional but recommended).** Follow `docs/backend-setup.md`, then fill in the two backend settings in `App/project.yml`. Without them the Account row is hidden and you can choose "Data Not Collected".
 5. **Legal review.** Have a lawyer read `Sources/GrowthCore/Brand/LegalDocuments.swift`, especially for children's privacy (COPPA, GDPR-K) and US state app-store age laws.
 6. **App Store Connect setup.**
    - Create the app with bundle ID `app.stature.height`.
-   - Create the "Stature Pro" subscription group with the three subscriptions, the yearly 3-day free-trial introductory offer, and the lifetime non-consumable, using exactly the product IDs above.
+   - Create the "Gromax Pro" subscription group with the three subscriptions, the yearly 3-day free-trial introductory offer, and the lifetime non-consumable, using exactly the product IDs above.
    - Fill in the listing and App Privacy from `docs/app-store-listing.md`. Answer the age-rating questionnaire.
 7. **Build on a Mac with Xcode 26.**
    - `brew install xcodegen && cd App && xcodegen generate`, then open `GrowthApp.xcodeproj`.

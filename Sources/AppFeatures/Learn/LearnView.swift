@@ -3,7 +3,7 @@ import SwiftUI
 import GrowthCore
 import DesignSystem
 
-/// Short, sourced reads. A few are free; the full library is part of Stature Pro.
+/// Short, sourced reads. A few are free; the full library is part of Gromax Pro.
 struct LearnView: View {
     @Environment(EntitlementStore.self) private var entitlements
     @Environment(AppNavigator.self) private var navigator

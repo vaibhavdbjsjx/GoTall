@@ -1,6 +1,6 @@
 # Accounts and backup: backend setup
 
-Accounts in Stature are optional. With no backend configured the Account row is hidden and the app is fully local, exactly as before. Turning accounts on takes about 20 minutes.
+Accounts in Gromax are optional. With no backend configured the Account row is hidden and the app is fully local, exactly as before. Turning accounts on takes about 20 minutes.
 
 ## What it is
 
@@ -13,7 +13,7 @@ Accounts in Stature are optional. With no backend configured the Account row is 
 1. Create a project at supabase.com. Pick a region near your users. Note the **Project URL** and **anon public key** (Project Settings › API).
 2. Database: run `supabase/migrations/20261021000000_backups.sql` in the SQL editor (or `supabase db push` with the CLI).
 3. Auth › Providers:
-   - **Email**: on. Turn "Confirm email" on (recommended). Set Site URL to `https://stature.netlify.app`.
+   - **Email**: on. Turn "Confirm email" on (recommended). Set Site URL to `https://gromax.netlify.app`.
    - **Apple**: on. Client IDs: `app.stature.height`. This is the native flow, so no Services ID or secret is needed for sign-in itself.
 4. Apple Developer › Certificates, IDs & Profiles:
    - App ID `app.stature.height`: enable **Sign in with Apple**.
@@ -30,7 +30,7 @@ Accounts in Stature are optional. With no backend configured the Account row is 
    STATURE_BACKEND_ANON_KEY: "<anon public key>"
    ```
    then `cd App && xcodegen generate`. The anon key is meant to be public; row-level security keeps each account's backup private.
-7. Email templates (Auth › Email Templates): change the sender name to Stature and the support address to support@stature.app. For production, add custom SMTP so emails don't come from Supabase's shared sender.
+7. Email templates (Auth › Email Templates): change the sender name to Gromax and the support address to gromax.support@gmail.com. For production, add custom SMTP so emails don't come from Supabase's shared sender.
 
 ## How backup works
 

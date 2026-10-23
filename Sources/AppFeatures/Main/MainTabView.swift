@@ -120,7 +120,7 @@ struct MainTabView: View {
     }
 }
 
-/// Opens Stature Coach, optionally with a question to send straight away.
+/// Opens Gromax Coach, optionally with a question to send straight away.
 struct AssistantRequest: Identifiable {
     let id = UUID()
     let question: String?
@@ -219,7 +219,7 @@ struct ProfileSwitcherSheet: View {
                     if !canAdd {
                         HStack(spacing: DS.Spacing.xs) {
                             PremiumBadge()
-                            Text("Family profiles are part of Stature Pro. Every profile here stays free to use.")
+                            Text("Family profiles are part of Gromax Pro. Every profile here stays free to use.")
                                 .font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }

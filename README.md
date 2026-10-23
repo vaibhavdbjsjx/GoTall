@@ -1,4 +1,4 @@
-# Stature: height, growth and posture (iOS)
+# Gromax: height, growth and posture (iOS)
 
 **Growth, measured honestly. Habits that help you stand tall.** An iOS app for teens, parents and adults:
 - real CDC growth charts and percentiles
@@ -9,7 +9,7 @@
 - bedtime planner, food-variety check-ins, a puberty-stage check
 - for parents: Outgrow Forecast (height and clothing size in 3, 6 and 12 months) and a doctor visit kit with a PDF report
 - a Learn library of sourced articles
-- **Stature Coach**, a growth assistant that runs on Apple's on-device model
+- **Gromax Coach**, a growth assistant that runs on Apple's on-device model
 - optional account (Sign in with Apple or email/password) to back up and restore
 
 Private by design: no ads, no tracking, data on the device unless you choose to back it up.

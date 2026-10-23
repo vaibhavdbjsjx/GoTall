@@ -8,8 +8,8 @@
       "internalID" : "6450000004",
       "localizations" : [
         {
-          "description" : "Personal growth plan, guided routines, Posture Check, Outgrow Forecast, doctor-ready reports, family profiles and unlimited Stature Coach.",
-          "displayName" : "Stature Pro Lifetime",
+          "description" : "Personal growth plan, guided routines, Posture Check, Outgrow Forecast, doctor-ready reports, family profiles and unlimited Gromax Coach.",
+          "displayName" : "Gromax Pro Lifetime",
           "locale" : "en_US"
         }
       ],
@@ -77,7 +77,7 @@
     {
       "id" : "21500001",
       "localizations" : [],
-      "name" : "Stature Pro",
+      "name" : "Gromax Pro",
       "subscriptions" : [
         {
           "adHocOffers" : [],
@@ -94,8 +94,8 @@
           },
           "localizations" : [
             {
-              "description" : "Personal growth plan, guided routines, Posture Check, Outgrow Forecast, doctor-ready reports, family profiles and unlimited Stature Coach.",
-              "displayName" : "Stature Pro Yearly",
+              "description" : "Personal growth plan, guided routines, Posture Check, Outgrow Forecast, doctor-ready reports, family profiles and unlimited Gromax Coach.",
+              "displayName" : "Gromax Pro Yearly",
               "locale" : "en_US"
             }
           ],
@@ -115,8 +115,8 @@
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Personal growth plan, guided routines, Posture Check, Outgrow Forecast, doctor-ready reports, family profiles and unlimited Stature Coach.",
-              "displayName" : "Stature Pro Monthly",
+              "description" : "Personal growth plan, guided routines, Posture Check, Outgrow Forecast, doctor-ready reports, family profiles and unlimited Gromax Coach.",
+              "displayName" : "Gromax Pro Monthly",
               "locale" : "en_US"
             }
           ],
@@ -136,8 +136,8 @@
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Personal growth plan, guided routines, Posture Check, Outgrow Forecast, doctor-ready reports, family profiles and unlimited Stature Coach.",
-              "displayName" : "Stature Pro Weekly",
+              "description" : "Personal growth plan, guided routines, Posture Check, Outgrow Forecast, doctor-ready reports, family profiles and unlimited Gromax Coach.",
+              "displayName" : "Gromax Pro Weekly",
               "locale" : "en_US"
             }
           ],

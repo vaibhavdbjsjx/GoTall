@@ -120,7 +120,7 @@ public final class StoreKitSubscriptionService: SubscriptionService {
         switch error {
         case .userCancelled: return .cancelled
         case .networkError: return .failed("The App Store couldn't be reached. Check your connection and try again.")
-        case .notAvailableInStorefront: return .failed("Stature Pro isn't available in your App Store country yet.")
+        case .notAvailableInStorefront: return .failed("Gromax Pro isn't available in your App Store country yet.")
         default: return .failed("The purchase didn't complete. You haven't been charged. Please try again.")
         }
     }

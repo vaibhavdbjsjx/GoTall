@@ -42,7 +42,7 @@ struct RoutineRow: View {
         }
         .buttonStyle(PressableStyle())
         .accessibilityElement(children: .combine)
-        .accessibilityHint(isLocked ? "Part of Stature Pro" : "Starts the routine")
+        .accessibilityHint(isLocked ? "Part of Gromax Pro" : "Starts the routine")
     }
 
     private var symbol: String {
@@ -120,7 +120,7 @@ struct BedtimePlannerView: View {
                             }
                             .tint(DS.Colors.accent)
                             if reminderDenied {
-                                InfoBanner("Notifications are off for Stature. Turn them on in Settings to get the reminder.", tone: .caution)
+                                InfoBanner("Notifications are off for Gromax. Turn them on in Settings to get the reminder.", tone: .caution)
                             }
                         }
                     }
@@ -367,7 +367,7 @@ struct OutgrowForecastView: View {
                     if let months = forecast.shoeCheckMonths {
                         QuietNote(title: "Shoes", message: "Feet grow in spurts too. At this age, check shoe fit about every \(months) months: there should be a thumb's width of space at the toe.", symbol: "shoeprints.fill")
                     }
-                    QuietNote(title: "How this works", message: "Stature follows the current percentile line on the CDC growth chart, which is how most children grow over a few months. Sizes are approximate US children's sizes; brands vary.", symbol: "info.circle")
+                    QuietNote(title: "How this works", message: "Gromax follows the current percentile line on the CDC growth chart, which is how most children grow over a few months. Sizes are approximate US children's sizes; brands vary.", symbol: "info.circle")
                 }
                 .padding(DS.Spacing.page)
             }

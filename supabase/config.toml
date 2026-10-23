@@ -1,4 +1,4 @@
-# Minimal Supabase CLI config for Stature's optional accounts. See docs/backend-setup.md.
+# Minimal Supabase CLI config for Gromax's optional accounts. See docs/backend-setup.md.
 project_id = "stature"
 
 [functions.delete-account]

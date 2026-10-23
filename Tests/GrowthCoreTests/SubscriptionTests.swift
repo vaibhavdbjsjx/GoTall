@@ -256,7 +256,7 @@ final class PaywallModelTests: XCTestCase {
         XCTAssertTrue(store.isPremium)
         XCTAssertTrue(store.justUnlocked)
         XCTAssertEqual(store.access(.doctorReport), .available)
-        XCTAssertEqual(model.statusMessage, "Stature Pro is active.")
+        XCTAssertEqual(model.statusMessage, "Gromax Pro is active.")
     }
 
     @MainActor

@@ -6,7 +6,7 @@ final class ReleaseTests: XCTestCase {
     static let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
 
     func testBrandIsConsistent() throws {
-        XCTAssertEqual(BrandConfig.current.displayName, "Stature")
+        XCTAssertEqual(BrandConfig.current.displayName, "Gromax")
         XCTAssertEqual(CopyGuard.violations(in: BrandConfig.current.tagline), [])
         let project = try String(contentsOf: Self.root.appendingPathComponent("App/project.yml"), encoding: .utf8)
         XCTAssertTrue(project.contains("APP_DISPLAY_NAME: \"\(BrandConfig.current.displayName)\""), "project display name matches BrandConfig")

@@ -77,7 +77,7 @@ shoot "$MAIN" light-37-growth-locked $PW free -initialTab growth -growthScrollTo
 shoot "$MAIN" light-38-growth-advanced $PW premium -initialTab growth -growthScrollTo advanced
 shoot "$MAIN" light-39-weekly-summary $PW free -openWeeklySummary YES
 shoot "$MAIN" light-40-switcher-gated -demoScenario parent -storeMode free -openProfileSwitcher YES
-# Release pass: Stature Coach (on CI simulators Apple Intelligence is unavailable, so the built-in guide answers)
+# Release pass: Gromax Coach (on CI simulators Apple Intelligence is unavailable, so the built-in guide answers)
 shoot "$MAIN" light-41-assistant-empty $PW free -openAssistant YES
 shoot "$MAIN" light-42-assistant-answer -demoScenario parent -storeMode free -openAssistant YES -assistantAsk "Is Ava's growth on track?"
 shoot "$MAIN" light-43-assistant-safety $PW free -openAssistant YES -assistantAsk "Where can I buy HGH?"

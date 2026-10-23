@@ -18,7 +18,7 @@ public struct TodayPlan: Sendable, Equatable {
         public var detail: String
         public var symbol: String
         public var isDone: Bool
-        /// Part of Stature Pro; shown with a Pro badge for free users.
+        /// Part of Gromax Pro; shown with a Pro badge for free users.
         public var isPro: Bool
 
         public var id: String {

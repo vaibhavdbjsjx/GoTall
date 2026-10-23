@@ -90,7 +90,7 @@ public struct ToolTile: View {
         }
         .buttonStyle(PressableStyle())
         .accessibilityElement(children: .combine)
-        .accessibilityHint(isLocked ? "Part of Stature Pro" : "")
+        .accessibilityHint(isLocked ? "Part of Gromax Pro" : "")
     }
 }
 

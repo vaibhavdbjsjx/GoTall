@@ -196,7 +196,7 @@ struct ReportPreviewView: View {
             case .idle, .generating:
                 generateButton(profile)
                 if !entitlements.isPremium {
-                    Text("Generating the PDF is part of Stature Pro. Everything shown above stays free to view.")
+                    Text("Generating the PDF is part of Gromax Pro. Everything shown above stays free to view.")
                         .font(DS.Typography.footnote).foregroundStyle(DS.Colors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }

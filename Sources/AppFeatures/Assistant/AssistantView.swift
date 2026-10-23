@@ -3,7 +3,7 @@ import SwiftUI
 import GrowthCore
 import DesignSystem
 
-/// Stature Coach: questions about this profile's growth, answered on the iPhone. Grounded in the same numbers as
+/// Gromax Coach: questions about this profile's growth, answered on the iPhone. Grounded in the same numbers as
 /// the rest of the app, guarded against invented numbers and medical claims, never sent anywhere.
 struct AssistantView: View {
     let repository: AppRepository
@@ -56,7 +56,7 @@ struct AssistantView: View {
                                 .id(message.id)
                                 .transition(.opacity.combined(with: .move(edge: .bottom)))
                             if message.isLimitNotice {
-                                AppButton("Explore Stature Pro", systemImage: "sparkles", kind: .secondary) { paywall = .general }
+                                AppButton("Explore Gromax Pro", systemImage: "sparkles", kind: .secondary) { paywall = .general }
                                     .accessibilityIdentifier("assistant.explorePremium")
                             }
                         }
@@ -124,8 +124,8 @@ struct AssistantView: View {
         VStack(spacing: 6) {
             if let remaining = session.remainingFree(isPremium: entitlements.access(.unlimitedAssistant) == .available) {
                 Button { if remaining == 0 { paywall = .general } } label: {
-                    Text(remaining == 0 ? "No free questions left today · Stature Pro is unlimited"
-                                        : "\(remaining) free question\(remaining == 1 ? "" : "s") left today · Stature Pro is unlimited")
+                    Text(remaining == 0 ? "No free questions left today · Gromax Pro is unlimited"
+                                        : "\(remaining) free question\(remaining == 1 ? "" : "s") left today · Gromax Pro is unlimited")
                         .font(DS.Typography.caption)
                         .foregroundStyle(DS.Colors.textSecondary)
                 }

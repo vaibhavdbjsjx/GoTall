@@ -93,7 +93,7 @@ public enum ArticleLibrary {
                 minutes: 2, symbol: "stethoscope", paragraphs: [
                     "Talk to a doctor if height is below the 3rd or above the 97th percentile, if growth seems to have slowed or stopped for six months or more while still young, or if height crosses two major percentile lines.",
                     "Also check in if puberty starts before 8 in girls or 9 in boys, or hasn't started by 13 in girls or 14 in boys.",
-                    "Bring your measurements: a record over time is the most useful thing a doctor can have. Stature's growth report is made for exactly that."
+                    "Bring your measurements: a record over time is the most useful thing a doctor can have. Gromax's growth report is made for exactly that."
                 ], sourceName: "NHS: Growth problems in children", sourceURL: "https://www.nhs.uk/conditions/growth-problems/", isFree: true)
     ]
 

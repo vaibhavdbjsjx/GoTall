@@ -45,7 +45,7 @@ public struct Routine: Sendable, Equatable, Identifiable {
     public var subtitle: String
     public var focus: RoutineFocus
     public var moves: [RoutineMove]
-    /// Free routines are available to everyone; the rest are part of Stature Pro.
+    /// Free routines are available to everyone; the rest are part of Gromax Pro.
     public var isFree: Bool
     /// Rest between moves, in seconds.
     public var restSeconds: Int

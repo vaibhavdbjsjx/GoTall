@@ -132,7 +132,7 @@ final class CommercialFlowsUITests: XCTestCase {
         XCTAssertTrue(element(app, "analysis.locked").waitForExistence(timeout: 5) || app.staticTexts["Advanced growth analysis"].exists)
     }
 
-    // Stature Coach: open from Home, use a suggestion, then type a question. On the CI simulator Apple Intelligence
+    // Gromax Coach: open from Home, use a suggestion, then type a question. On the CI simulator Apple Intelligence
     // isn't available, so answers come from the built-in guide; the flow and UI are the same.
     func testCoachAnswersQuestions() {
         let app = launch(tab: "home")

@@ -50,7 +50,7 @@ public struct LegalDocument: Sendable, Equatable, Identifiable {
                 "You can delete everything on your device at any time in Profile › Privacy & data › Delete all data. Deleting the app also removes its data from the device. Deleting your account removes its backup from our server. If you use iCloud Backup, Apple may include app data in your device backup according to your iCloud settings."
             ]),
             Section(title: "Changes and contact", paragraphs: [
-                "If this policy changes, the new version will appear in the app and on our website with a new effective date. Questions: privacy@stature.app."
+                "If this policy changes, the new version will appear in the app and on our website with a new effective date. Questions: gromax.support@gmail.com."
             ])
         ])
     }
@@ -61,8 +61,8 @@ public struct LegalDocument: Sendable, Equatable, Identifiable {
             Section(title: "Not medical advice", paragraphs: [
                 "\(name) shows measurements and growth-chart context for information. It does not diagnose, treat or prevent any condition. Estimates are not guarantees. Routines and the posture check support everyday posture and mobility habits; they don't change bone length. Talk to a doctor or other qualified health professional about any health concern, and stop any exercise that causes pain."
             ]),
-            Section(title: "Stature Pro", paragraphs: [
-                "Stature Pro is sold by Apple as an auto-renewable subscription (weekly, monthly or yearly) or as a one-time lifetime purchase. The price and billing period are shown before you buy. Payment is charged to your Apple Account. A subscription renews automatically unless cancelled at least 24 hours before the end of the current period. You can manage or cancel it in Settings › Apple Account › Subscriptions. A free trial, if offered, converts to a paid subscription unless cancelled before it ends. Deleting the app, its data or your account does not cancel a subscription.",
+            Section(title: "Gromax Pro", paragraphs: [
+                "Gromax Pro is sold by Apple as an auto-renewable subscription (weekly, monthly or yearly) or as a one-time lifetime purchase. The price and billing period are shown before you buy. Payment is charged to your Apple Account. A subscription renews automatically unless cancelled at least 24 hours before the end of the current period. You can manage or cancel it in Settings › Apple Account › Subscriptions. A free trial, if offered, converts to a paid subscription unless cancelled before it ends. Deleting the app, its data or your account does not cancel a subscription.",
                 "Apple's Standard Licensed Application End User License Agreement applies: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
             ]),
             Section(title: "Accounts", paragraphs: [

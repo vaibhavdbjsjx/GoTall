@@ -47,7 +47,7 @@ public struct DoctorVisitKit: Sendable, Equatable {
         questions.append("Are sleep, activity and diet on track for healthy growth at this age?")
 
         let bring = [
-            "The Stature growth report (PDF), or this phone",
+            "The Gromax growth report (PDF), or this phone",
             "Any earlier heights from school, sports or past check-ups",
             "Both parents' heights if you know them",
             "A list of medicines or supplements taken regularly"

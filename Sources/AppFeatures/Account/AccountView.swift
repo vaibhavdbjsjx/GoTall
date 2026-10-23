@@ -156,7 +156,7 @@ struct AccountView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This permanently deletes your account and its backup from our server. Data on this iPhone stays until you delete it in Profile › Privacy & data. A Stature Pro purchase belongs to your Apple Account and isn't affected.")
+            Text("This permanently deletes your account and its backup from our server. Data on this iPhone stays until you delete it in Profile › Privacy & data. A Gromax Pro purchase belongs to your Apple Account and isn't affected.")
         }
         .sheet(isPresented: $needsAppleReauth) { appleReauthSheet }
     }

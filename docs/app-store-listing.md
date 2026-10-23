@@ -1,4 +1,4 @@
-# App Store listing: Stature (v1.0.0)
+# App Store listing: Gromax (v1.0.0)
 
 Ready-to-paste metadata for App Store Connect. The character limits are Apple's. Check the name in App Store Connect before you rely on it (see `release-checklist.md`).
 
@@ -6,7 +6,7 @@ Ready-to-paste metadata for App Store Connect. The character limits are Apple's.
 
 | Field | Value | Notes |
 |---|---|---|
-| App name (30) | **Stature: Height & Posture** | 25 characters |
+| App name (30) | **Gromax: Height & Posture** | 25 characters |
 | Subtitle (30) | **Growth chart, routines, kids** | 29 characters |
 | Bundle ID | `app.stature.height` | Must match App Store Connect |
 | SKU | `stature-ios-001` | Any unique string |
@@ -27,7 +27,7 @@ height,predictor,growth chart,percentile,posture,stretch,kids,teen,tracker,puber
 
 ## Description (4000)
 
-> Stature helps teens, parents and adults understand growth honestly and build the habits that help you stand tall.
+> Gromax helps teens, parents and adults understand growth honestly and build the habits that help you stand tall.
 >
 > REAL GROWTH CHARTS
 > • Height percentiles from the CDC 2000 growth charts, explained in plain words
@@ -45,7 +45,7 @@ height,predictor,growth chart,percentile,posture,stretch,kids,teen,tracker,puber
 >
 > GUIDED ROUTINES
 > • Posture, mobility, core, morning, evening and desk-break routines with a timer, cues and haptics
-> • Built to help you stand at your full height and feel good. No exercise changes bone length, and Stature never pretends it does.
+> • Built to help you stand at your full height and feel good. No exercise changes bone length, and Gromax never pretends it does.
 >
 > 30-SECOND POSTURE CHECK
 > • Stand in front of your iPhone and get a score for head, shoulder and hip alignment, front or side
@@ -62,7 +62,7 @@ height,predictor,growth chart,percentile,posture,stretch,kids,teen,tracker,puber
 > • Outgrow Forecast: expected height and clothing size over the next 3, 6 and 12 months
 > • Doctor visit kit: questions to ask and a doctor-ready PDF report
 >
-> STATURE COACH
+> GROMAX COACH
 > • Ask questions about growth, sleep, food, posture or measuring; answered on your iPhone using your own data
 > • Careful by design: no invented numbers, no medical claims, no "grow taller" tricks
 >
@@ -70,26 +70,26 @@ height,predictor,growth chart,percentile,posture,stretch,kids,teen,tracker,puber
 > • No ads, no tracking. Your data stays on your iPhone.
 > • Optional account (Sign in with Apple or email) to back up and restore on a new iPhone. Delete it any time.
 >
-> STATURE PRO
-> All routines, weekly posture checks, the Outgrow Forecast, doctor-ready reports, advanced growth analysis, family profiles, the full Learn library and unlimited Stature Coach. Your growth result, chart, estimate, history, habits and starter routines are always free.
+> GROMAX PRO
+> All routines, weekly posture checks, the Outgrow Forecast, doctor-ready reports, advanced growth analysis, family profiles, the full Learn library and unlimited Gromax Coach. Your growth result, chart, estimate, history, habits and starter routines are always free.
 > Choose weekly, monthly or yearly (with a 3-day free trial), or a one-time lifetime purchase. Payment is charged to your Apple Account. Subscriptions renew automatically unless cancelled at least 24 hours before the end of the current period. Manage or cancel in Settings › Apple Account › Subscriptions.
 >
-> Stature provides information, not medical advice, and does not diagnose any condition. Talk to a doctor about any health concern.
+> Gromax provides information, not medical advice, and does not diagnose any condition. Talk to a doctor about any health concern.
 >
-> Privacy Policy: https://stature.netlify.app/privacy
-> Terms of Use: https://stature.netlify.app/terms
+> Privacy Policy: https://gromax.netlify.app/privacy
+> Terms of Use: https://gromax.netlify.app/terms
 
 ## What's New (v1.0.0)
 
-> Welcome to Stature. Real growth charts, an honest estimate, a daily plan, guided routines and a private posture check.
+> Welcome to Gromax. Real growth charts, an honest estimate, a daily plan, guided routines and a private posture check.
 
 ## URLs
 
 | Field | URL |
 |---|---|
-| Privacy Policy URL | https://stature.netlify.app/privacy |
-| Support URL | https://stature.netlify.app/support |
-| Marketing URL | https://stature.netlify.app/ |
+| Privacy Policy URL | https://gromax.netlify.app/privacy |
+| Support URL | https://gromax.netlify.app/support |
+| Marketing URL | https://gromax.netlify.app/ |
 
 The marketing site lives in the project's `website/stature-site` folder and deploys to Netlify. `site/` in this repo holds the same legal text generated from the app (`scripts/build_site.py`); copy `site/privacy.html` and `site/terms.html` into the Netlify site whenever the policy changes, or the in-app and web text will differ.
 
@@ -113,21 +113,21 @@ Prices are set a little under the original GoTall's. The app always shows the li
 
 | Reference name | Product ID | Type | Duration | Price (USD) | Notes |
 |---|---|---|---|---|---|
-| Stature Pro Yearly | `app.stature.height.pro.yearly` | Auto-renewable | 1 year | $34.99 | Introductory offer: 3-day free trial |
-| Stature Pro Monthly | `app.stature.height.pro.monthly` | Auto-renewable | 1 month | $9.99 | |
-| Stature Pro Weekly | `app.stature.height.pro.weekly` | Auto-renewable | 1 week | $4.99 | |
-| Stature Pro Lifetime | `app.stature.height.pro.lifetime` | Non-consumable | — | $49.99 | Family Sharing on |
+| Gromax Pro Yearly | `app.stature.height.pro.yearly` | Auto-renewable | 1 year | $34.99 | Introductory offer: 3-day free trial |
+| Gromax Pro Monthly | `app.stature.height.pro.monthly` | Auto-renewable | 1 month | $9.99 | |
+| Gromax Pro Weekly | `app.stature.height.pro.weekly` | Auto-renewable | 1 week | $4.99 | |
+| Gromax Pro Lifetime | `app.stature.height.pro.lifetime` | Non-consumable | — | $49.99 | Family Sharing on |
 
-- **Subscription group:** "Stature Pro". All three plans at the same level. Family Sharing on.
-- **Display name:** "Stature Pro". **Description:** "All routines, posture checks, forecasts and reports."
+- **Subscription group:** "Gromax Pro". All three plans at the same level. Family Sharing on.
+- **Display name:** "Gromax Pro". **Description:** "All routines, posture checks, forecasts and reports."
 - **Review screenshot:** a capture of the paywall (CI screenshot `light-26-paywall` or similar).
 
 ## App Review notes (paste into "Notes")
 
 > No login is needed. Accounts are optional and only used to back up data (Profile › Account). Sign in with Apple and email/password are offered; account deletion is in Profile › Account › Delete account and also revokes the Sign in with Apple token.
-> To see Stature Pro: Profile › Explore Stature Pro, or tap a locked routine on the Plan tab. Restore purchases is on the paywall and in Profile.
+> To see Gromax Pro: Profile › Explore Gromax Pro, or tap a locked routine on the Plan tab. Restore purchases is on the paywall and in Profile.
 > The posture check (Plan › Posture check) uses the front camera with Apple's Vision framework on device. Nothing is recorded or uploaded.
-> Stature Coach uses Apple's on-device Foundation Models framework where available and a built-in deterministic guide elsewhere. No data leaves the device. Safety topics get fixed answers.
+> Gromax Coach uses Apple's on-device Foundation Models framework where available and a built-in deterministic guide elsewhere. No data leaves the device. Safety topics get fixed answers.
 > Routines are posture and mobility exercises. The app states clearly that they don't change bone length. The adult-height estimate is labelled as an estimate, never a guarantee.
 
 ## Screenshots
