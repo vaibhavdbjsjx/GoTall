@@ -49,9 +49,8 @@ final class ReleaseTests: XCTestCase {
         XCTAssertTrue(manifest.contains("<key>NSPrivacyTracking</key>\n\t<false/>"))
         XCTAssertTrue(manifest.contains("NSPrivacyAccessedAPICategoryUserDefaults"))
         XCTAssertTrue(manifest.contains("CA92.1"))
-        // Optional accounts: email and the growth backup are declared, linked to the person, for app functionality only.
-        XCTAssertTrue(manifest.contains("NSPrivacyCollectedDataTypeEmailAddress"))
-        XCTAssertTrue(manifest.contains("NSPrivacyCollectedDataTypeHealth"))
+        // Accounts are off in this build, so nothing is collected.
+        XCTAssertTrue(manifest.contains("<key>NSPrivacyCollectedDataTypes</key>\n\t<array/>"), "matches the App Store label: Data Not Collected")
         XCTAssertFalse(manifest.contains("NSPrivacyCollectedDataTypePurposeThirdPartyAdvertising"))
     }
 }
