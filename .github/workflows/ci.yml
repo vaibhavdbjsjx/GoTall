@@ -63,7 +63,7 @@ jobs:
         # Artifact storage isn't reachable from every review environment; a branch is.
         if: github.event_name == 'push'
         run: |
-          mkdir -p /tmp/assets && cp store-screenshots/*.png /tmp/assets/ && cp screenshots/store-raw-*.png /tmp/assets/ 2>/dev/null || true
+          mkdir -p /tmp/assets && cp store-screenshots/*.png /tmp/assets/ && cp screenshots/store-raw-*.png screenshots/max-19-paywall.png /tmp/assets/ 2>/dev/null || true
           cd /tmp/assets && git init -q && git checkout -q -b store-assets && git add . \
             && git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "Store screenshots from ${GITHUB_SHA::7}" \
             && git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" store-assets
