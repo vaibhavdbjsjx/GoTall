@@ -20,7 +20,7 @@ What's done in the code, and what only you can do (accounts, money, legal, a rea
 
 1. **Check the name.** In App Store Connect, try to create the app as "Gromax: Height & Posture". If the name is taken, change `BrandConfig.displayName`, `APP_DISPLAY_NAME` in `App/project.yml` and the listing.
 2. **Apple Developer Program.** Sign the Paid Apps agreement and add bank and tax details (App Store Connect › Business). Apply for the Small Business Program (15% commission).
-3. **Website.** Deploy the Netlify site (project folder `website/stature-site`) so `https://gromax.netlify.app/privacy`, `/terms` and `/support` work. Set up the support@ and privacy@ mailboxes.
+3. **Website.** Deploy the Netlify site (project folder `website/stature-site`) so `https://gromax-app.netlify.app/privacy`, `/terms` and `/support` work. Set up the support@ and privacy@ mailboxes.
 4. **Accounts (optional but recommended).** Follow `docs/backend-setup.md`, then fill in the two backend settings in `App/project.yml`. Without them the Account row is hidden and you can choose "Data Not Collected".
 5. **Legal review.** Have a lawyer read `Sources/GrowthCore/Brand/LegalDocuments.swift`, especially for children's privacy (COPPA, GDPR-K) and US state app-store age laws.
 6. **App Store Connect setup.**

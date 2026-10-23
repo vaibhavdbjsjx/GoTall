@@ -13,7 +13,7 @@ Accounts in Gromax are optional. With no backend configured the Account row is h
 1. Create a project at supabase.com. Pick a region near your users. Note the **Project URL** and **anon public key** (Project Settings › API).
 2. Database: run `supabase/migrations/20261021000000_backups.sql` in the SQL editor (or `supabase db push` with the CLI).
 3. Auth › Providers:
-   - **Email**: on. Turn "Confirm email" on (recommended). Set Site URL to `https://gromax.netlify.app`.
+   - **Email**: on. Turn "Confirm email" on (recommended). Set Site URL to `https://gromax-app.netlify.app`.
    - **Apple**: on. Client IDs: `app.stature.height`. This is the native flow, so no Services ID or secret is needed for sign-in itself.
 4. Apple Developer › Certificates, IDs & Profiles:
    - App ID `app.stature.height`: enable **Sign in with Apple**.

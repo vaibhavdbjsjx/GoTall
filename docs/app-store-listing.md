@@ -76,8 +76,8 @@ height,predictor,growth chart,percentile,posture,stretch,kids,teen,tracker,puber
 >
 > Gromax provides information, not medical advice, and does not diagnose any condition. Talk to a doctor about any health concern.
 >
-> Privacy Policy: https://gromax.netlify.app/privacy
-> Terms of Use: https://gromax.netlify.app/terms
+> Privacy Policy: https://gromax-app.netlify.app/privacy
+> Terms of Use: https://gromax-app.netlify.app/terms
 
 ## What's New (v1.0.0)
 
@@ -87,9 +87,9 @@ height,predictor,growth chart,percentile,posture,stretch,kids,teen,tracker,puber
 
 | Field | URL |
 |---|---|
-| Privacy Policy URL | https://gromax.netlify.app/privacy |
-| Support URL | https://gromax.netlify.app/support |
-| Marketing URL | https://gromax.netlify.app/ |
+| Privacy Policy URL | https://gromax-app.netlify.app/privacy |
+| Support URL | https://gromax-app.netlify.app/support |
+| Marketing URL | https://gromax-app.netlify.app/ |
 
 The marketing site lives in the project's `website/stature-site` folder and deploys to Netlify. `site/` in this repo holds the same legal text generated from the app (`scripts/build_site.py`); copy `site/privacy.html` and `site/terms.html` into the Netlify site whenever the policy changes, or the in-app and web text will differ.
 

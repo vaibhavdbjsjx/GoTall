@@ -37,9 +37,9 @@ public struct BrandConfig: Sendable, Equatable {
         displayName: "Gromax",
         tagline: "Growth, measured honestly. Habits that help you stand tall.",
         assistantName: "Gromax Coach",
-        privacyPolicyURL: URL(string: "https://gromax.netlify.app/privacy"),
-        termsURL: URL(string: "https://gromax.netlify.app/terms"),
-        supportURL: URL(string: "https://gromax.netlify.app/support"),
+        privacyPolicyURL: URL(string: "https://gromax-app.netlify.app/privacy"),
+        termsURL: URL(string: "https://gromax-app.netlify.app/terms"),
+        supportURL: URL(string: "https://gromax-app.netlify.app/support"),
         supportEmail: "gromax.support@gmail.com"
     )
 
