@@ -6,7 +6,7 @@
 # The bundle ID and product IDs must match what you register in App Store Connect (docs/release-checklist.md).
 name: GrowthApp
 options:
-  bundleIdPrefix: app.stature.height
+  bundleIdPrefix: com.vaibhavsg.gromax
   deploymentTarget:
     iOS: "17.0"
   createIntermediateGroups: true
@@ -45,7 +45,7 @@ targets:
         product: AppFeatures
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.stature.height
+        PRODUCT_BUNDLE_IDENTIFIER: com.vaibhavsg.gromax
         TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: $(APP_DISPLAY_NAME)
@@ -77,7 +77,7 @@ targets:
       - sdk: StoreKitTest.framework
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.stature.height.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.vaibhavsg.gromax.tests
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: "5.0"
         CODE_SIGN_STYLE: Automatic
@@ -92,7 +92,7 @@ targets:
       - target: GrowthApp
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.stature.height.uitests
+        PRODUCT_BUNDLE_IDENTIFIER: com.vaibhavsg.gromax.uitests
         GENERATE_INFOPLIST_FILE: YES
         SWIFT_VERSION: "5.0"
         CODE_SIGN_STYLE: Automatic

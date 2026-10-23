@@ -13,7 +13,7 @@ final class ReleaseTests: XCTestCase {
         XCTAssertTrue(project.contains("MARKETING_VERSION: \"1.0.0\""))
         let storekit = try String(contentsOf: Self.root.appendingPathComponent("App/Products.storekit"), encoding: .utf8)
         for id in SubscriptionProductID.all { XCTAssertTrue(storekit.contains("\"\(id)\""), id) }
-        XCTAssertTrue(SubscriptionProductID.all.allSatisfy { $0.hasPrefix("app.stature.height.") })
+        XCTAssertTrue(SubscriptionProductID.all.allSatisfy { $0.hasPrefix("com.vaibhavsg.gromax.") })
     }
 
     func testLegalTextIsHonestAndComplete() {

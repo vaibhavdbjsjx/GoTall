@@ -13,7 +13,7 @@
           "locale" : "en_US"
         }
       ],
-      "productID" : "app.stature.height.pro.lifetime",
+      "productID" : "com.vaibhavsg.gromax.pro.lifetime",
       "referenceName" : "Pro Lifetime",
       "type" : "NonConsumable"
     }
@@ -99,7 +99,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "app.stature.height.pro.yearly",
+          "productID" : "com.vaibhavsg.gromax.pro.yearly",
           "recurringSubscriptionPeriod" : "P1Y",
           "referenceName" : "Pro Yearly",
           "subscriptionGroupID" : "21500001",
@@ -120,7 +120,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "app.stature.height.pro.monthly",
+          "productID" : "com.vaibhavsg.gromax.pro.monthly",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Pro Monthly",
           "subscriptionGroupID" : "21500001",
@@ -141,7 +141,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "app.stature.height.pro.weekly",
+          "productID" : "com.vaibhavsg.gromax.pro.weekly",
           "recurringSubscriptionPeriod" : "P1W",
           "referenceName" : "Pro Weekly",
           "subscriptionGroupID" : "21500001",

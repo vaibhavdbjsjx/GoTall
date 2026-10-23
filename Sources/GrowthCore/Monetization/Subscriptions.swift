@@ -5,11 +5,11 @@ import Foundation
 /// App Store product identifiers. Prices are never written in code: they come from the App Store
 /// (or the local StoreKit configuration file in development). See docs/phase-5-commercial.md §4.
 public enum SubscriptionProductID {
-    public static let weekly = "app.stature.height.pro.weekly"
-    public static let monthly = "app.stature.height.pro.monthly"
-    public static let yearly = "app.stature.height.pro.yearly"
+    public static let weekly = "com.vaibhavsg.gromax.pro.weekly"
+    public static let monthly = "com.vaibhavsg.gromax.pro.monthly"
+    public static let yearly = "com.vaibhavsg.gromax.pro.yearly"
     /// One-time, non-consumable purchase. Not part of the subscription group.
-    public static let lifetime = "app.stature.height.pro.lifetime"
+    public static let lifetime = "com.vaibhavsg.gromax.pro.lifetime"
     public static let subscriptions: [String] = [yearly, monthly, weekly]
     public static let all: [String] = [yearly, monthly, weekly, lifetime]
     public static let groupName = "Gromax Pro"

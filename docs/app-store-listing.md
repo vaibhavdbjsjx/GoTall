@@ -8,7 +8,7 @@ Ready-to-paste metadata for App Store Connect. The character limits are Apple's.
 |---|---|---|
 | App name (30) | **Gromax: Height & Posture** | 25 characters |
 | Subtitle (30) | **Growth chart, routines, kids** | 29 characters |
-| Bundle ID | `app.stature.height` | Must match App Store Connect |
+| Bundle ID | `com.vaibhavsg.gromax` | Must match App Store Connect |
 | SKU | `stature-ios-001` | Any unique string |
 | Primary category | Health & Fitness | |
 | Secondary category | Lifestyle | Avoid Medical: it brings closer review and the app makes no medical claims. |
@@ -113,10 +113,10 @@ Prices are set a little under the original GoTall's. The app always shows the li
 
 | Reference name | Product ID | Type | Duration | Price (USD) | Notes |
 |---|---|---|---|---|---|
-| Gromax Pro Yearly | `app.stature.height.pro.yearly` | Auto-renewable | 1 year | $34.99 | Introductory offer: 3-day free trial |
-| Gromax Pro Monthly | `app.stature.height.pro.monthly` | Auto-renewable | 1 month | $9.99 | |
-| Gromax Pro Weekly | `app.stature.height.pro.weekly` | Auto-renewable | 1 week | $4.99 | |
-| Gromax Pro Lifetime | `app.stature.height.pro.lifetime` | Non-consumable | — | $49.99 | Family Sharing on |
+| Gromax Pro Yearly | `com.vaibhavsg.gromax.pro.yearly` | Auto-renewable | 1 year | $34.99 | Introductory offer: 3-day free trial |
+| Gromax Pro Monthly | `com.vaibhavsg.gromax.pro.monthly` | Auto-renewable | 1 month | $9.99 | |
+| Gromax Pro Weekly | `com.vaibhavsg.gromax.pro.weekly` | Auto-renewable | 1 week | $4.99 | |
+| Gromax Pro Lifetime | `com.vaibhavsg.gromax.pro.lifetime` | Non-consumable | — | $49.99 | Family Sharing on |
 
 - **Subscription group:** "Gromax Pro". All three plans at the same level. Family Sharing on.
 - **Display name:** "Gromax Pro". **Description:** "All routines, posture checks, forecasts and reports."

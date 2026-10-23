@@ -14,14 +14,14 @@ Accounts in Gromax are optional. With no backend configured the Account row is h
 2. Database: run `supabase/migrations/20261021000000_backups.sql` in the SQL editor (or `supabase db push` with the CLI).
 3. Auth › Providers:
    - **Email**: on. Turn "Confirm email" on (recommended). Set Site URL to `https://gromax-app.netlify.app`.
-   - **Apple**: on. Client IDs: `app.stature.height`. This is the native flow, so no Services ID or secret is needed for sign-in itself.
+   - **Apple**: on. Client IDs: `com.vaibhavsg.gromax`. This is the native flow, so no Services ID or secret is needed for sign-in itself.
 4. Apple Developer › Certificates, IDs & Profiles:
-   - App ID `app.stature.height`: enable **Sign in with Apple**.
+   - App ID `com.vaibhavsg.gromax`: enable **Sign in with Apple**.
    - Keys: create a key with Sign in with Apple enabled. Download the `.p8`, note the Key ID and your Team ID. This is for revoking tokens when someone deletes their account (required by App Review).
 5. Edge Function:
    ```
    supabase functions deploy delete-account
-   supabase secrets set APPLE_TEAM_ID=XXXXXXXXXX APPLE_KEY_ID=YYYYYYYYYY APPLE_CLIENT_ID=app.stature.height
+   supabase secrets set APPLE_TEAM_ID=XXXXXXXXXX APPLE_KEY_ID=YYYYYYYYYY APPLE_CLIENT_ID=com.vaibhavsg.gromax
    supabase secrets set APPLE_PRIVATE_KEY="$(cat AuthKey_YYYYYYYYYY.p8)"
    ```
 6. App: in `App/project.yml` set
