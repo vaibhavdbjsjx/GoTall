@@ -7,7 +7,7 @@ Ready-to-paste metadata for App Store Connect. The character limits are Apple's.
 | Field | Value | Notes |
 |---|---|---|
 | App name (30) | **Gromax: Height & Posture** | 25 characters |
-| Subtitle (30) | **Growth chart, routines, kids** | 29 characters |
+| Subtitle (30) | **Growth chart & posture coach** | 29 characters. Keep "kids" out of the subtitle so it doesn't read as a Kids-category app. |
 | Bundle ID | `com.vaibhavsg.gromax` | Must match App Store Connect |
 | SKU | `stature-ios-001` | Any unique string |
 | Primary category | Health & Fitness | |
@@ -123,7 +123,7 @@ Prices are set a little under the original GoTall's. The app always shows the li
 
 ## App Review notes (paste into "Notes")
 
-> No login is needed. Accounts are optional and only used to back up data (Profile › Account). Sign in with Apple and email/password are offered; account deletion is in Profile › Account › Delete account and also revokes the Sign in with Apple token.
+> No login or account: everything is stored on the device. Onboarding takes about a minute (pick who you're tracking, birth date, a height).
 > To see Gromax Pro: Profile › Explore Gromax Pro, or tap a locked routine on the Plan tab. Restore purchases is on the paywall and in Profile.
 > The posture check (Plan › Posture check) uses the front camera with Apple's Vision framework on device. Nothing is recorded or uploaded.
 > Gromax Coach uses Apple's on-device Foundation Models framework where available and a built-in deterministic guide elsewhere. No data leaves the device. Safety topics get fixed answers.
