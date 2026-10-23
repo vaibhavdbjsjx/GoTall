@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /build/
+Sitemap: https://gromax-app.netlify.app/sitemap.xml

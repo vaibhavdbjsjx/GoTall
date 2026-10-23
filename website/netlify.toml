@@ -1,0 +1,52 @@
+# Netlify config for the Gromax marketing site.
+# The site is plain static HTML, so there's no build step; Netlify serves this folder as-is.
+# To change brand text or prices, edit build/build.py and run: python3 build/build.py
+
+[build]
+  publish = "."
+  command = ""
+
+# Clean URLs: /privacy serves privacy.html
+[build.processing.html]
+  pretty_urls = true
+
+[[redirects]]
+  from = "/build/*"
+  to = "/404.html"
+  status = 404
+
+[[redirects]]
+  from = "/privacy-policy"
+  to = "/privacy"
+  status = 301
+
+[[redirects]]
+  from = "/tos"
+  to = "/terms"
+  status = 301
+
+[[redirects]]
+  from = "/contact"
+  to = "/support"
+  status = 301
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Content-Security-Policy = "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; script-src 'self'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+# Lets you serve the Apple app-site-association file later for universal links
+[[headers]]
+  for = "/.well-known/apple-app-site-association"
+  [headers.values]
+    Content-Type = "application/json"
