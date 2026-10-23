@@ -85,10 +85,10 @@ public struct SubscriptionPlan: Sendable, Equatable, Identifiable {
         }
     }
 
-    /// "$34.99 per year", or "$49.99 once" for lifetime.
+    /// "$19.99 per year", or "$29.99 once" for lifetime.
     public var priceLine: String { isLifetime ? "\(displayPrice) once" : "\(displayPrice) per \(periodNoun)" }
 
-    /// "$34.99/year" or "$49.99 one time", for buttons.
+    /// "$19.99/year" or "$29.99 one time", for buttons.
     public var shortPrice: String { isLifetime ? "\(displayPrice) one time" : "\(displayPrice)/\(periodNoun)" }
 
     /// Plain-language billing terms shown next to the purchase button (App Store Guideline 3.1.2).

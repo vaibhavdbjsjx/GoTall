@@ -31,11 +31,11 @@ final class CommercialFlowsUITests: XCTestCase {
         XCTAssertTrue(element(app, "paywall.terms").exists, "billing terms are present")
         let purchase = app.buttons["paywall.purchase"]
         XCTAssertTrue(purchase.exists)
-        XCTAssertTrue(purchase.label.contains("$34.99"), "the purchase button shows the price: \(purchase.label)")
+        XCTAssertTrue(purchase.label.contains("$19.99"), "the purchase button shows the price: \(purchase.label)")
         XCTAssertTrue(app.buttons["paywall.restore"].exists, "restore is always available")
 
         app.buttons["plan.month"].tap()
-        XCTAssertTrue(purchase.label.contains("$9.99"), purchase.label)
+        XCTAssertTrue(purchase.label.contains("$4.99"), purchase.label)
 
         app.buttons["paywall.close"].tap()
         XCTAssertTrue(explore.waitForExistence(timeout: 5), "closing returns to Profile")

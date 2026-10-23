@@ -21,11 +21,11 @@ TRIAL = "3-day"
 EFFECTIVE = "21 October 2026"  # effective date of the privacy policy and terms, matching the app
 
 # Prices: keep in sync with App Store Connect
-WEEKLY = "$4.99"
-MONTHLY = "$9.99"
-YEARLY = "$34.99"
-YEARLY_PER_WEEK = "$0.67"
-LIFETIME = "$49.99"
+WEEKLY = "$1.99"
+MONTHLY = "$4.99"
+YEARLY = "$19.99"
+YEARLY_PER_WEEK = "$0.38"
+LIFETIME = "$29.99"
 
 GOLD = "#e8c77a"
 MARK = f'''<svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="{GOLD}"/><path d="M10 23h3V15h-3zM14.5 23h3V11h-3zM19 23h3V7h-3z" fill="#1a1408"/></svg>'''

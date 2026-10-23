@@ -108,14 +108,14 @@ If you ship without accounts, select "Data Not Collected" and remove the two ent
 
 ## In-app purchases (App Store Connect)
 
-Prices are set a little under the original GoTall's. The app always shows the live App Store price.
+Prices are set well under the original GoTall's. The app always shows the live App Store price.
 
 | Reference name | Product ID | Type | Duration | Price (USD) | Notes |
 |---|---|---|---|---|---|
-| Gromax Pro Yearly | `com.vaibhavsg.gromax.pro.yearly` | Auto-renewable | 1 year | $34.99 | Introductory offer: 3-day free trial |
-| Gromax Pro Monthly | `com.vaibhavsg.gromax.pro.monthly` | Auto-renewable | 1 month | $9.99 | |
-| Gromax Pro Weekly | `com.vaibhavsg.gromax.pro.weekly` | Auto-renewable | 1 week | $4.99 | Not offered at launch (the app hides plans App Store Connect doesn't return) |
-| Gromax Pro Lifetime | `com.vaibhavsg.gromax.pro.lifetime` | Non-consumable | — | $49.99 | Not offered at launch |
+| Gromax Pro Yearly | `com.vaibhavsg.gromax.pro.yearly` | Auto-renewable | 1 year | $19.99 | Introductory offer: 3-day free trial |
+| Gromax Pro Monthly | `com.vaibhavsg.gromax.pro.monthly` | Auto-renewable | 1 month | $4.99 | |
+| Gromax Pro Weekly | `com.vaibhavsg.gromax.pro.weekly` | Auto-renewable | 1 week | $1.99 | Not offered at launch (the app hides plans App Store Connect doesn't return) |
+| Gromax Pro Lifetime | `com.vaibhavsg.gromax.pro.lifetime` | Non-consumable | — | $29.99 | Not offered at launch |
 
 - **Subscription group:** "Gromax Pro". All three plans at the same level. Family Sharing on.
 - **Display name:** "Gromax Pro". **Description:** "All routines, posture checks, forecasts and reports."
