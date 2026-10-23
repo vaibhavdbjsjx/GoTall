@@ -63,7 +63,7 @@ struct PaywallView: View {
         ScrollViewReader { proxy in
         ScrollView {
             VStack(alignment: .leading, spacing: DS.Spacing.xl) {
-                PaywallHero(title: context == .onboarding ? "Your profile is ready. Want the full plan?" : "Stand taller, sleep better, track growth properly.",
+                PaywallHero(title: context == .onboarding ? "Your profile is ready. Want the full plan?" : "Better posture, better sleep, growth tracked properly.",
                             subtitle: "Your growth result, chart, estimate and history stay free. Gromax Pro adds the full routine library, weekly posture checks, the Outgrow Forecast and tools for sharing growth with a doctor.")
                     .padding(.top, DS.Spacing.xs)
                 if let intro = context.intro {

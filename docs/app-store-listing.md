@@ -17,7 +17,7 @@ Ready-to-paste metadata for App Store Connect. The character limits are Apple's.
 ## Keywords (100, comma-separated, no spaces after commas)
 
 ```
-height,predictor,growth chart,percentile,posture,stretch,kids,teen,tracker,puberty,sleep,child,parent
+height,predictor,growth chart,percentile,posture,stretch,kids,teen,tracker,puberty,sleep,child
 ```
 Don't add competitor names, agency names (CDC) or "taller": they invite 1.4.1 / 5.2 questions.
 
